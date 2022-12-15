@@ -1,2 +1,2 @@
 # account-validator-api
-Used to create, read, update, delete company exemptions resources.
+A backend service allowing users to test XBRL validation on their accounts.
