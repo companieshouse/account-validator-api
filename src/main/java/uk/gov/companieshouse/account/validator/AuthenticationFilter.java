@@ -20,7 +20,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                 FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String xxxId = request.getHeader("XXX-Identity");
 
@@ -33,7 +33,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String xxxIdType = request.getHeader("XXX-Identity-Type");
 
         if (StringUtils.isBlank(xxxIdType) ||
-                ! (xxxIdType.equalsIgnoreCase("key") || xxxIdType.equalsIgnoreCase("oauth2"))) {
+                !(xxxIdType.equalsIgnoreCase("key") || xxxIdType.equalsIgnoreCase("oauth2"))) {
             logger.error("Unauthenticated request received without XXX identity type");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;

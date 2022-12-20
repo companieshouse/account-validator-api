@@ -10,17 +10,17 @@ import javax.annotation.Resource;
 @SpringBootApplication
 public class AccountValidatorApplication implements CommandLineRunner {
 
-	@Resource
-	FilesStorageService storageService;
-	public static final String NAMESPACE = "account-validator-api";
+    @Resource
+    FilesStorageService storageService;
+    public static final String NAMESPACE = "account-validator-api";
 
-	public static void main(String[] args) {
-		SpringApplication.run(AccountValidatorApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(AccountValidatorApplication.class, args);
+    }
 
-	@Override
-	public void run(String... arg) throws Exception {
+    @Override
+    public void run(String... arg) throws Exception {
 //    storageService.deleteAll();
-		storageService.init();
-	}
+        storageService.init();
+    }
 }

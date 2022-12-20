@@ -25,14 +25,14 @@ public class ExceptionHandlerConfig {
 
     /**
      * BadRequestException exception handler.
-    * Thrown when data is given in the wrong format.
-    *
-    * @param ex      exception to handle.
-    * @param request request.
-    * @return error response to return.
-    */
+     * Thrown when data is given in the wrong format.
+     *
+     * @param ex      exception to handle.
+     * @param request request.
+     * @return error response to return.
+     */
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
-        HttpMessageNotReadableException.class})
+            HttpMessageNotReadableException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
         logger.error(String.format("Bad request, response code: %s", HttpStatus.BAD_REQUEST), ex);
 
