@@ -22,19 +22,19 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String xxxId = request.getHeader("XXX-Identity");
+        String ericId = request.getHeader("ERIC-Identity");
 
-        if (StringUtils.isBlank(xxxId)) {
-            logger.error("Unauthenticated request received without XXX identity");
+        if (StringUtils.isBlank(ericId)) {
+            logger.error("Unauthenticated request received without Eric identity");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String xxxIdType = request.getHeader("XXX-Identity-Type");
+        String ericIdType = request.getHeader("ERIC-Identity-Type");
 
-        if (StringUtils.isBlank(xxxIdType) ||
-                !(xxxIdType.equalsIgnoreCase("key") || xxxIdType.equalsIgnoreCase("oauth2"))) {
-            logger.error("Unauthenticated request received without XXX identity type");
+        if (StringUtils.isBlank(ericIdType) ||
+                !(ericIdType.equalsIgnoreCase("key") || ericIdType.equalsIgnoreCase("oauth2"))) {
+            logger.error("Unauthenticated request received without Eric identity type");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

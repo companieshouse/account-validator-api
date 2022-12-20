@@ -28,8 +28,8 @@ class AuthenticationFilterTest {
 
     @Test
     void authenticationFilterAllowsCallWithKeyCredentials() throws Exception {
-        when(request.getHeader("XXX-Identity")).thenReturn("TEST");
-        when(request.getHeader("XXX-Identity-Type")).thenReturn("KEY");
+        when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("KEY");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -38,8 +38,8 @@ class AuthenticationFilterTest {
 
     @Test
     void authenticationFilterAllowsCallWithOauth2Credentials() throws Exception {
-        when(request.getHeader("XXX-Identity")).thenReturn("TEST");
-        when(request.getHeader("XXX-Identity-Type")).thenReturn("OAUTH2");
+        when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -48,8 +48,8 @@ class AuthenticationFilterTest {
 
     @Test
     void authenticationFilterBlocksCallWithEmptyIdentity() throws Exception {
-        when(request.getHeader("XXX-Identity")).thenReturn("");
-        when(request.getHeader("XXX-Identity-Type")).thenReturn("OAUTH2");
+        when(request.getHeader("ERIC-Identity")).thenReturn("");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -59,8 +59,8 @@ class AuthenticationFilterTest {
 
     @Test
     void authenticationFilterBlocksCallWithIncorrectIdentityType() throws Exception {
-        when(request.getHeader("AAA-Identity")).thenReturn("TEST");
-        when(request.getHeader("BBB-Identity-Type")).thenReturn("INVALID");
+        when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("INVALID");
 
         filter.doFilterInternal(request, response, filterChain);
 
