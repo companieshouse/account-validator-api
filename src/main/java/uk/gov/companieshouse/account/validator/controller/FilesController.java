@@ -10,9 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import uk.gov.companieshouse.account.validator.message.ResponseMessage;
+import uk.gov.companieshouse.account.validator.model.AccountValidated;
+import uk.gov.companieshouse.account.validator.model.FileDetails;
 import uk.gov.companieshouse.account.validator.model.FileInfo;
+import uk.gov.companieshouse.account.validator.model.ValidationResponse;
+import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.FilesStorageService;
 
+import javax.tools.FileObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,59 +25,49 @@ import java.util.stream.Collectors;
 public class FilesController {
 
     @Autowired
-    FilesStorageService storageService;
+    AccountValidatedService accountValidatedService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/validate")
+    public ResponseEntity<ResponseMessage> validate(FileDetails fileDetails) {
         String message = "";
         try {
-            storageService.save(file);
 
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
+            message = "Uploaded the file successfully";
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
-            message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
+            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }
     }
 
-    @GetMapping("/files")
-    public ResponseEntity<List<FileInfo>> getListFiles() {
-        List<FileInfo> fileInfos = storageService.loadAll().map(path -> {
-            String filename = path.getFileName().toString();
-            String url = MvcUriComponentsBuilder
-                    .fromMethodName(FilesController.class, "getFile", path.getFileName().toString()).build().toString();
 
-            return new FileInfo(filename, url);
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-    }
-
-    @GetMapping("/files/{filename:.+}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = storageService.load(filename);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-    }
-
-    @DeleteMapping("/files/{filename:.+}")
-    public ResponseEntity<ResponseMessage> deleteFile(@PathVariable String filename) {
+    @PostMapping("/mock_validate")
+    public ResponseEntity<ResponseMessage> mockValidate(FileDetails fileDetails) {
         String message = "";
-
         try {
-            boolean existed = storageService.delete(filename);
 
-            if (existed) {
-                message = "Delete the file successfully: " + filename;
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-            }
+            AccountValidated accountValidated = new AccountValidated();
+            accountValidated.setId("63b6b14a5a177831d2ed830b");
+            accountValidated.setCustomerId("1234567890");
+            accountValidated.setFilename("account.zip");
+            accountValidated.setS3Key("697e40ba-cc6a-4b40-967c-6b4cdde8af23");
+            accountValidated.setStatus("Complete");
+            ValidationResponse validationResponse = new ValidationResponse();
+            validationResponse.setId("63b6b14a5a177831d2ed830b");
+            validationResponse.setValid(true);
+            validationResponse.setTndpResponse("OK");
 
-            message = "The file does not exist!";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage(message));
+            accountValidated.setData(validationResponse);
+            accountValidated.setShowImage(false);
+
+            accountValidatedService.createAccount(accountValidated);
+
+            message = "Uploaded the file successfully";
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
-            message = "Could not delete the file: " + filename + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseMessage(message));
+            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }
     }
+
 }
