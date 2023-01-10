@@ -33,3 +33,9 @@ MONGO_CONNECTION_POOL_MIN_SIZE         | Mongo Database connection pool size (Mi
 MONGO_CONNECTION_MAX_IDLE_TIME         | Mongo Database connection idle time, 0 for no ideal time                                                                                                                  | ✗         | 0       | 0                            
 MONGO_CONNECTION_MAX_LIFE_TIME         | Mongo Database connection life time, 0 for infinite life time.                                                                                                            | ✗         | 0       | 0                            
 
+
+### MondogDB End point for tests
+
+```
+  http://localhost:18624/mock_validate
+```

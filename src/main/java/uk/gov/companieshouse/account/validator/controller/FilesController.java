@@ -13,6 +13,7 @@ import uk.gov.companieshouse.account.validator.model.FileDetails;
 import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 
@@ -23,9 +24,13 @@ public class FilesController {
     AccountValidatedService accountValidatedService;
 
     @PostMapping("/validate")
-    public ResponseEntity<ResponseMessage> validate(FileDetails fileDetails) {
+    public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {
         String message = "";
         try {
+
+            // TODO
+            // IF ZIP FILE calls tnedp valildation No ixbrl_image_renderer
+            // IF NO ZIP FILE calls ixbrl/felix valildation call to ixbrl_image_renderer
 
             message = "Uploaded the file successfully";
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
@@ -37,7 +42,7 @@ public class FilesController {
 
 
     @PostMapping("/mock_validate")
-    public ResponseEntity<ResponseMessage> mockValidate(FileDetails fileDetails) {
+    public ResponseEntity<ResponseMessage> mockValidate(@Valid @RequestBody FileDetails fileDetails) {
         String message = "";
         try {
 

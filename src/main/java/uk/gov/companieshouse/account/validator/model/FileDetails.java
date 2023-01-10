@@ -1,8 +1,16 @@
 package uk.gov.companieshouse.account.validator.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 public class FileDetails {
+
+    @JsonProperty("customer_id")
     String customer_id;
+    @JsonProperty("file_name")
     String file_name;
+    @JsonProperty("s3_key")
     String s3_key;
 
     public String getCustomer_id() {
