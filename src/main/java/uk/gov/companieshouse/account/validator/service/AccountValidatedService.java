@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.account.validator.service;
 
 import uk.gov.companieshouse.account.validator.model.AccountValidated;
-import uk.gov.companieshouse.patch.service.PatchService;
 
 /**
  * A service for {@link AccountValidated}s

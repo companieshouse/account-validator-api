@@ -1,25 +1,20 @@
 package uk.gov.companieshouse.account.validator.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import uk.gov.companieshouse.account.validator.message.ResponseMessage;
 import uk.gov.companieshouse.account.validator.model.AccountValidated;
 import uk.gov.companieshouse.account.validator.model.FileDetails;
-import uk.gov.companieshouse.account.validator.model.FileInfo;
+
 import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
-import uk.gov.companieshouse.account.validator.service.FilesStorageService;
 
-import javax.tools.FileObject;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
+
 
 @Controller
 public class FilesController {
@@ -46,14 +41,15 @@ public class FilesController {
         String message = "";
         try {
 
+            String uuid = UUID.randomUUID().toString();
             AccountValidated accountValidated = new AccountValidated();
-            accountValidated.setId("63b6b14a5a177831d2ed830b");
+            accountValidated.setId(uuid);
             accountValidated.setCustomerId("1234567890");
             accountValidated.setFilename("account.zip");
             accountValidated.setS3Key("697e40ba-cc6a-4b40-967c-6b4cdde8af23");
             accountValidated.setStatus("Complete");
             ValidationResponse validationResponse = new ValidationResponse();
-            validationResponse.setId("63b6b14a5a177831d2ed830b");
+            validationResponse.setId(uuid);
             validationResponse.setValid(true);
             validationResponse.setTndpResponse("OK");
 
