@@ -35,7 +35,16 @@ MONGO_CONNECTION_MAX_LIFE_TIME         | Mongo Database connection life time, 0 
 
 
 ### MondogDB End point for tests
+#### Pre-requisite MongoDB up and running 
+#### Database accounts_validator pre created
 
 ```
+  POST
   http://localhost:18624/mock_validate
+  body:
+  {
+    "customer_id" : "1234567890",
+    "file_name" : "account.zip",
+    "s3_key" : "697e40ba-cc6a-4b40-967c-6b4cdde8af23"
+  }
 ```
