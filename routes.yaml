@@ -3,5 +3,5 @@ group: api
 weight: 999998
 routes:
   1: ^/actuator/health
-  2: ^/account-validator/validade
+  2: ^/account-validator/validate
 
