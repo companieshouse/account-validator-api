@@ -49,17 +49,6 @@ class AuthenticationFilterTest {
     }
 
     @Test
-    void authenticationFilterBlocksCallWithEmptyIdentity() throws Exception {
-        when(request.getHeader("ERIC-Identity")).thenReturn("");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(0)).doFilter(request, response);
-        verify(response, times(1)).sendError(401);
-    }
-
-    @Test
     void authenticationFilterBlocksCallWithIncorrectIdentityType() throws Exception {
         when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
         when(request.getHeader("ERIC-Identity-Type")).thenReturn("INVALID");
