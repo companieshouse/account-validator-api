@@ -37,6 +37,7 @@
 		<api-helper-java-library.version>1.4.5</api-helper-java-library.version>
 		<jaxb-api.version>2.3.1</jaxb-api.version>
 		<aws-java-sdk.version>1.12.343</aws-java-sdk.version>
+		<api-helper-java.version>1.4.3</api-helper-java.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -121,6 +122,11 @@
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>structured-logging</artifactId>
 			<version>${structured-logging.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>api-helper-java</artifactId>
+			<version>${api-helper-java.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
