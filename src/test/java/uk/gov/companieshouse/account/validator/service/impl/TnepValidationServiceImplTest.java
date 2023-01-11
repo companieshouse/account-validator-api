@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.impl;
+package uk.gov.companieshouse.account.validator.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

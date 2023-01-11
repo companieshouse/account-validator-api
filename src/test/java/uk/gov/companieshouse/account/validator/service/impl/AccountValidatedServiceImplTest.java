@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.service;
+package uk.gov.companieshouse.account.validator.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
