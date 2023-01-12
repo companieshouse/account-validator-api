@@ -42,6 +42,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         // Excluding healthcheck endpoint from security filter
-        web.ignoring().antMatchers("/healthcheck");
+        web.ignoring().antMatchers("/actuator/**");
     }
 }

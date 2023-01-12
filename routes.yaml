@@ -2,9 +2,6 @@ app_name: account-validator-api
 group: api
 weight: 999998
 routes:
-  1: ^/account-validator/healthcheck
-  2: ^/account-validator/upload
-  3: ^/account-validator/files
-  4: ^/account-validator/files/{filename:.+}
-
+  1: ^/actuator/health
+  2: ^/account-validator/validate
 
