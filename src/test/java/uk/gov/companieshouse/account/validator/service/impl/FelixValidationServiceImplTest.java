@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.companieshouse.account.validator.service.impl.TnepValidationServiceImpl;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 
@@ -25,10 +24,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
-class TnepValidationServiceImplTest {
+class FelixValidationServiceImplTest {
 
     private static final String ENV_VARIABLE_IXBRL_VALIDATOR_URI = "IXBRL_VALIDATOR_URI";
-    private static final String ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE = "http://tnep.url/validate";
+    private static final String ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE = "http://felix.url/validate";
     private static final String IXBRL_LOCATION = "s3://test-bucket/accounts/ixbrl-generated-name.html";
     private static final String IXBRL = getIxbrl();
     private static final String VALIDATION_STATUS_UNIT_TEST_FAILURE = "unit test failure";
@@ -39,17 +38,17 @@ class TnepValidationServiceImplTest {
     @Mock
     private EnvironmentReader environmentReaderMock;
 
-    private TnepValidationServiceImpl tnepValidationService;
+    private FelixValidationServiceImpl felixValidationService;
 
     @BeforeEach
     void setup() {
-        tnepValidationService = new TnepValidationServiceImpl(
+        felixValidationService = new FelixValidationServiceImpl(
             restTemplateMock,
             environmentReaderMock);
     }
 
     @Test
-    @DisplayName("Tnep validation call is successful. Happy path")
+    @DisplayName("Felix validation call is successful. Happy path")
     void validationSuccess() {
 
         Results results = new Results();
@@ -64,7 +63,7 @@ class TnepValidationServiceImplTest {
     }
 
     @Test
-    @DisplayName("Tnep validation fails due to unit test failure")
+    @DisplayName("Felix validation fails due to unit test failure")
     void validationFailure() {
 
         Results results = new Results();
@@ -114,7 +113,7 @@ class TnepValidationServiceImplTest {
     }
 
     private boolean validateIxbrl() {
-        return tnepValidationService.validate(IXBRL, IXBRL_LOCATION);
+        return felixValidationService.validate(IXBRL, IXBRL_LOCATION);
     }
 
     private static String getIxbrl() {

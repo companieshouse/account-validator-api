@@ -8,7 +8,7 @@ import uk.gov.companieshouse.account.validator.model.FileDetails;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.AccountValidator;
 import uk.gov.companieshouse.account.validator.service.AmazonFileTransfer;
-import uk.gov.companieshouse.account.validator.service.TnepValidationService;
+import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.account.validator.utility.filetransfer.FileTransferTool;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -38,24 +38,24 @@ public class AccountValidatorImpl implements AccountValidator {
 
     private final ApplicationConfiguration _config;
     private final FileTransferTool fileTransferTool;
-    private final TnepValidationService tnepValidationService;
+    private final FelixValidationService felixValidationService;
 
     private final IxbrlValidationImpl ixbrlValidationImpl;
 
     @Autowired
     public AccountValidatorImpl(FileTransferTool fileTransferTool,
-                                TnepValidationService tnepValidationService,
+                                FelixValidationService felixValidationService,
                                 IxbrlValidationImpl ixbrlValidationImpl,
                                 ApplicationConfiguration config) {
         this.fileTransferTool = fileTransferTool;
-        this.tnepValidationService = tnepValidationService;
+        this.felixValidationService = felixValidationService;
         this.ixbrlValidationImpl = ixbrlValidationImpl;
         this._config = config;
     }
 
     /**
-     * Downloads the ixbrl content and call the tnep validation service if the
-     * download was successful. The tnep validation service needs the location
+     * Downloads the ixbrl content and call the felix validation service if the
+     * download was successful. The felix validation service needs the location
      * and the data to performs the validation.
      *
      * @param fileLocation - location of the file that needs to be validated.
@@ -68,7 +68,7 @@ public class AccountValidatorImpl implements AccountValidator {
 
 
         if (ixbrlData != null) {
-            isIxbrlValid = tnepValidationService.validate(ixbrlData, fileLocation);
+            isIxbrlValid = felixValidationService.validate(ixbrlData, fileLocation);
         }
 
         return isIxbrlValid;
@@ -130,7 +130,7 @@ public class AccountValidatorImpl implements AccountValidator {
 
         //Validate against TNEP
         if (isZipFile) {
-            return tnepValidationService.validate(ixbrlData, location);
+            return felixValidationService.validate(ixbrlData, location);
         } else {
             return ixbrlValidationImpl.validate(ixbrlData, location);
         }

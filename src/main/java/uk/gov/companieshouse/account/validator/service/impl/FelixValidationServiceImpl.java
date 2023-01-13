@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.companieshouse.account.validator.service.TnepValidationService;
+import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
@@ -24,9 +24,9 @@ import static uk.gov.companieshouse.account.validator.AccountValidatorApplicatio
 
 
 @Service
-public class TnepValidationServiceImpl implements TnepValidationService {
+public class FelixValidationServiceImpl implements FelixValidationService {
 
-    private static final String IXBRL_VALIDATOR_URI = "IXBRL_VALIDATOR_URI";
+    private static final String FELIX_VALIDATOR_URI = "FELIX_VALIDATOR_URI";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
@@ -34,8 +34,8 @@ public class TnepValidationServiceImpl implements TnepValidationService {
     private EnvironmentReader environmentReader;
 
     @Autowired
-    public TnepValidationServiceImpl(RestTemplate restTemplate,
-                                     EnvironmentReader environmentReader) {
+    public FelixValidationServiceImpl(RestTemplate restTemplate,
+                                      EnvironmentReader environmentReader) {
 
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
@@ -51,41 +51,41 @@ public class TnepValidationServiceImpl implements TnepValidationService {
 
         boolean isIxbrlValid = false;
 
-        LOGGER.info("TnepValidationServiceImpl: Ixbrl validation has started");
+        LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has started");
         try {
-            Results results = validatIxbrlAgainstTnep(ixbrl, location);
+            Results results = validatIxbrlAgainstFelix(ixbrl, location);
 
-            if (hasPassedTnepValidation(results)) {
+            if (hasPassedFelixValidation(results)) {
                 addToLog(false, null, location,
-                        "Ixbrl is valid. It has passed the TNEP validation");
+                        "Ixbrl is valid. It has passed the FELIX validation");
 
                 isIxbrlValid = true;
 
             } else {
                 addToLog(true, null, location,
-                        "Ixbrl is invalid. It has failed the TNEP validation");
+                        "Ixbrl is invalid. It has failed the FELIX validation");
             }
 
         } catch (Exception e) {
             addToLog(true, e, location,
-                    "Exception has been thrown when calling TNEP validator. Unable to validate Ixbrl");
+                    "Exception has been thrown when calling FELIX validator. Unable to validate Ixbrl");
         }
 
-        LOGGER.info("TnepValidationServiceImpl: Ixbrl validation has finished");
+        LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has finished");
 
         return isIxbrlValid;
     }
 
     /**
-     * Call TNEP validator service, via http POST using multipart file upload, to check if ixbrl is
+     * Call FELIX validator service, via http POST using multipart file upload, to check if ixbrl is
      * valid.
      *
      * @param ixbrl - ixbrl content to be validated.
      * @param location - ixbrl location, public location.
-     * @return {@link Results} with the information from calling the Tnep service.
+     * @return {@link Results} with the information from calling the Felix service.
      * @throws URISyntaxException
      */
-    private Results validatIxbrlAgainstTnep(String ixbrl, String location)
+    private Results validatIxbrlAgainstFelix(String ixbrl, String location)
             throws URISyntaxException {
 
         LinkedMultiValueMap<String, Object> map = createFileMessageResource(ixbrl, location);
@@ -94,12 +94,12 @@ public class TnepValidationServiceImpl implements TnepValidationService {
         return postForValidation(requestEntity);
     }
 
-    private boolean hasPassedTnepValidation(Results results) {
+    private boolean hasPassedFelixValidation(Results results) {
         return results != null && "OK".equalsIgnoreCase(results.getValidationStatus());
     }
 
     /**
-     * Connect to the TNEP validator via http POST using multipart file upload
+     * Connect to the FELIX validator via http POST using multipart file upload
      *
      * @return RestTemplate
      */
@@ -118,9 +118,9 @@ public class TnepValidationServiceImpl implements TnepValidationService {
         logMap.put("location", location);
 
         if (hasValidationFailed) {
-            LOGGER.error("TnepValidationServiceImpl: validation has failed", e, logMap);
+            LOGGER.error("FelixValidationServiceImpl: validation has failed", e, logMap);
         } else {
-            LOGGER.debug("TnepValidationServiceImpl: validation has passed", logMap);
+            LOGGER.debug("FelixValidationServiceImpl: validation has passed", logMap);
         }
     }
 
@@ -147,13 +147,13 @@ public class TnepValidationServiceImpl implements TnepValidationService {
     }
 
     /**
-     * Obtain the URL of the TNEP validator from the environment
+     * Obtain the URL of the FELIX validator from the environment
      *
      * @return String
      */
     protected String getIxbrlValidatorUri() {
 
-        return environmentReader.getMandatoryString(IXBRL_VALIDATOR_URI);
+        return environmentReader.getMandatoryString(FELIX_VALIDATOR_URI);
     }
 
     private static class FileMessageResource extends ByteArrayResource {
