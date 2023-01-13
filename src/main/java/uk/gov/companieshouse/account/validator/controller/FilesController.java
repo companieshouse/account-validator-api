@@ -16,11 +16,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
-import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
 import java.util.UUID;
-import java.util.zip.ZipInputStream;
-
 
 @Controller
 public class FilesController {

@@ -22,7 +22,6 @@ import java.util.Objects;
 
 import static uk.gov.companieshouse.account.validator.AccountValidatorApplication.APPLICATION_NAME_SPACE;
 
-
 @Service
 public class FelixValidationServiceImpl implements FelixValidationService {
 
