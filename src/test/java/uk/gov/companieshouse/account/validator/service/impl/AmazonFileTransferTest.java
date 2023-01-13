@@ -42,7 +42,9 @@ class AmazonFileTransferTest {
     private static final String PATH_DIRECTORY="hamish/";
     private static final String  FILE_NAME = "fileName";
     private static final String MOCK_URL = "http://mock-path-to-ixbrl";
-    private static final String S3_LOCATION = "s3://dev-pdf-bucket/accounts/abridged_accounts/abridged-accounts19a5c3bd-4e54-49b1-915d-632f12036372.html";
+//    private static final String S3_LOCATION = "s3://dev-pdf-bucket/accounts/abridged_accounts/abridged-accounts19a5c3bd-4e54-49b1-915d-632f12036372.html";
+    private static final String S3_LOCATION = "s3://account-validator-bucket/accounts-validator/accounts19a5c3bd-4e54-49b1-915d-632f12036372.html";
+
     private static final String MOCK_AWS_REGION = "eu-west-1";
     
     @BeforeEach

@@ -26,20 +26,21 @@ CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https:
 
 ### Deployment Variables
 
-Name                                   | Description                                                                                                                                                               | Mandatory | Default | Example
--------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- | ----------------------------------------
-AWS_SECRET_ACCESS_KEY                  |                                                                                                                                                                           | ✓         |         | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_ACCESS_KEY_ID                      |                                                                                                                                                                           | ✓         |         | AKIAIOSFODNN7EXAMPLE
-IXBRL_VALIDATOR_URI                    | URL to TNEP ixbrl validator                                                                                                                                               | ✓         |         | http://HOST/validate
-DOCUMENT_RENDER_SERVICE_HOST           | [Document render service](https://github.com/companieshouse/document-render-service)                                                                                      | ✓         |         | http://HOST:PORT
-MONGODB_HOST                           | Mongo database host                                                                                                                                                       | ✓         |         | HOST:PORT
-MONGODB_PORT                           | Mongo database port                                                                                                                                                       | ✓         |         | 1234
-MONGODB_TRANSACTIONS_DATABASE          | MongoDB Transactions Database name.                                                                                                                                       | ✓         |         | transactions
-MONGODB_URL                            | Mongo database URL.                                                                                                                                                       | ✓         |         | mongodb://HOST:PORT/DATABASE
-DOCUMENT_BUCKET_NAME                   | Bucket name on s3                                                                                                                                                         | ✓         |         | example-bucket
-MONGO_CONNECTION_POOL_MIN_SIZE         | Mongo Database connection pool size (Min)                                                                                                                                 | ✗         | 0       | 1
-MONGO_CONNECTION_MAX_IDLE_TIME         | Mongo Database connection idle time, 0 for no ideal time                                                                                                                  | ✗         | 0       | 0
-MONGO_CONNECTION_MAX_LIFE_TIME         | Mongo Database connection life time, 0 for infinite life time.                                                                                                            | ✗         | 0       | 0
+Name                                   | Description                                                                          | Mandatory | Default | Example
+-------------------------------------- |--------------------------------------------------------------------------------------| --------- | ------- | ----------------------------------------
+AWS_SECRET_ACCESS_KEY                  |                                                                                      | ✓         |         | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_ACCESS_KEY_ID                      |                                                                                      | ✓         |         | AKIAIOSFODNN7EXAMPLE
+IXBRL_VALIDATOR_URI                    | URL to TNEP ixbrl validator                                                          | ✓         |         | http://HOST/validate
+BUCKET_NAME                            | S3 BUCKET NAME                                                                       | ✓         |         | accounts-validator
+DOCUMENT_BUCKET_NAME                   | Bucket name on s3                                                                    | ✓         |         | example-bucket
+DOCUMENT_RENDER_SERVICE_HOST           | [Document render service](https://github.com/companieshouse/document-render-service) | ✓         |         | http://HOST:PORT
+MONGODB_HOST                           | Mongo database host                                                                  | ✓         |         | HOST:PORT
+MONGODB_PORT                           | Mongo database port                                                                  | ✓         |         | 1234
+MONGODB_TRANSACTIONS_DATABASE          | MongoDB Transactions Database name.                                                  | ✓         |         | accounts_validator
+MONGODB_URL                            | Mongo database URL.                                                                  | ✓         |         | mongodb://HOST:PORT/DATABASE
+MONGO_CONNECTION_POOL_MIN_SIZE         | Mongo Database connection pool size (Min)                                            | ✗         | 0       | 1
+MONGO_CONNECTION_MAX_IDLE_TIME         | Mongo Database connection idle time, 0 for no ideal time                             | ✗         | 0       | 0
+MONGO_CONNECTION_MAX_LIFE_TIME         | Mongo Database connection life time, 0 for infinite life time.                       | ✗         | 0       | 0
 
 
 ### MondogDB End point for tests
