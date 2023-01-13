@@ -179,6 +179,12 @@ public class AccountValidatorImpl implements AccountValidator {
         return documentBucketName;
     }
 
+    /**
+     * Verifies (ZIP) file or Plain HMTL
+     *
+     * @param source - the file.
+     * @return then returns false ou true.
+     */
     private boolean isZipFile(StreamSource source) throws IOException {
         source.getInputStream().mark(Integer.MAX_VALUE);
         ZipInputStream zipInputStream = new ZipInputStream(source.getInputStream());

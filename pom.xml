@@ -35,9 +35,11 @@
 		<api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
 		<api-sdk-java.version>4.3.24</api-sdk-java.version>
 		<api-helper-java-library.version>1.4.5</api-helper-java-library.version>
-		<jaxb-api.version>2.3.1</jaxb-api.version>
 		<aws-java-sdk.version>1.12.343</aws-java-sdk.version>
 		<api-helper-java.version>1.4.3</api-helper-java.version>
+
+		<!-- java apis libs -->
+		<jaxb-api.version>2.3.1</jaxb-api.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

@@ -81,19 +81,4 @@ public class FilesController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }
     }
-
-    /**
-     * Verifies (ZIP) file or Plain HMTL
-     *
-     * @param source - the file.
-     * @return then returns false ou true.
-     */
-    public boolean isZipFile(StreamSource source) throws IOException {
-        source.getInputStream().mark(Integer.MAX_VALUE);
-        ZipInputStream zipInputStream = new ZipInputStream(source.getInputStream());
-        boolean isZipFile = zipInputStream.getNextEntry() != null;
-        source.getInputStream().reset();
-
-        return isZipFile;
-    }
 }

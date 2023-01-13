@@ -30,7 +30,7 @@ Name                                   | Description                            
 -------------------------------------- |--------------------------------------------------------------------------------------| --------- | ------- | ----------------------------------------
 AWS_SECRET_ACCESS_KEY                  |                                                                                      | ✓         |         | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 AWS_ACCESS_KEY_ID                      |                                                                                      | ✓         |         | AKIAIOSFODNN7EXAMPLE
-IXBRL_VALIDATOR_URI                    | URL to TNEP ixbrl validator                                                          | ✓         |         | http://HOST/validate
+IXBRL_VALIDATOR_URI                    | URL to FELIX validator                                                               | ✓         |         | http://HOST/validate
 BUCKET_NAME                            | S3 BUCKET NAME                                                                       | ✓         |         | accounts-validator
 DOCUMENT_BUCKET_NAME                   | Bucket name on s3                                                                    | ✓         |         | example-bucket
 DOCUMENT_RENDER_SERVICE_HOST           | [Document render service](https://github.com/companieshouse/document-render-service) | ✓         |         | http://HOST:PORT
