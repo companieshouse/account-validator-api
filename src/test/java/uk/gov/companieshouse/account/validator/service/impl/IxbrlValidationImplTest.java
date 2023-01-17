@@ -59,7 +59,7 @@ public class IxbrlValidationImplTest {
     }
  
     @Test
-    void validationSucess() {
+    void validationSuccess() {
 
         mockServer.expect(requestTo(TNEP_URL))
             .andExpect(method(HttpMethod.POST))
