@@ -23,11 +23,17 @@ public class FilesController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("accounts-validator-api");
 
-    @Autowired
-    private AccountValidatorImpl accountValidatorImpl;
+
+    private final AccountValidatorImpl accountValidatorImpl;
+
+
+    private final AccountValidatedService accountValidatedService;
 
     @Autowired
-    AccountValidatedService accountValidatedService;
+    public FilesController(AccountValidatorImpl accountValidatorImpl, AccountValidatedService accountValidatedService) {
+        this.accountValidatorImpl = accountValidatorImpl;
+        this.accountValidatedService = accountValidatedService;
+    }
 
     @PostMapping("/validate")
     public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {

@@ -16,6 +16,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,12 @@ public class IxbrlValidationImpl implements IxbrlValidation {
     
     @Autowired
     private RestTemplate restTemplate;
+
+    private final String ixbrlUri;
+
+    public IxbrlValidationImpl() {
+        this.ixbrlUri = getIxbrlValidatorUri();
+    }
     
     /**
      * Validate the ixbrl
@@ -46,7 +53,7 @@ public class IxbrlValidationImpl implements IxbrlValidation {
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
             
-            Results results = restTemplate.postForObject(new URI(getIxbrlValidatorUri()), requestEntity, Results.class);
+            Results results = restTemplate.postForObject(new URI(this.ixbrlUri), requestEntity, Results.class);
 
             if(results != null && "OK".equalsIgnoreCase(results.getValidationStatus())) {
                 Map<String, Object> logMap = new HashMap<>();
