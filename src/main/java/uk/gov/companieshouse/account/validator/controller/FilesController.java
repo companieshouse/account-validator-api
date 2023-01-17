@@ -39,11 +39,11 @@ public class FilesController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
             } else {
                 message = "File validation failed";
-                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
             }
         } catch (Exception e) {
             message = "Could not validate the file: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         }
     }
 
