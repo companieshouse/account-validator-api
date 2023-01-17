@@ -32,12 +32,15 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     private RestTemplate restTemplate;
     private EnvironmentReader environmentReader;
 
+    private String felixUri;
+
     @Autowired
     public FelixValidationServiceImpl(RestTemplate restTemplate,
                                       EnvironmentReader environmentReader) {
 
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
+        this.felixUri = getFelixValidatorUri();
     }
 
     /**
@@ -106,7 +109,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
             throws URISyntaxException {
 
         return restTemplate
-                .postForObject(new URI(getIxbrlValidatorUri()), requestEntity, Results.class);
+                .postForObject(new URI(this.felixUri), requestEntity, Results.class);
     }
 
     private void addToLog(boolean hasValidationFailed, Exception e,
@@ -150,7 +153,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      *
      * @return String
      */
-    protected String getIxbrlValidatorUri() {
+    protected String getFelixValidatorUri() {
 
         return environmentReader.getMandatoryString(FELIX_VALIDATOR_URI);
     }

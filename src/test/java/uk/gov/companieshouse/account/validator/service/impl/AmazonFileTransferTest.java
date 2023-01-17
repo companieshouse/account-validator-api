@@ -194,13 +194,13 @@ class AmazonFileTransferTest {
     @Test
     void getBucketFromS3Location() {
         String bucket = amazonFileTransfer.getBucketFromS3Location(S3_LOCATION);
-        assertEquals("dev-pdf-bucket", bucket);
+        assertEquals("account-validator-bucket", bucket);
     }
     
     @Test
     void getKeyFromS3Location() {
         String key = amazonFileTransfer.getKeyFromS3Location(S3_LOCATION);
-        assertEquals("accounts/abridged_accounts/abridged-accounts19a5c3bd-4e54-49b1-915d-632f12036372.html", key);
+        assertEquals("accounts-validator/accounts19a5c3bd-4e54-49b1-915d-632f12036372.html", key);
     }
     
     @Test
