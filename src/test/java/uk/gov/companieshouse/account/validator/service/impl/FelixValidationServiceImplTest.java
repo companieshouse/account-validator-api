@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -25,9 +22,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 class FelixValidationServiceImplTest {
-
-    private static final String ENV_VARIABLE_IXBRL_VALIDATOR_URI = "IXBRL_VALIDATOR_URI";
-    private static final String ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE = "http://felix.url/validate";
+    private static final String ENV_VARIABLE_FELIX_VALIDATOR_URI = "FELIX_VALIDATOR_URI";
+    private static final String ENV_VARIABLE_FELIX_VALIDATOR_URI_VALUE = "http://felix.url/validate";
     private static final String IXBRL_LOCATION = "s3://test-bucket/accounts/ixbrl-generated-name.html";
     private static final String IXBRL = getIxbrl();
     private static final String VALIDATION_STATUS_UNIT_TEST_FAILURE = "unit test failure";
@@ -37,24 +33,31 @@ class FelixValidationServiceImplTest {
     private RestTemplate restTemplateMock;
     @Mock
     private EnvironmentReader environmentReaderMock;
-
     private FelixValidationServiceImpl felixValidationService;
 
     @BeforeEach
-    void setup() {
-        felixValidationService = new FelixValidationServiceImpl(
-            restTemplateMock,
-            environmentReaderMock);
-    }
+    void init(TestInfo info) {
+        if (info.getDisplayName().contains("Felix validation")) {
+            mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_FELIX_VALIDATOR_URI_VALUE);
+        }else{
+            mockEnvironmentReaderGetMandatoryString(null);
+        }
 
+        felixValidationService = new FelixValidationServiceImpl(
+                restTemplateMock,
+                environmentReaderMock);
+    }
     @Test
     @DisplayName("Felix validation call is successful. Happy path")
     void validationSuccess() {
+        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_FELIX_VALIDATOR_URI_VALUE);
+
+        felixValidationService = new FelixValidationServiceImpl(
+                restTemplateMock,
+                environmentReaderMock);
 
         Results results = new Results();
         results.setValidationStatus(VALIDATION_STATUS_OK);
-
-        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
             .thenReturn(results);
@@ -69,8 +72,6 @@ class FelixValidationServiceImplTest {
         Results results = new Results();
         results.setValidationStatus(VALIDATION_STATUS_UNIT_TEST_FAILURE);
 
-        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
-
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
             .thenReturn(results);
 
@@ -78,9 +79,8 @@ class FelixValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Felix validation fails due to missing response")
     void validationMissingResponse() {
-
-        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
             .thenReturn(null);
@@ -89,9 +89,8 @@ class FelixValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Felix validation fails due to invalid response")
     void invalidResponse() {
-
-        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
             .thenThrow(new RestClientException(VALIDATION_STATUS_UNIT_TEST_FAILURE));
@@ -100,16 +99,16 @@ class FelixValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Missing environment variable")
     void missingEnvVariable() {
-
-        mockEnvironmentReaderGetMandatoryString(null);
         assertFalse(validateIxbrl());
     }
 
     private void mockEnvironmentReaderGetMandatoryString(String returnedMandatoryValue) {
 
-        when(environmentReaderMock.getMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI))
-            .thenReturn(returnedMandatoryValue);
+        when(environmentReaderMock.getMandatoryString(ENV_VARIABLE_FELIX_VALIDATOR_URI))
+                .thenReturn(returnedMandatoryValue);
+
     }
 
     private boolean validateIxbrl() {
