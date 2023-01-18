@@ -11,6 +11,8 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -39,7 +41,7 @@ class FelixValidationServiceImplTest {
     void init(TestInfo info) {
         if (info.getDisplayName().contains("Felix validation")) {
             mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_FELIX_VALIDATOR_URI_VALUE);
-        }else{
+        } else {
             mockEnvironmentReaderGetMandatoryString(null);
         }
 
@@ -47,6 +49,7 @@ class FelixValidationServiceImplTest {
                 restTemplateMock,
                 environmentReaderMock);
     }
+
     @Test
     @DisplayName("Felix validation call is successful. Happy path")
     void validationSuccess() {
@@ -60,7 +63,7 @@ class FelixValidationServiceImplTest {
         results.setValidationStatus(VALIDATION_STATUS_OK);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(results);
+                .thenReturn(results);
 
         assertTrue(validateIxbrl());
     }
@@ -73,7 +76,7 @@ class FelixValidationServiceImplTest {
         results.setValidationStatus(VALIDATION_STATUS_UNIT_TEST_FAILURE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(results);
+                .thenReturn(results);
 
         assertFalse(validateIxbrl());
     }
@@ -83,7 +86,7 @@ class FelixValidationServiceImplTest {
     void validationMissingResponse() {
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(null);
+                .thenReturn(null);
 
         assertFalse(validateIxbrl());
     }
@@ -93,7 +96,7 @@ class FelixValidationServiceImplTest {
     void invalidResponse() {
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenThrow(new RestClientException(VALIDATION_STATUS_UNIT_TEST_FAILURE));
+                .thenThrow(new RestClientException(VALIDATION_STATUS_UNIT_TEST_FAILURE));
 
         assertFalse(validateIxbrl());
     }
@@ -112,23 +115,23 @@ class FelixValidationServiceImplTest {
     }
 
     private boolean validateIxbrl() {
-        return felixValidationService.validate(IXBRL, IXBRL_LOCATION);
+        return felixValidationService.validate(getIxbrl(), IXBRL_LOCATION);
     }
 
     private static String getIxbrl() {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<html xmlns:ixt2=\"http://www.xbrl.org/inlineXBRL/transformation/2011-07-31\">\n"
-            + "  <head>\n"
-            + "    <meta content=\"application/xhtml+xml; charset=UTF-8\" http-equiv=\"content-type\" />\n"
-            + "    <title>\n"
-            + "            TEST COMPANY\n"
-            + "        </title>\n"
-            + "  <body xml:lang=\"en\">\n"
-            + "    <div class=\"accounts-body \">\n"
-            + "      <div id=\"your-account-type\" class=\"wholedoc\">\n"
-            + "      </div>\n"
-            + "    </div>\n"
-            + "   </body>\n"
-            + "</html>\n";
+                + "<html xmlns:ixt2=\"http://www.xbrl.org/inlineXBRL/transformation/2011-07-31\">\n"
+                + "  <head>\n"
+                + "    <meta content=\"application/xhtml+xml; charset=UTF-8\" http-equiv=\"content-type\" />\n"
+                + "    <title>\n"
+                + "            TEST COMPANY\n"
+                + "        </title>\n"
+                + "  <body xml:lang=\"en\">\n"
+                + "    <div class=\"accounts-body \">\n"
+                + "      <div id=\"your-account-type\" class=\"wholedoc\">\n"
+                + "      </div>\n"
+                + "    </div>\n"
+                + "   </body>\n"
+                + "</html>\n";
     }
 }

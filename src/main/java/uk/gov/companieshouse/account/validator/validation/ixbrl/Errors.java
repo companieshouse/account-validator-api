@@ -5,20 +5,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "errors")
 public class Errors {
-
-    private String errorMessage;
+    public Errors(){}
 
     @XmlElement(name = "ErrorMessage")
+    private String errorMessage;
+
+
     public String getErrorMessage() {
         return errorMessage;
     }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-    @Override
-    public String toString() {
-        return "Errors [errorMessage=" + errorMessage + "]";
     }
 }

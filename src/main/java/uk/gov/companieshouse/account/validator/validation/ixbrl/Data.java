@@ -6,13 +6,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "data")
 public class Data {
 
+    public Data(){}
+    @XmlElement(name = "BalanceSheetDate")
     private String balanceSheetDate;
-    
+
+    @XmlElement(name = "AccountsType")
     private String accountsType;
-    
+
+    @XmlElement(name = "CompaniesHouseRegisteredNumber")
     private String companiesHouseRegisteredNumber;
 
-    @XmlElement(name = "BalanceSheetDate")
+
     public String getBalanceSheetDate() {
         return balanceSheetDate;
     }
@@ -21,7 +25,6 @@ public class Data {
         this.balanceSheetDate = balanceSheetDate;
     }
 
-    @XmlElement(name = "AccountsType")
     public String getAccountsType() {
         return accountsType;
     }
@@ -30,18 +33,11 @@ public class Data {
         this.accountsType = accountsType;
     }
 
-    @XmlElement(name = "CompaniesHouseRegisteredNumber")
     public String getCompaniesHouseRegisteredNumber() {
         return companiesHouseRegisteredNumber;
     }
 
     public void setCompaniesHouseRegisteredNumber(String companiesHouseRegisteredNumber) {
         this.companiesHouseRegisteredNumber = companiesHouseRegisteredNumber;
-    }
-
-    @Override
-    public String toString() {
-        return "Data [balanceSheetDate=" + balanceSheetDate + ", accountsType=" + accountsType
-                + ", companiesHouseRegisteredNumber=" + companiesHouseRegisteredNumber + "]";
     }
 }

@@ -12,7 +12,7 @@
 	<name>account-validator-api</name>
 	<description>Handles accounts XBRL Validator</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>1.8</java.version>
 
 		<maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
 		<spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
@@ -198,11 +198,11 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>${jaxb-api.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-api</artifactId>-->
+<!--			<version>${jaxb-api.version}</version>-->
+<!--		</dependency>-->
 
 	</dependencies>
 

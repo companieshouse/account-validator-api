@@ -16,6 +16,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,13 +50,19 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * @return boolean
      */
     @Override
-    public boolean validate(String ixbrl, String location) {
+    public boolean validate(String iXbrlData, String location) {
 
         boolean isIxbrlValid = false;
 
         LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has started");
         try {
-            Results results = validatIxbrlAgainstFelix(ixbrl, location);
+
+            byte[] bytes = iXbrlData.getBytes(StandardCharsets.UTF_8);
+
+            String s = new String(bytes, StandardCharsets.UTF_8);
+            System.out.println("Output : " + s);
+
+            Results results = validatIxbrlAgainstFelix(iXbrlData, location);
 
             if (hasPassedFelixValidation(results)) {
                 addToLog(false, null, location,
@@ -82,7 +89,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * Call FELIX validator service, via http POST using multipart file upload, to check if ixbrl is
      * valid.
      *
-     * @param ixbrl - ixbrl content to be validated.
+     * @param ixbrl    - ixbrl content to be validated.
      * @param location - ixbrl location, public location.
      * @return {@link Results} with the information from calling the Felix service.
      * @throws URISyntaxException
@@ -108,8 +115,10 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     private Results postForValidation(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity)
             throws URISyntaxException {
 
-        return restTemplate
+        Results response = restTemplate
                 .postForObject(new URI(this.felixUri), requestEntity, Results.class);
+
+        return (Results) response;
     }
 
     private void addToLog(boolean hasValidationFailed, Exception e,
@@ -169,8 +178,8 @@ public class FelixValidationServiceImpl implements FelixValidationService {
          * Constructs a new {@link FileMessageResource}.
          *
          * @param byteArray A byte array containing data from a {@link MimeMessage}.
-         * @param filename The filename to be associated with the {@link MimeMessage} in the form
-         * data.
+         * @param filename  The filename to be associated with the {@link MimeMessage} in the form
+         *                  data.
          */
         public FileMessageResource(final byte[] byteArray, final String filename) {
             super(byteArray);
@@ -204,4 +213,5 @@ public class FelixValidationServiceImpl implements FelixValidationService {
             return Objects.hash(super.hashCode(), filename);
         }
     }
+
 }
