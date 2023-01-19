@@ -326,16 +326,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         return environmentReader.getMandatoryString(FELIX_VALIDATOR_URI);
     }
 
-    @Override
-    public void serialize(Object object, OutputStream outputStream) throws IOException {
-
-    }
-
-    @Override
-    public byte[] serializeToByteArray(Object object) throws IOException {
-        return FelixValidationService.super.serializeToByteArray(object);
-    }
-
     private static class FileMessageResource extends ByteArrayResource {
 
         /**
