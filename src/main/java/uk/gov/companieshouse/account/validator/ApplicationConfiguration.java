@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.account.validator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +43,8 @@ public class ApplicationConfiguration {
         return new RestTemplate();
     }
 
+    @Bean public ObjectMapper objectMapper() {
+        return new ObjectMapper().disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);}
     public int getPlatformMaxDecodedSizeMB() {
         return _platformMaxDecodedSizeMB;
     }

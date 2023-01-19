@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -14,17 +17,23 @@ import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.*;
+import java.net.*;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static uk.gov.companieshouse.account.validator.AccountValidatorApplication.APPLICATION_NAME_SPACE;
 
 @Service
 public class FelixValidationServiceImpl implements FelixValidationService {
+
+    private String boundary;
+    private static final String LINE = "\r\n";
+    private HttpURLConnection httpConn;
+    private String charset;
+    private OutputStream outputStream;
+    private PrintWriter writer;
 
     private static final String FELIX_VALIDATOR_URI = "FELIX_VALIDATOR_URI";
 
@@ -97,10 +106,10 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     private Results validatIxbrlAgainstFelix(String ixbrl, String location)
             throws URISyntaxException {
 
-        LinkedMultiValueMap<String, Object> map = createFileMessageResource(ixbrl, location);
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = setHttpHeaders(map);
+        LinkedMultiValueMap<String, Object> attach = createFileMessageResource(ixbrl, location);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = setHttpHeaders(attach);
 
-        return postForValidation(requestEntity);
+        return postForValidation(requestEntity, ixbrl);
     }
 
     private boolean hasPassedFelixValidation(Results results) {
@@ -112,13 +121,162 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      *
      * @return RestTemplate
      */
-    private Results postForValidation(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity)
+    private Results postForValidation(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity, String ixblrData)
             throws URISyntaxException {
 
-        Results response = restTemplate
-                .postForObject(new URI(this.felixUri), requestEntity, Results.class);
 
-        return (Results) response;
+        try {
+            // Set header
+            Map<String, String> headers = new HashMap<>();
+            headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
+//            HttpPostMultipart multipart = new HttpPostMultipart("http://localhost/index", "utf-8", headers);
+//            // Add form field
+//            multipart.addFormField("username", "test_name");
+//            multipart.addFormField("password", "test_psw");
+//            // Add file
+//            multipart.addFilePart("imgFile", new File("/Users/apple/Desktop/test.png"));
+//            // Print result
+//            String response = multipart.finish();
+//            System.out.println(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.charset = "utf-8";
+        boundary = UUID.randomUUID().toString();
+
+
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
+//
+
+
+        URL url = null;
+        try {
+            url = new URL(this.felixUri);
+        } catch (MalformedURLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            httpConn = (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        httpConn.setUseCaches(false);
+        httpConn.setDoOutput(true);    // indicates POST method
+        httpConn.setDoInput(true);
+        httpConn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        if (headers != null && headers.size() > 0) {
+            Iterator<String> it = headers.keySet().iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                String value = headers.get(key);
+                httpConn.setRequestProperty(key, value);
+            }
+        }
+        try {
+            outputStream = httpConn.getOutputStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            addFilePart("file", new File("/Users/osvaldomartini/Download/Files-IXBRL/12345716_aa_2022-10-14.xhtml"), ixblrData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        String response = null;
+        try {
+            response = finish();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(response);
+        return null;
+    }
+
+    /**
+     * Adds a form field to the request
+     *
+     * @param name  field name
+     * @param value field value
+     */
+    public void addFormField(String name, String value) {
+        writer.append("--" + boundary).append(LINE);
+        writer.append("Content-Disposition: form-data; name=\"" + name + "\"").append(LINE);
+        writer.append("Content-Type: text/plain; charset=" + charset).append(LINE);
+        writer.append(LINE);
+        writer.append(value).append(LINE);
+        writer.flush();
+    }
+
+    /**
+     * Adds a upload file section to the request
+     *
+     * @param fieldName
+     * @param uploadFile
+     * @throws IOException
+     */
+    public void addFilePart(String fieldName, File uploadFile, String ixblrData)
+            throws IOException {
+        String fileName = uploadFile.getName();
+        writer.append("--" + boundary).append(LINE);
+        writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"").append(LINE);
+        writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE);
+        writer.append("Content-Transfer-Encoding: binary").append(LINE);
+        writer.append(LINE);
+        writer.flush();
+
+        //FileInputStream inputStream = new FileInputStream(uploadFile);
+
+        InputStream inputStream = new ByteArrayInputStream(ixblrData.getBytes(StandardCharsets.UTF_8));
+        byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        outputStream.flush();
+        inputStream.close();
+        writer.append(LINE);
+        writer.flush();
+    }
+
+    /**
+     * Completes the request and receives response from the server.
+     *
+     * @return String as response in case the server returned
+     * status OK, otherwise an exception is thrown.
+     * @throws IOException
+     */
+    public String finish() throws IOException {
+        String response = "";
+        writer.flush();
+        writer.append("--" + boundary + "--").append(LINE);
+        writer.close();
+
+        // checks server's status code first
+        int status = httpConn.getResponseCode();
+        if (status == HttpURLConnection.HTTP_OK) {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = httpConn.getInputStream().read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            response = result.toString(this.charset);
+            httpConn.disconnect();
+        } else {
+            throw new IOException("Server returned non-OK status: " + status);
+        }
+        return response;
     }
 
     private void addToLog(boolean hasValidationFailed, Exception e,
@@ -144,6 +302,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
             LinkedMultiValueMap<String, Object> map) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Content-Type", "multipart/form-data");
 
         return new HttpEntity<>(map,
                 headers);
@@ -165,6 +324,16 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     protected String getFelixValidatorUri() {
 
         return environmentReader.getMandatoryString(FELIX_VALIDATOR_URI);
+    }
+
+    @Override
+    public void serialize(Object object, OutputStream outputStream) throws IOException {
+
+    }
+
+    @Override
+    public byte[] serializeToByteArray(Object object) throws IOException {
+        return FelixValidationService.super.serializeToByteArray(object);
     }
 
     private static class FileMessageResource extends ByteArrayResource {

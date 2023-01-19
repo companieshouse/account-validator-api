@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Errors {
     public Errors(){}
 
-    @XmlElement(name = "ErrorMessage")
     private String errorMessage;
 
 
@@ -15,6 +14,7 @@ public class Errors {
         return errorMessage;
     }
 
+    @XmlElement(name = "ErrorMessage")
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }

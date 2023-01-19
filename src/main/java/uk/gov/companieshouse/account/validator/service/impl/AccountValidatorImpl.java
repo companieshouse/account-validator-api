@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
+import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.util.http.fileupload.util.LimitedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +16,6 @@ import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
