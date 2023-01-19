@@ -13,6 +13,7 @@ import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.AccountValidator;
 import uk.gov.companieshouse.account.validator.service.AmazonFileTransfer;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
+import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -23,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -64,7 +64,7 @@ public class AccountValidatorImpl implements AccountValidator {
      * @return true is valid ixbrl.
      */
     @Override
-    public boolean downloadIxbrlFromLocation(FileDetails fileDetails) throws IOException {
+    public Results downloadIxbrlFromLocation(FileDetails fileDetails) throws IOException {
 
         //S3 file location
         String location = generateS3FileLocation(fileDetails);
@@ -78,7 +78,7 @@ public class AccountValidatorImpl implements AccountValidator {
 
             LOGGER.error("Account validator: Amazon File Transfer has fail to download file", logMap);
 
-            return false;
+            return null;
         }
 
         //Preparing the data for zip file check
@@ -89,7 +89,7 @@ public class AccountValidatorImpl implements AccountValidator {
         File file = createFile(ixbrlData, location);
 
         //Validate against Felix
-        boolean validated = felixValidationService.validate(ixbrlData, location);
+        Results validated = felixValidationService.validate(ixbrlData, location);
 
         createAccountValidated(fileDetails, validated, !isZipFile);
 
@@ -114,35 +114,22 @@ public class AccountValidatorImpl implements AccountValidator {
      * and the data to performs the validation.
      *
      * @param iXbrlData - file data from de request to be validated.
-     * @param fileName - file data from de request to be validated.
+     * @param fileName  - file data from de request to be validated.
      * @return true is valid ixbrl.
      */
     @Override
-    public boolean validateFileDirect(String iXbrlData, String fileName) throws IOException {
+    public Results validateFileDirect(String iXbrlData, String fileName) throws IOException {
 
         boolean isBase64Encoded = false;
 
         byte[] bytes = iXbrlData.getBytes(StandardCharsets.UTF_8);
-
-
-        String s = new String(bytes, StandardCharsets.UTF_8);
-        System.out.println("Output : " + s);
-//        Path path = Paths.get(file.getAbsolutePath());
-//
-//        byte[] arr = Files.readAllBytes(path);
-//
-//        String iXbrlData = Arrays.toString(arr);
-
-        // Printing the above byte array
-//        System.out.println(Arrays.toString(arr));
 
         if (StringUtils.isEmpty(iXbrlData)) {
             Map<String, Object> logMap = new HashMap<>();
             logMap.put(LOG_MESSAGE_KEY, "The ixbrl data content is empty");
 
             LOGGER.error("Account validator: Direct Validation has fail", logMap);
-
-            return false;
+            throw new IOException("Account validator: he ixbrl data content is empty");
         }
 
         //Preparing the data for zip file check
@@ -150,15 +137,14 @@ public class AccountValidatorImpl implements AccountValidator {
 
         if (_config.getPlatformMaxDecodedSizeMB() > 0) {
             inputDocStreamSource = wrapInBuffer(wrapInSizeLimiter(inputDocStreamSource, isBase64Encoded));
-        }
-        else {
+        } else {
             inputDocStreamSource = wrapInBuffer(inputDocStreamSource);
         }
 
         boolean isZipFile = isZipFile(inputDocStreamSource);
 
         //Validate against Felix
-        boolean validated = felixValidationService.validate(iXbrlData, "submission:/" );
+        Results validated = felixValidationService.validate(iXbrlData, "submission:/");
 
 //      TODO: Call ixbrl_renderer
         if (!isZipFile) {
@@ -239,7 +225,7 @@ public class AccountValidatorImpl implements AccountValidator {
         return isZipFile;
     }
 
-    private void createAccountValidated(FileDetails fileDetails, boolean valid, boolean showImage){
+    private void createAccountValidated(FileDetails fileDetails, Results result, boolean showImage) {
         String uuid = UUID.randomUUID().toString();
         AccountValidated accountValidated = new AccountValidated();
         accountValidated.setId(uuid);
@@ -249,8 +235,8 @@ public class AccountValidatorImpl implements AccountValidator {
 
         ValidationResponse validationResponse = new ValidationResponse();
         validationResponse.setId(uuid);
-        validationResponse.setValid(valid);
-        validationResponse.setTndpResponse(valid?"OK":"Failed");
+        validationResponse.setValid(result.getValidationStatus().equalsIgnoreCase("success"));
+        validationResponse.setTndpResponse(result.getValidationStatus().equalsIgnoreCase("success") ? "OK" : "Failed");
 
         accountValidated.setData(validationResponse);
         accountValidated.setShowImage(showImage);
@@ -260,12 +246,11 @@ public class AccountValidatorImpl implements AccountValidator {
 
     @Override
     public InputStream getImageContentAsStream(Object data) {
-        if(data instanceof String){
+        if (data instanceof String) {
             String xrblData = data.toString();
             return new ByteArrayInputStream(xrblData.getBytes());
-        }
-        else{
-            return (InputStream)data;
+        } else {
+            return (InputStream) data;
         }
     }
 

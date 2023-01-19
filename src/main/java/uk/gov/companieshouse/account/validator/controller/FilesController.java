@@ -14,15 +14,11 @@ import uk.gov.companieshouse.account.validator.model.FileDetails;
 import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.impl.AccountValidatorImpl;
+import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Controller
@@ -43,20 +39,14 @@ public class FilesController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {
+    public ResponseEntity<?> validate(@Valid @RequestBody FileDetails fileDetails) {
         String message = "";
         try {
-            boolean result = accountValidatorImpl.downloadIxbrlFromLocation(fileDetails);
-            if (result) {
-                message = "File validated successfully";
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-            } else {
-                message = "File validation failed";
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-            }
+            Results result = accountValidatorImpl.downloadIxbrlFromLocation(fileDetails);
+            return new ResponseEntity<Results>(result, HttpStatus.OK);
         } catch (Exception e) {
             message = "Could not validate the file: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessage(message));
         }
     }
 
@@ -92,28 +82,12 @@ public class FilesController {
     }
 
     @PostMapping("/direct_file_validate")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
-        boolean result;
         try {
-
-//            StreamSource inputDocStreamSource = new StreamSource(new ByteArrayInputStream(file.getBytes(), "submission:/" + file.getOriginalFilename());
-//            String inputDoc = new String(file.getBytes());
-//            LOGGER.info(inputDoc);
-
             String inputDoc = new String(file.getBytes());
-            LOGGER.info(inputDoc);
-
-//            File doc = accountValidatorImpl.convertToFile(file);
-            result = accountValidatorImpl.validateFileDirect(inputDoc, file.getOriginalFilename());
-
-            if (result) {
-                message = "File validated successfully";
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-            } else {
-                message = "File validation failed";
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-            }
+            Results result = accountValidatorImpl.validateFileDirect(inputDoc, file.getOriginalFilename());
+            return new ResponseEntity<Results>(result, HttpStatus.OK);
         } catch (Exception e) {
             message = "Could not validate the file: " + file.getName() + ". Error: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));

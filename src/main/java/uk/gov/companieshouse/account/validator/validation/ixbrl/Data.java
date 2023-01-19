@@ -12,15 +12,12 @@ public class Data {
 
     public Data(){}
     @JacksonXmlProperty(localName="BalanceSheetDate")
-    @JsonProperty("BalanceSheetDate")
    private String balanceSheetDate;
 
     @JacksonXmlProperty(localName="AccountsType")
-    @JsonProperty("AccountsType")
     private String accountsType;
 
     @JacksonXmlProperty(localName="CompaniesHouseRegisteredNumber")
-    @JsonProperty("CompaniesHouseRegisteredNumber")
     private String companiesHouseRegisteredNumber;
 
     public String getBalanceSheetDate() {

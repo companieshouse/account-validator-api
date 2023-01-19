@@ -54,35 +54,20 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * @return boolean
      */
     @Override
-    public boolean validate(String iXbrlData, String location) {
+    public Results validate(String iXbrlData, String location) {
 
         boolean isIxbrlValid = false;
 
         LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has started");
         try {
-
-            byte[] bytes = iXbrlData.getBytes(StandardCharsets.UTF_8);
-            Results results = validatIxbrlAgainstFelix(iXbrlData, location);
-
-            if (hasPassedFelixValidation(results)) {
-                addToLog(false, null, location,
-                        "Ixbrl is valid. It has passed the FELIX validation");
-
-                isIxbrlValid = true;
-
-            } else {
-                addToLog(true, null, location,
-                        "Ixbrl is invalid. It has failed the FELIX validation");
-            }
-
+            return validatIxbrlAgainstFelix(iXbrlData, location);
         } catch (Exception e) {
-            addToLog(true, e, location,
-                    "Exception has been thrown when calling FELIX validator. Unable to validate Ixbrl");
+            LOGGER.error(String.format("Exception has been thrown when calling FELIX validator: %s ", e.getMessage()));
         }
 
         LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has finished");
 
-        return isIxbrlValid;
+        return null;
     }
 
     /**

@@ -12,7 +12,6 @@ public class Errors {
     public Errors(){}
 
     @JacksonXmlProperty(localName="ErrorMessage")
-    @JsonProperty("ErrorMessage")
     private String errorMessage;
 
 
