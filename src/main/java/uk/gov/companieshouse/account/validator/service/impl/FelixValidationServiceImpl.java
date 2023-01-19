@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -14,6 +17,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static uk.gov.companieshouse.account.validator.AccountValidatorApplication.APPLICATION_NAME_SPACE;
@@ -57,10 +62,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         try {
 
             byte[] bytes = iXbrlData.getBytes(StandardCharsets.UTF_8);
-            String s = new String(bytes, StandardCharsets.UTF_8);
-            System.out.println("Output : " + s);
-
-            Results results = validatIxbrlAgainstFelix(iXbrlData);
+            Results results = validatIxbrlAgainstFelix(iXbrlData, location);
 
             if (hasPassedFelixValidation(results)) {
                 addToLog(false, null, location,
@@ -91,13 +93,12 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * @return {@link Results} with the information from calling the Felix service.
      * @throws URISyntaxException
      */
-    private Results validatIxbrlAgainstFelix(String ixbrl)
-            throws URISyntaxException {
+    private Results validatIxbrlAgainstFelix(String ixbrl, String location){
         try {
             // Set header
             Map<String, String> headers = new HashMap<>();
             headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
-            return postForValidation(headers, ixbrl);
+            return postForValidation(headers, ixbrl, location);
         } catch (Exception e) {
             LOGGER.error(String.format("ValidatIxbrlAgainstFelix: %s", e.getMessage()));
         }
@@ -114,25 +115,15 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      *
      * @return RestTemplate
      */
-    private Results postForValidation(Map<String, String> headers, String ixblrData)
-            throws URISyntaxException {
+    private Results postForValidation(Map<String, String> headers, String ixblrData, String location)
+            throws IOException {
 
         this.charset = "utf-8";
         boundary = UUID.randomUUID().toString();
 
+        URL url = new URL(this.felixUri);
 
-        URL url = null;
-        try {
-            url = new URL(this.felixUri);
-        } catch (MalformedURLException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        try {
-            httpConn = (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);
         httpConn.setDoOutput(true);    // indicates POST method
         httpConn.setDoInput(true);
@@ -145,22 +136,12 @@ public class FelixValidationServiceImpl implements FelixValidationService {
                 httpConn.setRequestProperty(key, value);
             }
         }
-        try {
-            outputStream = httpConn.getOutputStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
 
-        try {
-            addFilePart("file", new File("/Users/osvaldomartini/Download/Files-IXBRL/12345716_aa_2022-10-14.xhtml"), ixblrData);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        outputStream = httpConn.getOutputStream();
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
+
+        Path pathXMLFile = Paths.get(location);
+        addFilePart("file", new File(pathXMLFile.toUri()), ixblrData);
 
         String response = null;
         try {
@@ -169,7 +150,14 @@ public class FelixValidationServiceImpl implements FelixValidationService {
             throw new RuntimeException(e);
         }
         System.out.println(response);
-        return null;
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        ObjectMapper objectMapper = new XmlMapper();
+        Results Results = objectMapper.readValue(response, Results.class);
+
+        return Results;
     }
 
     /**

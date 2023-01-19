@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement(name = "results")
 public class Results {
 
     public Results(){}
@@ -21,7 +20,6 @@ public class Results {
         return errors;
     }
 
-    @XmlAttribute(name= "errors")
     public void setErrors(Errors errors) {
         this.errors = errors;
     }
@@ -30,7 +28,6 @@ public class Results {
         return data;
     }
 
-    @XmlElement(name= "data")
     public void setData(Data data) {
         this.data = data;
     }
@@ -40,7 +37,6 @@ public class Results {
         return validationStatus;
     }
 
-    @XmlAttribute(name= "validationStatus")
     public void setValidationStatus(String validationStatus) {
         this.validationStatus = validationStatus;
     }
