@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,7 +44,6 @@ class FelixValidationServiceImplTest {
         }
 
         felixValidationService = new FelixValidationServiceImpl(
-                restTemplateMock,
                 environmentReaderMock);
     }
 

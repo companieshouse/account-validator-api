@@ -57,7 +57,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         try {
 
             byte[] bytes = iXbrlData.getBytes(StandardCharsets.UTF_8);
-
             String s = new String(bytes, StandardCharsets.UTF_8);
             System.out.println("Output : " + s);
 
