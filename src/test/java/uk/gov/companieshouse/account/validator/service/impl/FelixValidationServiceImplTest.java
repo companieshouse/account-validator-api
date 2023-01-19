@@ -56,7 +56,6 @@ class FelixValidationServiceImplTest {
         mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_FELIX_VALIDATOR_URI_VALUE);
 
         felixValidationService = new FelixValidationServiceImpl(
-                restTemplateMock,
                 environmentReaderMock);
 
         Results results = new Results();

@@ -1,16 +1,10 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
@@ -19,7 +13,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.io.*;
 import java.net.*;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -39,16 +32,13 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
-    private RestTemplate restTemplate;
     private EnvironmentReader environmentReader;
 
     private String felixUri;
 
     @Autowired
-    public FelixValidationServiceImpl(RestTemplate restTemplate,
-                                      EnvironmentReader environmentReader) {
+    public FelixValidationServiceImpl(EnvironmentReader environmentReader) {
 
-        this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
         this.felixUri = getFelixValidatorUri();
     }
@@ -71,7 +61,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
             String s = new String(bytes, StandardCharsets.UTF_8);
             System.out.println("Output : " + s);
 
-            Results results = validatIxbrlAgainstFelix(iXbrlData, location);
+            Results results = validatIxbrlAgainstFelix(iXbrlData);
 
             if (hasPassedFelixValidation(results)) {
                 addToLog(false, null, location,
@@ -99,17 +89,21 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * valid.
      *
      * @param ixbrl    - ixbrl content to be validated.
-     * @param location - ixbrl location, public location.
      * @return {@link Results} with the information from calling the Felix service.
      * @throws URISyntaxException
      */
-    private Results validatIxbrlAgainstFelix(String ixbrl, String location)
+    private Results validatIxbrlAgainstFelix(String ixbrl)
             throws URISyntaxException {
+        try {
+            // Set header
+            Map<String, String> headers = new HashMap<>();
+            headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
+            return postForValidation(headers, ixbrl);
+        } catch (Exception e) {
+            LOGGER.error(String.format("ValidatIxbrlAgainstFelix: %s", e.getMessage()));
+        }
+        return null;
 
-        LinkedMultiValueMap<String, Object> attach = createFileMessageResource(ixbrl, location);
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = setHttpHeaders(attach);
-
-        return postForValidation(requestEntity, ixbrl);
     }
 
     private boolean hasPassedFelixValidation(Results results) {
@@ -121,35 +115,11 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      *
      * @return RestTemplate
      */
-    private Results postForValidation(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity, String ixblrData)
+    private Results postForValidation(Map<String, String> headers, String ixblrData)
             throws URISyntaxException {
-
-
-        try {
-            // Set header
-            Map<String, String> headers = new HashMap<>();
-            headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
-//            HttpPostMultipart multipart = new HttpPostMultipart("http://localhost/index", "utf-8", headers);
-//            // Add form field
-//            multipart.addFormField("username", "test_name");
-//            multipart.addFormField("password", "test_psw");
-//            // Add file
-//            multipart.addFilePart("imgFile", new File("/Users/apple/Desktop/test.png"));
-//            // Print result
-//            String response = multipart.finish();
-//            System.out.println(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         this.charset = "utf-8";
         boundary = UUID.randomUUID().toString();
-
-
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
-//
 
 
         URL url = null;
@@ -201,21 +171,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         }
         System.out.println(response);
         return null;
-    }
-
-    /**
-     * Adds a form field to the request
-     *
-     * @param name  field name
-     * @param value field value
-     */
-    public void addFormField(String name, String value) {
-        writer.append("--" + boundary).append(LINE);
-        writer.append("Content-Disposition: form-data; name=\"" + name + "\"").append(LINE);
-        writer.append("Content-Type: text/plain; charset=" + charset).append(LINE);
-        writer.append(LINE);
-        writer.append(value).append(LINE);
-        writer.flush();
     }
 
     /**
