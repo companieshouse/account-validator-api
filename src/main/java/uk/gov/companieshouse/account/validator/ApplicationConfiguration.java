@@ -36,11 +36,6 @@ public class ApplicationConfiguration {
         return new EnvironmentReaderImpl();
     }
 
-    @Bean
-    public RestTemplate getRestTemplate() {
-        return new RestTemplate();
-    }
-
     public int getPlatformMaxDecodedSizeMB() {
         return _platformMaxDecodedSizeMB;
     }

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
@@ -43,7 +40,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
     @Autowired
     public FelixValidationServiceImpl(EnvironmentReader environmentReader) {
-
         this.environmentReader = environmentReader;
         this.felixUri = getFelixValidatorUri();
     }
@@ -55,8 +51,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      */
     @Override
     public Results validate(String iXbrlData, String location) {
-
-        boolean isIxbrlValid = false;
 
         LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has started");
         try {
@@ -75,8 +69,8 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * valid.
      *
      * @param ixbrl    - ixbrl content to be validated.
+     * @param location - location of the file.
      * @return {@link Results} with the information from calling the Felix service.
-     * @throws URISyntaxException
      */
     private Results validatIxbrlAgainstFelix(String ixbrl, String location){
         try {
@@ -91,14 +85,14 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
     }
 
-    private boolean hasPassedFelixValidation(Results results) {
-        return results != null && "OK".equalsIgnoreCase(results.getValidationStatus());
-    }
-
     /**
      * Connect to the FELIX validator via http POST using multipart file upload
      *
-     * @return RestTemplate
+     * @param headers    - request headers.
+     * @param ixblrData    - ixbrl content to be validated.
+     * @param location - location of the file.
+     * @return {@link Results} with the information from calling the Felix service.
+     * @throws IOException
      */
     private Results postForValidation(Map<String, String> headers, String ixblrData, String location)
             throws IOException {
@@ -130,7 +124,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
         String response = null;
         try {
-            response = finish();
+            response = completeTheRequest();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -148,21 +142,21 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     /**
      * Adds a upload file section to the request
      *
-     * @param fieldName
-     * @param uploadFile
+     * @param fieldName     - file name.
+     * @param fileToUpload  - file to upload.
+     * @param ixblrData     - ixbrl content to be validated.
+     * @return {@link Results} with the information from calling the Felix service.
      * @throws IOException
      */
-    public void addFilePart(String fieldName, File uploadFile, String ixblrData)
+    public void addFilePart(String fieldName, File fileToUpload, String ixblrData)
             throws IOException {
-        String fileName = uploadFile.getName();
+        String fileName = fileToUpload.getName();
         writer.append("--" + boundary).append(LINE);
         writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"").append(LINE);
         writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE);
         writer.append("Content-Transfer-Encoding: binary").append(LINE);
         writer.append(LINE);
         writer.flush();
-
-        //FileInputStream inputStream = new FileInputStream(uploadFile);
 
         InputStream inputStream = new ByteArrayInputStream(ixblrData.getBytes(StandardCharsets.UTF_8));
         byte[] buffer = new byte[4096];
@@ -183,7 +177,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * status OK, otherwise an exception is thrown.
      * @throws IOException
      */
-    public String finish() throws IOException {
+    public String completeTheRequest() throws IOException {
         String response = "";
         writer.flush();
         writer.append("--" + boundary + "--").append(LINE);
@@ -206,43 +200,6 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         return response;
     }
 
-    private void addToLog(boolean hasValidationFailed, Exception e,
-                          String location, String message) {
-
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put("message", message);
-        logMap.put("location", location);
-
-        if (hasValidationFailed) {
-            LOGGER.error("FelixValidationServiceImpl: validation has failed", e, logMap);
-        } else {
-            LOGGER.debug("FelixValidationServiceImpl: validation has passed", logMap);
-        }
-    }
-
-    /**
-     * Add http Header attributes for validation POST
-     *
-     * @Return HttpEntity<>(LinkedMultiValueMap<String, Object> , HttpHeaders);
-     */
-    private HttpEntity<LinkedMultiValueMap<String, Object>> setHttpHeaders(
-            LinkedMultiValueMap<String, Object> map) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.add("Content-Type", "multipart/form-data");
-
-        return new HttpEntity<>(map,
-                headers);
-    }
-
-    private LinkedMultiValueMap<String, Object> createFileMessageResource(String ixbrl,
-                                                                          String location) {
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new FileMessageResource(ixbrl.getBytes(), location));
-
-        return map;
-    }
-
     /**
      * Obtain the URL of the FELIX validator from the environment
      *
@@ -252,52 +209,4 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
         return environmentReader.getMandatoryString(FELIX_VALIDATOR_URI);
     }
-
-    private static class FileMessageResource extends ByteArrayResource {
-
-        /**
-         * The filename to be associated with the {@link MimeMessage} in the form data.
-         */
-        private final String filename;
-
-        /**
-         * Constructs a new {@link FileMessageResource}.
-         *
-         * @param byteArray A byte array containing data from a {@link MimeMessage}.
-         * @param filename  The filename to be associated with the {@link MimeMessage} in the form
-         *                  data.
-         */
-        public FileMessageResource(final byte[] byteArray, final String filename) {
-            super(byteArray);
-            this.filename = filename;
-        }
-
-        @Override
-        public String getFilename() {
-            return filename;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof FileMessageResource)) {
-                return false;
-            }
-
-            if (!super.equals(o)) {
-                return false;
-            }
-
-            FileMessageResource that = (FileMessageResource) o;
-            return Objects.equals(filename, that.filename);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), filename);
-        }
-    }
-
 }
