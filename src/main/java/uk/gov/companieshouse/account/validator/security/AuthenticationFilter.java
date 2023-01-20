@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator;
+package uk.gov.companieshouse.account.validator.security;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
