@@ -7,27 +7,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.companieshouse.account.validator.message.ResponseMessage;
-import uk.gov.companieshouse.account.validator.model.AccountValidated;
 import uk.gov.companieshouse.account.validator.model.FileDetails;
-import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.impl.AccountValidatorImpl;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
-import java.util.UUID;
 
 @Controller
 public class AccountValidationController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("accounts-validator-api");
-
-    @Autowired
     private AccountValidatorImpl accountValidatorImpl;
+    private AccountValidatedService accountValidatedService;
+    private Logger logger;
 
     @Autowired
-    AccountValidatedService accountValidatedService;
+    public AccountValidationController(
+                AccountValidatorImpl accountValidatorImpl,
+                AccountValidatedService accountValidatedService,
+                Logger logger) {
+        this.accountValidatorImpl = accountValidatorImpl;
+        this.accountValidatedService = accountValidatedService;
+    }
 
     @PostMapping("/validate")
     public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {
