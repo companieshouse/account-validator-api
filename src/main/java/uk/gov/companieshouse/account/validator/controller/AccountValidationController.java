@@ -19,7 +19,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @Controller
-public class FilesController {
+public class AccountValidationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("accounts-validator-api");
 
