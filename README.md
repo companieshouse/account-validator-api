@@ -28,8 +28,6 @@ CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https:
 
 Name                                   | Description                                                                          | Mandatory | Default | Example
 -------------------------------------- |--------------------------------------------------------------------------------------| --------- | ------- | ----------------------------------------
-AWS_SECRET_ACCESS_KEY                  |                                                                                      | ✓         |         | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_ACCESS_KEY_ID                      |                                                                                      | ✓         |         | AKIAIOSFODNN7EXAMPLE
 IXBRL_VALIDATOR_URI                    | URL to IXBRL validator                                                               | ✓         |         | http://HOST/validate
 FELIX_VALIDATOR_URI                    | URL to FELIX validator                                                               | ✓         |         | http://HOST/validate
 BUCKET_NAME                            | S3 BUCKET NAME                                                                       | ✓         |         | accounts-validator

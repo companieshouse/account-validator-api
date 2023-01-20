@@ -7,7 +7,6 @@ import uk.gov.companieshouse.account.validator.ApplicationConfiguration;
 import uk.gov.companieshouse.account.validator.model.FileDetails;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.AccountValidator;
-import uk.gov.companieshouse.account.validator.service.AmazonFileTransfer;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -31,9 +30,6 @@ public class AccountValidatorImpl implements AccountValidator {
 
     @Autowired
     AccountValidatedService accountValidatedService;
-
-    @Autowired
-    private AmazonFileTransfer amazonFileTransfer;
 
     private final ApplicationConfiguration _config;
     private final FelixValidationService felixValidationService;
@@ -63,7 +59,7 @@ public class AccountValidatorImpl implements AccountValidator {
         String location = generateS3FileLocation(fileDetails);
 
         //Option 1: Fetch ixbrl from AmazonFileTransfer from S3
-        String ixbrlData = amazonFileTransfer.getIxbrlFromS3(location);
+        String ixbrlData = ""; // TODO: implement
 
         if (StringUtils.isEmpty(ixbrlData)) {
             Map<String, Object> logMap = new HashMap<>();
