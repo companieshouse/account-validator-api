@@ -27,6 +27,7 @@ public class AccountValidationController {
                 Logger logger) {
         this.accountValidatorImpl = accountValidatorImpl;
         this.accountValidatedService = accountValidatedService;
+        this.logger = logger;
     }
 
     @PostMapping("/validate")
