@@ -4,7 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.account.validator.ApplicationConfiguration;
-import uk.gov.companieshouse.account.validator.model.FileDetails;
+import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.AccountValidator;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
@@ -53,7 +53,7 @@ public class AccountValidatorImpl implements AccountValidator {
      * @param fileDetails - fileDetails details that needs to be validated.
      * @return true is valid ixbrl.
      */
-    public boolean downloadIxbrlFromLocation(FileDetails fileDetails) throws IOException {
+    public boolean downloadIxbrlFromLocation(ValidationRequest fileDetails) throws IOException {
 
         //S3 file location
         String location = generateS3FileLocation(fileDetails);
@@ -91,7 +91,7 @@ public class AccountValidatorImpl implements AccountValidator {
      * @return location or null if document generation failed
      * @throws IOException
      */
-    private String generateS3FileLocation(FileDetails fileDetails) {
+    private String generateS3FileLocation(ValidationRequest fileDetails) {
 
         String bucketName = getDocumentBucketName();
 

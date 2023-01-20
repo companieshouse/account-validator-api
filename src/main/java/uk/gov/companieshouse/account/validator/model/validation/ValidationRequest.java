@@ -1,8 +1,8 @@
-package uk.gov.companieshouse.account.validator.model;
+package uk.gov.companieshouse.account.validator.model.validation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FileDetails {
+public class ValidationRequest {
     @JsonProperty("customer_id")
     String customer_id;
     @JsonProperty("file_name")
