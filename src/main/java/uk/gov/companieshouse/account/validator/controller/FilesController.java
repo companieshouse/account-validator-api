@@ -1,24 +1,30 @@
 package uk.gov.companieshouse.account.validator.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.companieshouse.account.validator.message.ResponseMessage;
 import uk.gov.companieshouse.account.validator.model.AccountValidated;
 import uk.gov.companieshouse.account.validator.model.FileDetails;
-
 import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
+import uk.gov.companieshouse.account.validator.service.impl.AccountValidatorImpl;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
 import java.util.UUID;
 
-
 @Controller
 public class FilesController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("accounts-validator-api");
+
+    @Autowired
+    private AccountValidatorImpl accountValidatorImpl;
 
     @Autowired
     AccountValidatedService accountValidatedService;
@@ -27,15 +33,16 @@ public class FilesController {
     public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {
         String message = "";
         try {
-
-            // TODO
-            // IF ZIP FILE calls tnedp valildation No ixbrl_image_renderer
-            // IF NO ZIP FILE calls ixbrl/felix valildation call to ixbrl_image_renderer
-
-            message = "Uploaded the file successfully";
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            boolean result = accountValidatorImpl.downloadIxbrlFromLocation(fileDetails);
+            if (result) {
+                message = "File validated successfully";
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            } else {
+                message = "File validation failed";
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+            }
         } catch (Exception e) {
-            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
+            message = "Could not validate the file: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }
     }
@@ -63,12 +70,11 @@ public class FilesController {
 
             accountValidatedService.createAccount(accountValidated);
 
-            message = "Uploaded the file successfully";
+            message = "Validation saved successfully";
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
-            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
+            message = "Could not save the validation: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }
     }
-
 }

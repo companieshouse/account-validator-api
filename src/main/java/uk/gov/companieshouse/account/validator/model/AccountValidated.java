@@ -8,8 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.account.validator.JsonDateDeserializer;
-import uk.gov.companieshouse.charset.CharSet;
-
 import java.util.Date;
 
 import static org.springframework.util.Assert.notNull;
@@ -24,38 +22,30 @@ public class AccountValidated implements Prunable{
     @Field("_id")
     @JsonProperty("id")
     private String id;
-
     @Field("customer_id")
     @JsonProperty("customer_id")
     private String customerId;
-
     @Field("file_name")
     @JsonProperty("file_name")
 //    @CharSetValid(CharSet.CHARACTER_SET_2)
     private String filename;
-
     @Field("file_size")
     @JsonProperty("file_size")
     private String fileSize;
-
     @Field("s3_key")
     @JsonProperty("s3_key")
     private String s3Key;
-
     @Field("created_at")
     @JsonDeserialize(using = JsonDateDeserializer.class)
     @JsonProperty("created_at")
     private Date createdAt;
-
     @Field("status")
     @JsonProperty("status")
     private String status;
-
     @Field("validation")
     @JsonMerge
     @JsonProperty("validation")
     private ValidationResponse data;
-
     @Field("show_image")
     @JsonProperty("show_image")
     private boolean showImage;

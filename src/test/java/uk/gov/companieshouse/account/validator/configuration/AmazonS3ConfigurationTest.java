@@ -17,10 +17,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AmazonS3ConfigurationTest {
-
     @InjectMocks
     private AmazonS3Configuration amazonS3Configuration;
-
     @Mock
     private EnvironmentReader environmentReader;
 

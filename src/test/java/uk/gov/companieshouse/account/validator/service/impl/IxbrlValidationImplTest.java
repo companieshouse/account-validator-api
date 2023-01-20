@@ -20,7 +20,7 @@ public class IxbrlValidationImplTest {
     
     private MockRestServiceServer mockServer;
     
-    private static final String TNEP_URL = "http://dummytnep.companieshouse.gov.uk/validate";
+    private static final String TNEP_URL = "http://dummyfelix.companieshouse.gov.uk/validate";
     
     private static final String VALIDATION_FAILURE_RESPONSE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<results validationStatus=\"FAILED\">"
