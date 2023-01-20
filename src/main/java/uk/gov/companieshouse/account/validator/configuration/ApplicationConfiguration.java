@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator;
+package uk.gov.companieshouse.account.validator.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
