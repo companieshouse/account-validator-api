@@ -5,11 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.account.validator.ApplicationConfiguration;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
-import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
 import uk.gov.companieshouse.account.validator.service.AccountValidator;
 import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
@@ -20,30 +18,28 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class AccountValidatorImpl implements AccountValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger("account-validator-api");
     private static final String LOG_MESSAGE_KEY = "message";
     private static final String LOG_ERROR_KEY = "error";
     private static final String LOCATION = "s3://%s/%s/%s";
     private static final String DOCUMENT_BUCKET_NAME = "DOCUMENT_BUCKET_NAME";
-    private static final String DOCUMENT_RENDER_SERVICE_HOST = "DOCUMENT_RENDER_SERVICE_HOST";
+
     private String documentBucketName;
-
-    @Autowired
-    AccountValidatedService accountValidatedService;
-
     private final ApplicationConfiguration _config;
     private final FelixValidationService felixValidationService;
-
     private final IxbrlValidationImpl ixbrlValidationImpl;
+    private final Logger logger;
 
-    @Autowired
-    public AccountValidatorImpl(FelixValidationService felixValidationService,
-                                IxbrlValidationImpl ixbrlValidationImpl,
-                                ApplicationConfiguration config) {
+    public AccountValidatorImpl(ApplicationConfiguration _config,
+                                FelixValidationService felixValidationService,
+                                IxbrlValidationImpl ixbrlValidationImpl, Logger logger) {
+        this._config = _config;
         this.felixValidationService = felixValidationService;
         this.ixbrlValidationImpl = ixbrlValidationImpl;
-        this._config = config;
+        this.logger = logger;
     }
+
+    @Autowired
+
 
     /**
      * Downloads the ixbrl content and call the felix validation service if the
@@ -65,7 +61,7 @@ public class AccountValidatorImpl implements AccountValidator {
             Map<String, Object> logMap = new HashMap<>();
             logMap.put(LOG_MESSAGE_KEY, "The ixbrl data content is empty");
 
-            LOGGER.error("Account validator: Amazon File Transfer has fail to download file", logMap);
+            logger.error("Account validator: Amazon File Transfer has fail to download file", logMap);
 
             return false;
         }
@@ -105,7 +101,7 @@ public class AccountValidatorImpl implements AccountValidator {
             logMap.put(LOG_ERROR_KEY, "S3 file location generation failure");
             logMap.put(LOG_MESSAGE_KEY, "The bucket name to store the generated document has not been configured");
 
-            LOGGER.error("S3 file location generation failure", logMap);
+            logger.error("S3 file location generation failure", logMap);
         }
 
         return null;

@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.account.validator.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,14 +19,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
+import uk.gov.companieshouse.logging.Logger;
 
 import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -37,14 +38,33 @@ class FelixValidationServiceImplTest {
     private RestTemplate restTemplateMock;
     @Mock
     private EnvironmentReader environmentReaderMock;
+    @Mock
+    private Logger mockLogger;
 
     private FelixValidationServiceImpl felixValidationService;
+
+    private static String getIxbrl() {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<html xmlns:ixt2=\"http://www.xbrl.org/inlineXBRL/transformation/2011-07-31\">\n"
+                + "  <head>\n"
+                + "    <meta content=\"application/xhtml+xml; charset=UTF-8\" http-equiv=\"content-type\" />\n"
+                + "    <title>\n"
+                + "            TEST COMPANY\n"
+                + "        </title>\n"
+                + "  <body xml:lang=\"en\">\n"
+                + "    <div class=\"accounts-body \">\n"
+                + "      <div id=\"your-account-type\" class=\"wholedoc\">\n"
+                + "      </div>\n"
+                + "    </div>\n"
+                + "   </body>\n"
+                + "</html>\n";
+    }
 
     @BeforeEach
     void setup() {
         felixValidationService = new FelixValidationServiceImpl(
-            restTemplateMock,
-            environmentReaderMock);
+                restTemplateMock,
+                environmentReaderMock, mockLogger);
     }
 
     @Test
@@ -57,7 +77,7 @@ class FelixValidationServiceImplTest {
         mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(results);
+                .thenReturn(results);
 
         assertTrue(validateIxbrl());
     }
@@ -72,7 +92,7 @@ class FelixValidationServiceImplTest {
         mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(results);
+                .thenReturn(results);
 
         assertFalse(validateIxbrl());
     }
@@ -83,18 +103,7 @@ class FelixValidationServiceImplTest {
         mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
 
         when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenReturn(null);
-
-        assertFalse(validateIxbrl());
-    }
-
-    @Test
-    void invalidResponse() {
-
-        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
-
-        when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
-            .thenThrow(new RestClientException(VALIDATION_STATUS_UNIT_TEST_FAILURE));
+                .thenReturn(null);
 
         assertFalse(validateIxbrl());
     }
@@ -106,30 +115,24 @@ class FelixValidationServiceImplTest {
         assertFalse(validateIxbrl());
     }
 
-    private void mockEnvironmentReaderGetMandatoryString(String returnedMandatoryValue) {
+    @Test
+    void invalidResponse() {
 
-        when(environmentReaderMock.getMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI))
-            .thenReturn(returnedMandatoryValue);
+        mockEnvironmentReaderGetMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI_VALUE);
+
+        when(restTemplateMock.postForObject(any(URI.class), any(HttpEntity.class), eq(Results.class)))
+                .thenThrow(new RestClientException(VALIDATION_STATUS_UNIT_TEST_FAILURE));
+
+        assertFalse(validateIxbrl());
     }
 
     private boolean validateIxbrl() {
         return felixValidationService.validate(IXBRL, IXBRL_LOCATION);
     }
 
-    private static String getIxbrl() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<html xmlns:ixt2=\"http://www.xbrl.org/inlineXBRL/transformation/2011-07-31\">\n"
-            + "  <head>\n"
-            + "    <meta content=\"application/xhtml+xml; charset=UTF-8\" http-equiv=\"content-type\" />\n"
-            + "    <title>\n"
-            + "            TEST COMPANY\n"
-            + "        </title>\n"
-            + "  <body xml:lang=\"en\">\n"
-            + "    <div class=\"accounts-body \">\n"
-            + "      <div id=\"your-account-type\" class=\"wholedoc\">\n"
-            + "      </div>\n"
-            + "    </div>\n"
-            + "   </body>\n"
-            + "</html>\n";
+    private void mockEnvironmentReaderGetMandatoryString(String returnedMandatoryValue) {
+
+        when(environmentReaderMock.getMandatoryString(ENV_VARIABLE_IXBRL_VALIDATOR_URI))
+                .thenReturn(returnedMandatoryValue);
     }
 }

@@ -12,7 +12,6 @@ import uk.gov.companieshouse.account.validator.service.FelixValidationService;
 import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,25 +19,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static uk.gov.companieshouse.account.validator.AccountValidatorApplication.APPLICATION_NAME_SPACE;
-
 @Service
 public class FelixValidationServiceImpl implements FelixValidationService {
 
     private static final String FELIX_VALIDATOR_URI = "FELIX_VALIDATOR_URI";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
-
     private RestTemplate restTemplate;
     private EnvironmentReader environmentReader;
+    private Logger logger;
 
     @Autowired
     public FelixValidationServiceImpl(RestTemplate restTemplate,
-                                      EnvironmentReader environmentReader) {
-
+                                      EnvironmentReader environmentReader, Logger logger) {
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
+        this.logger = logger;
     }
+
 
     /**
      * Validate the ixbrl
@@ -50,7 +47,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
 
         boolean isIxbrlValid = false;
 
-        LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has started");
+        logger.info("FelixValidationServiceImpl: Ixbrl validation has started");
         try {
             Results results = validatIxbrlAgainstFelix(ixbrl, location);
 
@@ -70,7 +67,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
                     "Exception has been thrown when calling FELIX validator. Unable to validate Ixbrl");
         }
 
-        LOGGER.info("FelixValidationServiceImpl: Ixbrl validation has finished");
+        logger.info("FelixValidationServiceImpl: Ixbrl validation has finished");
 
         return isIxbrlValid;
     }
@@ -79,7 +76,7 @@ public class FelixValidationServiceImpl implements FelixValidationService {
      * Call FELIX validator service, via http POST using multipart file upload, to check if ixbrl is
      * valid.
      *
-     * @param ixbrl - ixbrl content to be validated.
+     * @param ixbrl    - ixbrl content to be validated.
      * @param location - ixbrl location, public location.
      * @return {@link Results} with the information from calling the Felix service.
      * @throws URISyntaxException
@@ -117,9 +114,9 @@ public class FelixValidationServiceImpl implements FelixValidationService {
         logMap.put("location", location);
 
         if (hasValidationFailed) {
-            LOGGER.error("FelixValidationServiceImpl: validation has failed", e, logMap);
+            logger.error("FelixValidationServiceImpl: validation has failed", e, logMap);
         } else {
-            LOGGER.debug("FelixValidationServiceImpl: validation has passed", logMap);
+            logger.debug("FelixValidationServiceImpl: validation has passed", logMap);
         }
     }
 
@@ -158,16 +155,16 @@ public class FelixValidationServiceImpl implements FelixValidationService {
     private static class FileMessageResource extends ByteArrayResource {
 
         /**
-         * The filename to be associated with the {@link MimeMessage} in the form data.
+         * The filename to be associated with the  MimeMessage in the form data.
          */
         private final String filename;
 
         /**
          * Constructs a new {@link FileMessageResource}.
          *
-         * @param byteArray A byte array containing data from a {@link MimeMessage}.
-         * @param filename The filename to be associated with the {@link MimeMessage} in the form
-         * data.
+         * @param byteArray A byte array containing data from a MimeMessage
+         * @param filename  The filename to be associated with the MimeMessage in the form
+         *                  data.
          */
         public FileMessageResource(final byte[] byteArray, final String filename) {
             super(byteArray);
