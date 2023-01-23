@@ -11,6 +11,9 @@ import uk.gov.companieshouse.environment.impl.EnvironmentReaderImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 @Configuration
 public class ApplicationConfiguration {
     @Value("${application.namespace}")
@@ -36,5 +39,9 @@ public class ApplicationConfiguration {
         return new RestTemplate();
     }
 
+    @Bean
+    public Executor getExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
 }
 
