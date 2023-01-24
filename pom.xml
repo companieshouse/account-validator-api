@@ -33,7 +33,7 @@
 		<!-- internal -->
 		<structured-logging.version>1.9.14</structured-logging.version>
 		<api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
-		<api-sdk-java.version>4.3.24</api-sdk-java.version>
+		<api-sdk-java.version>4.3.21</api-sdk-java.version>
 		<api-helper-java-library.version>1.4.5</api-helper-java-library.version>
 		<aws-java-sdk.version>1.12.343</aws-java-sdk.version>
 		<api-helper-java.version>1.4.3</api-helper-java.version>
@@ -43,6 +43,11 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>uk.gov.companieshouse</groupId>
+				<artifactId>api-sdk-java</artifactId>
+				<version>${api-sdk-java.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
@@ -272,6 +277,12 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>${jib-maven-plugin.version}</version>
+
+				<configuration>
+					<from>
+						<image>amazoncorretto:17</image>
+					</from>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
