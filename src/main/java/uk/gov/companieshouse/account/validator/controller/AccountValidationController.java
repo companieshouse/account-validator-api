@@ -2,7 +2,10 @@ package uk.gov.companieshouse.account.validator.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
@@ -39,7 +42,7 @@ public class AccountValidationController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<?> validate(
+    public ResponseEntity<?> submitForValidation(
             @Valid @RequestBody ValidationRequest validationRequest) {
 
         var fileId = validationRequest.id();
@@ -57,4 +60,25 @@ public class AccountValidationController {
         return ValidationResponse.success(RequestStatus.pending(fileId));
     }
 
+    @GetMapping("/validate/{fileId}")
+    ResponseEntity<?> getStatus(final String fileId) {
+        var requestStatus = statusRepository.findById(fileId);
+        if (requestStatus.isEmpty()) {
+            return ValidationResponse.requestNotFound();
+        }
+
+        return ValidationResponse.success(requestStatus.get());
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class})
+    ResponseEntity<?> noBodyException() {
+        return ResponseEntity.badRequest().body("Request required a body");
+    }
+
+    @ExceptionHandler
+    ResponseEntity<?> exceptionHandler(Exception ex) {
+        logger.error("Unhandled exception", ex);
+
+        return ResponseEntity.internalServerError().build();
+    }
 }

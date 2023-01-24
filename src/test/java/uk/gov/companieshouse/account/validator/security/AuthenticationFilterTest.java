@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator;
+package uk.gov.companieshouse.account.validator.security;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.account.validator.security.AuthenticationFilter;
 import uk.gov.companieshouse.logging.Logger;
 
 import javax.servlet.FilterChain;
