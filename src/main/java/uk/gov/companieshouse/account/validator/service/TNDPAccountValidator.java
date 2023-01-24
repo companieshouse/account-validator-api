@@ -6,7 +6,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationResult
 /**
  * A method of validating accounts via the FelixValidator
  */
-public class FelixAccountValidator implements AccountValidationStrategy {
+public class TNDPAccountValidator implements AccountValidationStrategy {
     /**
      * Validate submits the file to the felix validator for validation
      *
