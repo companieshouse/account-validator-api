@@ -1,20 +1,13 @@
 package uk.gov.companieshouse.account.validator.service.retry;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-@Component
 public record IncrementalBackoff(Duration baseDelay, Duration delayIncrement,
                                  Duration timeout,
                                  Duration maxDelay) implements RetryStrategy {
-    @Autowired
-    public IncrementalBackoff {
-    }
 
     @Override
     public <T> T attempt(Supplier<T> func) {
