@@ -1,12 +1,14 @@
 package uk.gov.companieshouse.account.validator.security;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
  * Helper class for user authentication.
  */
+@Component
 public class AuthenticationHelper {
     public static final String OAUTH2_IDENTITY_TYPE = "oauth2";
     public static final String API_KEY_IDENTITY_TYPE = "key";
