@@ -8,7 +8,7 @@ public enum LocationType {
     JSON_PATH("json-path"),
     QUERY_PARAMETER("query-parameter");
 
-    private String value;
+    private final String value;
 
     LocationType(String value) {
         this.value = value;

@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Results {
 
     private Errors errors;
-    
+
     private String validationStatus;
-    
+
     private Data data;
-    
+
     @XmlElement
     public Errors getErrors() {
         return errors;

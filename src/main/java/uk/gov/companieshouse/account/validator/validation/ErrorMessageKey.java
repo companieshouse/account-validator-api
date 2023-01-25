@@ -16,7 +16,7 @@ public enum ErrorMessageKey {
     MANDATORY_ELEMENT_MISSING("mandatory_element_missing"),
     MAXIMUM_LIMIT("maximum_limit");
 
-    private String key;
+    private final String key;
 
     ErrorMessageKey(String key) {
         this.key = key;

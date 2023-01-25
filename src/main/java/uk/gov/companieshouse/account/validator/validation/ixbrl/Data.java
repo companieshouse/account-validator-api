@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Data {
 
     private String balanceSheetDate;
-    
+
     private String accountsType;
-    
+
     private String companiesHouseRegisteredNumber;
 
     @XmlElement(name = "BalanceSheetDate")
