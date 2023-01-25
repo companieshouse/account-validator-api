@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import uk.gov.companieshouse.logging.Logger;
 
 @Configuration
@@ -16,8 +15,14 @@ import uk.gov.companieshouse.logging.Logger;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final UserAuthenticationInterceptor userAuthenticationInterceptor;
+    private final Logger logger;
+
     @Autowired
-    private Logger logger;
+    public WebSecurityConfig(UserAuthenticationInterceptor userAuthenticationInterceptor, Logger logger) {
+        this.userAuthenticationInterceptor = userAuthenticationInterceptor;
+        this.logger = logger;
+    }
 
     /**
      * Configure Http Security.
@@ -31,7 +36,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterAt(new AuthenticationFilter(logger), BasicAuthenticationFilter.class)
                 .authorizeRequests()
                 .anyRequest().permitAll();
     }
