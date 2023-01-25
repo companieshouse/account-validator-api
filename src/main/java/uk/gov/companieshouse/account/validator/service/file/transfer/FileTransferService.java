@@ -4,7 +4,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +39,8 @@ public class FileTransferService implements FileTransferStrategy {
     public FileTransferService(
             @Value("${file.transfer.api.url}") String fileTransferApiUrl,
             @Value("${file.transfer.api.key}") String fileTransferApiKey,
-            RestTemplate restTemplate, Logger logger, RetryStrategy retryStrategy) {
+            RestTemplate restTemplate, Logger logger,
+            @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy) {
 
         this.fileTransferApiUrl = FileTransferService.normaliseUrl(fileTransferApiUrl);
         this.fileTransferApiKey = fileTransferApiKey;
@@ -104,17 +109,34 @@ public class FileTransferService implements FileTransferStrategy {
             return Optional.empty();
         }
 
-        var downloadUrl = details.get().links().download();
-        byte[] fileBytesResponse = restTemplate.getForObject(downloadUrl, byte[].class);
-        var file = new File(id, details.get().name(), fileBytesResponse);
+        var downloadUrl = fileTransferApiUrl + details.get().links().download();
+        ResponseEntity<byte[]> fileBytesResponse = get(downloadUrl, byte[].class);
+        var file = new File(id, details.get().name(), fileBytesResponse.getBody());
         return Optional.of(file);
+    }
+
+    private <T> ResponseEntity<T> doRequest(String urlTemplate, HttpMethod method, Class<T> clazz, Object... urlParams) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", fileTransferApiKey);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        return restTemplate.exchange(
+                urlTemplate, method, entity, clazz, urlParams);
+    }
+
+    private <T> ResponseEntity<T> get(String urlTemplate, Class<T> clazz, Object... urlParams) {
+        return doRequest(urlTemplate, HttpMethod.GET, clazz, urlParams);
+    }
+
+    private void delete(String urlTemplate, Object... urlParams) {
+        doRequest(urlTemplate, HttpMethod.DELETE, Void.class, urlParams);
     }
 
     private Optional<FileDetails> getFileDetails(final String id) {
         // For getting file details the file id is the relative path
-        var getFileDetailsUrlTemplate = fileTransferApiUrl + "/{id}";
-        ResponseEntity<FileDetails> fileDetailsResponse = restTemplate.getForEntity(
+        var getFileDetailsUrlTemplate = fileTransferApiUrl + "/files/{id}";
+        ResponseEntity<FileDetails> fileDetailsResponse = get(
                 getFileDetailsUrlTemplate, FileDetails.class, id);
+
 
         return switch (fileDetailsResponse.getStatusCode()) {
             case NOT_FOUND -> Optional.empty();
@@ -140,6 +162,6 @@ public class FileTransferService implements FileTransferStrategy {
     @Override
     public void delete(String id) {
         var fileDeleteUrlTemplate = fileTransferApiUrl + "/{id}";
-        restTemplate.delete(fileDeleteUrlTemplate, id);
+        delete(fileDeleteUrlTemplate, id);
     }
 }
