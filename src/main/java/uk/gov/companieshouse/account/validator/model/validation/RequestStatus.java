@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.account.validator.model.validation;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -10,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
  * @see PendingStatus
  */
 @Document("validation_request_status")
-public record RequestStatus(@Id String fileId,
+public record RequestStatus(@Id @JsonProperty("file_id") String fileId,
                             @Field("status") String status,
                             @Field("result") ValidationResult result) {
 
