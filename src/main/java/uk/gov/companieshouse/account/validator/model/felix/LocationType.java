@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.validation;
+package uk.gov.companieshouse.account.validator.model.felix;
 
 /**
  * Validation error location types

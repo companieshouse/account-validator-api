@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.validation.ixbrl;
+package uk.gov.companieshouse.account.validator.model.felix.ixbrl;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
