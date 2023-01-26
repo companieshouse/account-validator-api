@@ -12,6 +12,7 @@ import java.util.Set;
  * DummyValidator is a stand-in for the business logic required to validate accounts.
  * It is used to show functionality of the rest of the system until the FelixValidator integration
  * is complete.
+ *
  * <p>
  * It fails any file named "example.xbrl" and OK's any other.
  */
