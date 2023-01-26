@@ -6,6 +6,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
@@ -60,8 +61,8 @@ public class AccountValidationController {
         return ValidationResponse.success(RequestStatus.pending(fileId));
     }
 
-    @GetMapping("/validate/{fileId}")
-    ResponseEntity<?> getStatus(final String fileId) {
+    @GetMapping("/validate/check/{fileId}")
+    ResponseEntity<?> getStatus(@PathVariable final String fileId) {
         var requestStatus = statusRepository.findById(fileId);
         if (requestStatus.isEmpty()) {
             return ValidationResponse.requestNotFound();
