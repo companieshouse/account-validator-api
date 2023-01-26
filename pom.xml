@@ -138,6 +138,11 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>api-helper-java</artifactId>
+			<version>${api-helper-java.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>api-sdk-manager-java-library</artifactId>
 			<version>${api-sdk-manager-java-library.version}</version>
 			<exclusions>
@@ -202,7 +207,7 @@
 			<artifactId>junit-jupiter-params</artifactId>
 			<scope>test</scope>
 		</dependency>
-	   <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
