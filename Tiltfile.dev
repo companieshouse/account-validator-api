@@ -1,7 +1,7 @@
 local_resource(
-  name = 'dev:account-validator-api-build',
+  name = 'dev:account-validator-api',
   cmd = 'mvn compile',
-  deps = ['src']
+  deps = ['src/main']
 )
 
 custom_build(
