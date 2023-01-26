@@ -45,5 +45,10 @@ public class ApplicationConfiguration {
                 Duration.ofSeconds(timeout),
                 Duration.ofSeconds(maxDelay));
     }
+
+    @Bean
+    public AccountValidationStrategy accountValidationStrategy() {
+        return new DummyValidator();
+    }
 }
 
