@@ -20,21 +20,45 @@ public class ApplicationConfiguration {
     @Value("${application.namespace}")
     private String applicationNameSpace;
 
+    /**
+     * Creates the logger used by the application.
+     *
+     * @return the logger
+     */
     @Bean
     public Logger logger() {
         return LoggerFactory.getLogger(applicationNameSpace);
     }
 
+    /**
+     * Creates the rest template used for rest api calls
+     *
+     * @return the rest template
+     */
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
     }
 
+    /**
+     * Creates the executor used for running asynchronous tasks
+     *
+     * @return the executor
+     */
     @Bean
     public Executor getExecutor() {
         return Executors.newSingleThreadExecutor();
     }
 
+    /**
+     * Creates the retry strategy for file transfer polling
+     *
+     * @param baseDelay      the initial delay in seconds
+     * @param delayIncrement the amount o increase the delay each time
+     * @param timeout        the maximum time allowed spending retrying
+     * @param maxDelay       the maximum delay increment
+     * @return the retry strategy
+     */
     @Bean
     public RetryStrategy fileTransferRetryStrategy(
             @Value("${file.transfer.retry.base.delay.seconds}") long baseDelay,
@@ -48,6 +72,11 @@ public class ApplicationConfiguration {
                 Duration.ofSeconds(maxDelay));
     }
 
+    /**
+     * Creates the account validator bean. This can be used to specify the specific strategy required
+     *
+     * @return The account validator strategy to use
+     */
     @Bean
     public AccountValidationStrategy accountValidationStrategy() {
         return new DummyValidator();

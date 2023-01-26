@@ -5,6 +5,11 @@ import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+/**
+ * Will attempt to retry the operation after a short delay. Each unsuccessful retry will increase
+ * the delay. This is to prevent "retry storms" where a service is down and other services send a
+ * barrage of retry attempts preventing the service from restarting.
+ */
 public record IncrementalBackoff(Duration baseDelay, Duration delayIncrement,
                                  Duration timeout,
                                  Duration maxDelay) implements RetryStrategy {

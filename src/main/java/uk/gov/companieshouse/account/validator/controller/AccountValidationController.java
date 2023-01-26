@@ -42,6 +42,14 @@ public class AccountValidationController {
         this.statusRepository = statusRepository;
     }
 
+    /**
+     * Handles the request to validate an accounts file.
+     * Starts a background process that will validate the file and save the result in the repository
+     * when complete.
+     *
+     * @param validationRequest the request data
+     * @return 404 if no file with that id is found, 200 and PENDING status otherwise
+     */
     @PostMapping("/validate")
     public ResponseEntity<?> submitForValidation(
             @Valid @RequestBody ValidationRequest validationRequest) {
@@ -61,6 +69,13 @@ public class AccountValidationController {
         return ValidationResponse.success(RequestStatus.pending(fileId));
     }
 
+    /**
+     * Checks the status of a validation request by retrieving the status from the repository
+     * Can be pending or complete, and a complete request will include the validation result.
+     *
+     * @param fileId the id of the file for which validation was requested
+     * @return 404 if there is no request for a file with that id, 200 and the status otherwise
+     */
     @GetMapping("/validate/check/{fileId}")
     ResponseEntity<?> getStatus(@PathVariable final String fileId) {
         var requestStatus = statusRepository.findById(fileId);
@@ -71,11 +86,22 @@ public class AccountValidationController {
         return ValidationResponse.success(requestStatus.get());
     }
 
+    /**
+     * Handles the exception thrown when the request body is empty
+     *
+     * @return 400 bad request response
+     */
     @ExceptionHandler({HttpMessageNotReadableException.class})
     ResponseEntity<?> noBodyException() {
         return ResponseEntity.badRequest().body("Request required a body");
     }
 
+    /**
+     * Handles all un-caught exceptions
+     *
+     * @param ex the exception
+     * @return 500 internal server error response
+     */
     @ExceptionHandler
     ResponseEntity<?> exceptionHandler(Exception ex) {
         logger.error("Unhandled exception", ex);

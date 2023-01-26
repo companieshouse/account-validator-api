@@ -14,9 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
 
-    public static final int USER_EMAIL_INDEX = 0;
-    public static final int USER_FORNAME_INDEX = 1;
-    public static final int USER_SURNAME_INDEX = 2;
     private final Logger logger;
     private final AuthenticationHelper authHelper;
 
