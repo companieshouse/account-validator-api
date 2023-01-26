@@ -1,18 +1,25 @@
 package uk.gov.companieshouse.account.validator.validation.ixbrl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "data")
+@JacksonXmlRootElement(localName="data")
 public class Data {
 
-    private String balanceSheetDate;
-    
+    public Data(){}
+    @JacksonXmlProperty(localName="BalanceSheetDate")
+   private String balanceSheetDate;
+
+    @JacksonXmlProperty(localName="AccountsType")
     private String accountsType;
-    
+
+    @JacksonXmlProperty(localName="CompaniesHouseRegisteredNumber")
     private String companiesHouseRegisteredNumber;
 
-    @XmlElement(name = "BalanceSheetDate")
     public String getBalanceSheetDate() {
         return balanceSheetDate;
     }
@@ -21,7 +28,6 @@ public class Data {
         this.balanceSheetDate = balanceSheetDate;
     }
 
-    @XmlElement(name = "AccountsType")
     public String getAccountsType() {
         return accountsType;
     }
@@ -30,18 +36,11 @@ public class Data {
         this.accountsType = accountsType;
     }
 
-    @XmlElement(name = "CompaniesHouseRegisteredNumber")
     public String getCompaniesHouseRegisteredNumber() {
         return companiesHouseRegisteredNumber;
     }
 
     public void setCompaniesHouseRegisteredNumber(String companiesHouseRegisteredNumber) {
         this.companiesHouseRegisteredNumber = companiesHouseRegisteredNumber;
-    }
-
-    @Override
-    public String toString() {
-        return "Data [balanceSheetDate=" + balanceSheetDate + ", accountsType=" + accountsType
-                + ", companiesHouseRegisteredNumber=" + companiesHouseRegisteredNumber + "]";
     }
 }

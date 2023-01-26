@@ -1,42 +1,52 @@
 package uk.gov.companieshouse.account.validator.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.companieshouse.account.validator.message.ResponseMessage;
 import uk.gov.companieshouse.account.validator.model.AccountValidated;
 import uk.gov.companieshouse.account.validator.model.FileDetails;
-
 import uk.gov.companieshouse.account.validator.model.ValidationResponse;
 import uk.gov.companieshouse.account.validator.service.AccountValidatedService;
+import uk.gov.companieshouse.account.validator.service.impl.AccountValidatorImpl;
+import uk.gov.companieshouse.account.validator.validation.ixbrl.Results;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
 import java.util.UUID;
 
-
 @Controller
 public class FilesController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("accounts-validator-api");
+
+
+    private final AccountValidatorImpl accountValidatorImpl;
+
+
+    private final AccountValidatedService accountValidatedService;
+
     @Autowired
-    AccountValidatedService accountValidatedService;
+    public FilesController(AccountValidatorImpl accountValidatorImpl, AccountValidatedService accountValidatedService) {
+        this.accountValidatorImpl = accountValidatorImpl;
+        this.accountValidatedService = accountValidatedService;
+    }
 
     @PostMapping("/validate")
-    public ResponseEntity<ResponseMessage> validate(@Valid @RequestBody FileDetails fileDetails) {
+    public ResponseEntity<?> validate(@Valid @RequestBody FileDetails fileDetails) {
         String message = "";
         try {
-
-            // TODO
-            // IF ZIP FILE calls tnedp valildation No ixbrl_image_renderer
-            // IF NO ZIP FILE calls ixbrl/felix valildation call to ixbrl_image_renderer
-
-            message = "Uploaded the file successfully";
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            Results result = accountValidatorImpl.downloadIxbrlFromLocation(fileDetails);
+            return new ResponseEntity<Results>(result, HttpStatus.OK);
         } catch (Exception e) {
-            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+            message = "Could not validate the file: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessage(message));
         }
     }
 
@@ -63,11 +73,24 @@ public class FilesController {
 
             accountValidatedService.createAccount(accountValidated);
 
-            message = "Uploaded the file successfully";
+            message = "Validation saved successfully";
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
-            message = "Could not upload the file: " + fileDetails.getFile_name()+ ". Error: " + e.getMessage();
+            message = "Could not save the validation: " + fileDetails.getFile_name() + ". Error: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+        }
+    }
+
+    @PostMapping("/direct_file_validate")
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+        String message = "";
+        try {
+            String inputDoc = new String(file.getBytes());
+            Results result = accountValidatorImpl.validateFileDirect(inputDoc, file.getOriginalFilename());
+            return new ResponseEntity<Results>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            message = "Could not validate the file: " + file.getName() + ". Error: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         }
     }
 
