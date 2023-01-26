@@ -23,7 +23,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.model.File;
@@ -37,7 +39,7 @@ import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class FileTransferServiceTest {
-    private static final String fileTransferUrl = "http://file.transfer.chs.local/files";
+    private static final String fileTransferUrl = "http://file.transfer.chs.local";
     private static final String fileTransferApiKey = "file-transfer-api-key";
 
     @Mock
@@ -48,6 +50,8 @@ class FileTransferServiceTest {
 
     @Mock
     RetryStrategy retryStrategy;
+
+    HttpEntity<String> httpEntity;
 
     FileTransferService fileTransferService;
 
@@ -75,6 +79,10 @@ class FileTransferServiceTest {
                 fileTransferApiKey,
                 restTemplate,
                 logger, retryStrategy);
+
+        var headers = new HttpHeaders();
+        headers.set(FileTransferService.API_KEY_HEADER, fileTransferApiKey);
+        httpEntity = new HttpEntity<>(headers);
     }
 
     @ParameterizedTest
@@ -178,7 +186,11 @@ class FileTransferServiceTest {
         var fileId = "fileId";
         var details = createDetails(fileId, "name", AvStatus.CLEAN, new byte[]{});
 
-        when(restTemplate.getForEntity(details.links().self(), FileDetails.class, fileId))
+        when(restTemplate.exchange(
+                fileTransferUrl + details.links().self(),
+                HttpMethod.GET,
+                httpEntity,
+                FileDetails.class, fileId))
                 .thenReturn(ResponseEntity.internalServerError().build());
 
         setupRetryStrategy();
@@ -194,17 +206,16 @@ class FileTransferServiceTest {
 
     private String setupFileDetails(String id, String name, AvStatus avStatus, byte[] data) {
         var details = createDetails(id, name, avStatus, data);
-        var fileDetailsEntity = new ResponseEntity<>(details, HttpStatus.OK);
 
-        when(restTemplate.getForEntity(details.links().self(), FileDetails.class, id))
-                .thenReturn(fileDetailsEntity);
+        when(restTemplate.exchange(fileTransferUrl + details.links().self(), HttpMethod.GET, httpEntity, FileDetails.class, id))
+                .thenReturn(ResponseEntity.ok(details));
 
         return details.links().download();
     }
 
     @NotNull
     private FileDetails createDetails(String id, String name, AvStatus avStatus, byte[] data) {
-        var getFileDetailsUrl = fileTransferUrl + "/{id}";
+        var getFileDetailsUrl = "/files/{id}";
         var fileDownloadUrl = getFileDetailsUrl + "/download";
 
         return new FileDetails(id,
@@ -220,13 +231,14 @@ class FileTransferServiceTest {
     private void setupFileDownload(String id, String name, byte[] data) {
         var fileDownloadUrl = setupFileDetails(id, name, AvStatus.CLEAN, data);
 
-        when(restTemplate.getForObject(fileDownloadUrl, byte[].class))
-                .thenReturn(data);
+        when(restTemplate.exchange(fileTransferUrl + fileDownloadUrl, HttpMethod.GET, httpEntity, byte[].class))
+                .thenReturn(ResponseEntity.ok(data));
     }
 
     void setupFileDownloadNotFound(String id) {
-        var getFileDetailsUrl = fileTransferUrl + "/{id}";
-        when(restTemplate.getForEntity(getFileDetailsUrl, FileDetails.class, id))
+        var getFileDetailsUrl = fileTransferUrl + "/files/{id}";
+
+        when(restTemplate.exchange(getFileDetailsUrl, HttpMethod.GET, httpEntity, FileDetails.class, id))
                 .thenReturn(ResponseEntity.notFound().build());
     }
 
@@ -240,7 +252,12 @@ class FileTransferServiceTest {
         // When
         fileTransferService.delete(id);
 
-        verify(restTemplate).delete(fileDeleteUrlTemplate, id);
+        verify(restTemplate).exchange(
+                fileDeleteUrlTemplate,
+                HttpMethod.DELETE,
+                httpEntity,
+                Void.class,
+                id);
 
     }
 }

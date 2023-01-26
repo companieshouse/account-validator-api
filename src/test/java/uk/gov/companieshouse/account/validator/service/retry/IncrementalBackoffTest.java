@@ -22,8 +22,9 @@ class IncrementalBackoffTest {
 
     @BeforeEach
     void setUp() {
-        retryStrategy = new IncrementalBackoff(Duration.ofSeconds(1),
-                Duration.ofSeconds(1),
+        retryStrategy = new IncrementalBackoff(
+                Duration.ofMillis(10),
+                Duration.ofMillis(10),
                 Duration.ofSeconds(30),
                 Duration.ofSeconds(10));
     }

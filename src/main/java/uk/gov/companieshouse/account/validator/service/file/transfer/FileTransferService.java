@@ -26,6 +26,7 @@ import java.util.Optional;
 @Component
 public class FileTransferService implements FileTransferStrategy {
 
+    public static final String API_KEY_HEADER = "x-api-key";
     private final String fileTransferApiUrl;
     private final String fileTransferApiKey;
     private final RestTemplate restTemplate;
@@ -117,7 +118,7 @@ public class FileTransferService implements FileTransferStrategy {
 
     private <T> ResponseEntity<T> doRequest(String urlTemplate, HttpMethod method, Class<T> clazz, Object... urlParams) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", fileTransferApiKey);
+        headers.set(API_KEY_HEADER, fileTransferApiKey);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         return restTemplate.exchange(
                 urlTemplate, method, entity, clazz, urlParams);
