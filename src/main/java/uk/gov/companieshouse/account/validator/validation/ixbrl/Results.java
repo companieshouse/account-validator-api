@@ -1,19 +1,18 @@
 package uk.gov.companieshouse.account.validator.validation.ixbrl;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@XmlRootElement(name = "results")
+@JacksonXmlRootElement(localName="Results")
 public class Results {
 
+    public Results(){}
+
     private Errors errors;
-    
+
     private String validationStatus;
-    
+
     private Data data;
     
-    @XmlElement
     public Errors getErrors() {
         return errors;
     }
@@ -22,7 +21,6 @@ public class Results {
         this.errors = errors;
     }
 
-    @XmlElement
     public Data getData() {
         return data;
     }
@@ -31,17 +29,12 @@ public class Results {
         this.data = data;
     }
 
-    @XmlAttribute
+
     public String getValidationStatus() {
         return validationStatus;
     }
 
     public void setValidationStatus(String validationStatus) {
         this.validationStatus = validationStatus;
-    }
-
-    @Override
-    public String toString() {
-        return "Results [errors=" + errors + ", validationStatus=" + validationStatus + ", data=" + data + "]";
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.account.validator;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -17,6 +18,9 @@ import static uk.gov.companieshouse.account.validator.AccountValidatorApplicatio
 @PropertySource("classpath:ValidationMessages.properties")
 public class ApplicationConfiguration {
 
+    @Value("${uk.gov.ch.felixvalidator.platformMaxDecodedSizeMB}")
+    private int _platformMaxDecodedSizeMB;
+
     @Bean
     public Logger logger() {
         return LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
@@ -32,9 +36,8 @@ public class ApplicationConfiguration {
         return new EnvironmentReaderImpl();
     }
 
-    @Bean
-    public RestTemplate getRestTemplate() {
-        return new RestTemplate();
+    public int getPlatformMaxDecodedSizeMB() {
+        return _platformMaxDecodedSizeMB;
     }
 
 }
