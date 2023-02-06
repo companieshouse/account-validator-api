@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.account.validator.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
@@ -107,5 +108,11 @@ public class AccountValidationController {
         logger.error("Unhandled exception", ex);
 
         return ResponseEntity.internalServerError().build();
+    }
+
+    //todo ade debug code
+    @GetMapping("/validate/adetest")
+    ResponseEntity<String> getAdeTest() {
+        return new ResponseEntity<>("sonarqube test pr", HttpStatus.CREATED);
     }
 }
