@@ -10,8 +10,4 @@ public final class ValidationResponse {
     public static ResponseEntity<?> requestNotFound() {
         return ResponseEntity.notFound().build();
     }
-
-    public static ResponseEntity<RequestStatus> success(RequestStatus requestStatus) {
-        return ResponseEntity.ok(requestStatus);
-    }
 }

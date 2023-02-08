@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
-import uk.gov.companieshouse.account.validator.service.DummyValidator;
-import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -65,11 +63,7 @@ public class ApplicationConfiguration {
             @Value("${file.transfer.retry.delay.increment.seconds}") long delayIncrement,
             @Value("${file.transfer.retry.timeout.seconds}") long timeout,
             @Value("${file.transfer.retry.max.delay.seconds}") long maxDelay) {
-        return new IncrementalBackoff(
-                Duration.ofSeconds(baseDelay),
-                Duration.ofSeconds(delayIncrement),
-                Duration.ofSeconds(timeout),
-                Duration.ofSeconds(maxDelay));
+        return null;
     }
 
     /**
@@ -79,7 +73,7 @@ public class ApplicationConfiguration {
      */
     @Bean
     public AccountValidationStrategy accountValidationStrategy() {
-        return new DummyValidator();
+        return null;
     }
 }
 
