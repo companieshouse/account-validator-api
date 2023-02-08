@@ -284,11 +284,6 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>${jib-maven-plugin.version}</version>
 
-				<configuration>
-					<from>
-						<image>amazoncorretto:17</image>
-					</from>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
