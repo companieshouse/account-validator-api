@@ -18,8 +18,10 @@
 		<spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
 		<spring-boot-maven-plugin.version>3.0.2</spring-boot-maven-plugin.version>
 		<maven.compiler.release.version>3.8.0</maven.compiler.release.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <!-- tests -->
+		<!-- tests -->
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
 		<test-containers.version>1.16.3</test-containers.version>
@@ -354,15 +356,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven.compiler.release.version}</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
