@@ -15,7 +15,21 @@ import java.util.Set;
  * <p>
  * It fails any file named "example.xbrl" and OK's any other.
  */
-public record DummyValidator() implements AccountValidationStrategy {
+public final class DummyValidator implements AccountValidationStrategy {
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj != null && obj.getClass() == this.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+
+    @Override
+    public String toString() {
+        return "DummyValidator[]";
+    }
 
     private static ValidationResult dummyResult(ValidationStatus status) {
         Set<String> errorMessages = status.equals(ValidationStatus.OK)
@@ -31,10 +45,9 @@ public record DummyValidator() implements AccountValidationStrategy {
         return new ValidationResult(errorMessages, validationData, status);
     }
 
-
     @Override
     public ValidationResult validate(File file) {
-        if (file.name().equalsIgnoreCase("example.xbrl")) {
+        if (file.getName().equalsIgnoreCase("example.xbrl")) {
             return DummyValidator.dummyResult(ValidationStatus.FAILED);
         }
 

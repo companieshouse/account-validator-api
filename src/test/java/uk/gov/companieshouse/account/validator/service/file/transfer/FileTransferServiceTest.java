@@ -1,16 +1,5 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +25,17 @@ import uk.gov.companieshouse.logging.Logger;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FileTransferServiceTest {
@@ -118,9 +118,9 @@ class FileTransferServiceTest {
 
         //then
         assertTrue(maybeFile.isPresent());
-        assertThat(maybeFile.get().name(), is(equalTo(fileName)));
-        assertThat(maybeFile.get().id(), is(equalTo(fileId)));
-        assertThat(maybeFile.get().data(), is(equalTo("Hello World!".getBytes())));
+        assertThat(maybeFile.get().getName(), is(equalTo(fileName)));
+        assertThat(maybeFile.get().getId(), is(equalTo(fileId)));
+        assertThat(maybeFile.get().getData(), is(equalTo("Hello World!".getBytes())));
     }
 
     @Test
@@ -187,7 +187,7 @@ class FileTransferServiceTest {
         var details = createDetails(fileId, "name", AvStatus.CLEAN, new byte[]{});
 
         when(restTemplate.exchange(
-                fileTransferUrl + details.links().self(),
+                fileTransferUrl + details.getLinks().getSelf(),
                 HttpMethod.GET,
                 httpEntity,
                 FileDetails.class, fileId))
@@ -207,10 +207,10 @@ class FileTransferServiceTest {
     private String setupFileDetails(String id, String name, AvStatus avStatus, byte[] data) {
         var details = createDetails(id, name, avStatus, data);
 
-        when(restTemplate.exchange(fileTransferUrl + details.links().self(), HttpMethod.GET, httpEntity, FileDetails.class, id))
+        when(restTemplate.exchange(fileTransferUrl + details.getLinks().getSelf(), HttpMethod.GET, httpEntity, FileDetails.class, id))
                 .thenReturn(ResponseEntity.ok(details));
 
-        return details.links().download();
+        return details.getLinks().getDownload();
     }
 
     @NotNull

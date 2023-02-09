@@ -2,6 +2,7 @@ package uk.gov.companieshouse.account.validator.service.retry;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
@@ -10,9 +11,61 @@ import java.util.function.Supplier;
  * the delay. This is to prevent "retry storms" where a service is down and other services send a
  * barrage of retry attempts preventing the service from restarting.
  */
-public record IncrementalBackoff(Duration baseDelay, Duration delayIncrement,
-                                 Duration timeout,
-                                 Duration maxDelay) implements RetryStrategy {
+public final class IncrementalBackoff implements RetryStrategy {
+    private final Duration baseDelay;
+    private final Duration delayIncrement;
+    private final Duration timeout;
+    private final Duration maxDelay;
+
+    public IncrementalBackoff(Duration baseDelay, Duration delayIncrement,
+                              Duration timeout,
+                              Duration maxDelay) {
+        this.baseDelay = baseDelay;
+        this.delayIncrement = delayIncrement;
+        this.timeout = timeout;
+        this.maxDelay = maxDelay;
+    }
+
+    public Duration getBaseDelay() {
+        return baseDelay;
+    }
+
+    public Duration getDelayIncrement() {
+        return delayIncrement;
+    }
+
+    public Duration getTimeout() {
+        return timeout;
+    }
+
+    public Duration getMaxDelay() {
+        return maxDelay;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (IncrementalBackoff) obj;
+        return Objects.equals(this.baseDelay, that.baseDelay) &&
+                Objects.equals(this.delayIncrement, that.delayIncrement) &&
+                Objects.equals(this.timeout, that.timeout) &&
+                Objects.equals(this.maxDelay, that.maxDelay);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(baseDelay, delayIncrement, timeout, maxDelay);
+    }
+
+    @Override
+    public String toString() {
+        return "IncrementalBackoff[" +
+                "baseDelay=" + baseDelay + ", " +
+                "delayIncrement=" + delayIncrement + ", " +
+                "timeout=" + timeout + ", " +
+                "maxDelay=" + maxDelay + ']';
+    }
 
     @Override
     public <T> T attempt(Supplier<T> func) {
