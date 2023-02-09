@@ -5,24 +5,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public final class FileDetails {
-    private final String id;
+    private String id;
 
     @JsonProperty("av_timestamp")
-    private final String avTimestamp;
+    private String avTimestamp;
 
     @JsonProperty("av_status")
-    private final AvStatus avStatus;
+    private AvStatus avStatus;
 
     @JsonProperty("content_type")
-    private final String contentType;
+    private String contentType;
 
-    private final long size;
-    private final String name;
+    private long size;
+    private String name;
 
     @JsonProperty("created_on")
-    private final String createdOn;
+    private String createdOn;
 
-    private final FileLinks links;
+    private FileLinks links;
+
+    public FileDetails() {
+    }
 
     public FileDetails(String id, String avTimestamp, AvStatus avStatus, String contentType, long size, String name, String createdOn, FileLinks links) {
         this.id = id;

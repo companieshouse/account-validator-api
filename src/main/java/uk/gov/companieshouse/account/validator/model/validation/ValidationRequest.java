@@ -4,9 +4,12 @@ package uk.gov.companieshouse.account.validator.model.validation;
 import java.util.Objects;
 
 public final class ValidationRequest {
-    private final String fileName;
-    private final String id;
-    private final String customerId;
+    private String fileName;
+    private String id;
+    private String customerId;
+
+    public ValidationRequest() {
+    }
 
     ValidationRequest(String fileName, String id, String customerId) {
         this.fileName = fileName;

@@ -3,8 +3,11 @@ package uk.gov.companieshouse.account.validator.service.file.transfer;
 import java.util.Objects;
 
 public final class FileLinks {
-    private final String download;
-    private final String self;
+    private String download;
+    private String self;
+
+    public FileLinks() {
+    }
 
     FileLinks(String download, String self) {
         this.download = download;
