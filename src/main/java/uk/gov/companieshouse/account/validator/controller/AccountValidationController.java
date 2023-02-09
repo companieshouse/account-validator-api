@@ -54,7 +54,7 @@ public class AccountValidationController {
     public ResponseEntity<?> submitForValidation(
             @Valid @RequestBody ValidationRequest validationRequest) {
 
-        var fileId = validationRequest.id();
+        var fileId = validationRequest.getId();
         var file = fileTransferStrategy.get(fileId);
         if (file.isEmpty()) {
             return ValidationResponse.fileNotFound();

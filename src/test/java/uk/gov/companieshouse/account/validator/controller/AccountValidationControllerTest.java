@@ -103,7 +103,7 @@ class AccountValidationControllerTest {
     }
 
     private void setupFile(String id, File file) {
-        when(validationRequest.id()).thenReturn(id);
+        when(validationRequest.getId()).thenReturn(id);
         when(fileTransferStrategy.get(id)).thenReturn(Optional.ofNullable(file));
     }
 

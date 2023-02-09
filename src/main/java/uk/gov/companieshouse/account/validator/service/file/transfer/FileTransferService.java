@@ -94,7 +94,7 @@ public class FileTransferService implements FileTransferStrategy {
         Optional<FileDetails> details = retryStrategy.attempt(() -> {
             var maybeFileDetails = getFileDetails(id);
             var stillAwaitingScan = maybeFileDetails
-                    .map(fileDetails -> fileDetails.avStatus().equals(AvStatus.NOT_SCANNED))
+                    .map(fileDetails -> fileDetails.getAvStatus().equals(AvStatus.NOT_SCANNED))
                     .orElse(false);
 
             if (stillAwaitingScan) {
@@ -110,9 +110,9 @@ public class FileTransferService implements FileTransferStrategy {
             return Optional.empty();
         }
 
-        var downloadUrl = fileTransferApiUrl + details.get().links().download();
+        var downloadUrl = fileTransferApiUrl + details.get().getLinks().getDownload();
         ResponseEntity<byte[]> fileBytesResponse = get(downloadUrl, byte[].class);
-        var file = new File(id, details.get().name(), fileBytesResponse.getBody());
+        var file = new File(id, details.get().getName(), fileBytesResponse.getBody());
         return Optional.of(file);
     }
 
@@ -139,10 +139,12 @@ public class FileTransferService implements FileTransferStrategy {
                 getFileDetailsUrlTemplate, FileDetails.class, id);
 
 
-        return switch (fileDetailsResponse.getStatusCode()) {
-            case NOT_FOUND -> Optional.empty();
-            case OK -> Optional.ofNullable(fileDetailsResponse.getBody());
-            default -> {
+        switch (fileDetailsResponse.getStatusCode()) {
+            case NOT_FOUND:
+                return Optional.empty();
+            case OK:
+                return Optional.ofNullable(fileDetailsResponse.getBody());
+            default:
                 var message = "Unexpected response status from file transfer api when getting file details.";
                 logger.error(message, Map.of(
                         "expected", "200 or 404",
@@ -150,8 +152,7 @@ public class FileTransferService implements FileTransferStrategy {
                         "url", getFileDetailsUrlTemplate
                 ));
                 throw new RuntimeException(message);
-            }
-        };
+        }
     }
 
 
