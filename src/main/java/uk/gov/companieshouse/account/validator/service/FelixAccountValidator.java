@@ -33,6 +33,9 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger("account.validator.api");
 
+    //todo move to env var
+    String FELIX_ENDPOINT = "http://tnep.aws.chdev.org:8080/validateBase64";
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -45,7 +48,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     @Override
     public ValidationResult validate(File file) {
 
-        String location = "not sure";
+        String location = file.getName();
         try {
             String encoded = Base64.getEncoder().encodeToString(file.getData());
             byte[] fileContent = encoded.getBytes();
@@ -59,7 +62,9 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
-            Results results = restTemplate.postForObject(new URI("http://tnep.aws.chdev.org:8080/validateBase64"), requestEntity, Results.class);
+            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", FELIX_ENDPOINT, location));
+            Results results = restTemplate.postForObject(new URI(FELIX_ENDPOINT), requestEntity, Results.class);
+            LOG.debug("Call to Felix Ixbrl Validation was successfully made");
 
             //todo combine Results & ValidationResult
             Set errorMessage = new HashSet<>();
