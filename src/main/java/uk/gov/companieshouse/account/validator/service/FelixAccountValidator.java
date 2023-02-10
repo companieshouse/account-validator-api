@@ -62,7 +62,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
-            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", FELIX_ENDPOINT, location));
+            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", location));
             Results results = restTemplate.postForObject(new URI(FELIX_ENDPOINT), requestEntity, Results.class);
             LOG.debug("Call to Felix Ixbrl Validation was successfully made");
 
