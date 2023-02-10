@@ -11,13 +11,13 @@ import java.util.Set;
  * @see <a href="https://github.com/companieshouse/felixvalidator/blob/f2e246eff0a914a567c2d43075b997194111411c/src/main/java/uk/gov/ch/felixvalidator/FelixXBRLValidatorServlet.java#L284">FelixXBRLValidatorServlet#buildResponseXML</a>
  */
 public final class ValidationResult {
-    @JsonProperty("error_messages")
+//    @JsonProperty("error_messages")
     private final Set<String> errorMessages;
 
-    @JsonProperty("data")
+//    @JsonProperty("data")
     private final ValidationData data;
 
-    @JsonProperty("validation_status")
+//    @JsonProperty("validation_status")
     private final ValidationStatus validationStatus;
 
     public ValidationResult(Set<String> errorMessages, ValidationData data, ValidationStatus validationStatus) {

@@ -19,7 +19,7 @@ public final class RequestStatus {
     public static final String STATE_COMPLETE = "complete";
 
     @Id
-    @JsonProperty("file_id")
+//    @JsonProperty("file_id")
     private final String fileId;
 
     @Field("status")

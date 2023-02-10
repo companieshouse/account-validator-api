@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.companieshouse.account.validator.model.File;
+import uk.gov.companieshouse.account.validator.model.validation.ValidationResult;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.DummyValidator;
+import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.logging.Logger;
@@ -79,7 +82,7 @@ public class ApplicationConfiguration {
      */
     @Bean
     public AccountValidationStrategy accountValidationStrategy() {
-        return new DummyValidator();
+        return new FelixAccountValidator();
     }
 }
 
