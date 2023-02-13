@@ -48,21 +48,21 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     @Override
     public ValidationResult validate(File file) {
 
-        String location = file.getName();
+        String s3Key = file.getName();
         try {
             String encoded = Base64.getEncoder().encodeToString(file.getData());
             byte[] fileContent = encoded.getBytes();
 
             //Connect to TNEP validator via http POST using multipart file upload
             LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-            map.add("file", new FileMessageResource(fileContent, location));
+            map.add("file", new FileMessageResource(fileContent, s3Key));
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
-            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", location));
+            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", s3Key));
             Results results = restTemplate.postForObject(new URI(FELIX_ENDPOINT), requestEntity, Results.class);
             LOG.debug("Call to Felix Ixbrl Validation was successfully made");
 
@@ -77,14 +77,14 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
             if (results != null && "OK".equalsIgnoreCase(results.getValidationStatus())) {
                 Map<String, Object> logMap = new HashMap<>();
-                logMap.put("location", location);
+                logMap.put("location", s3Key);
                 logMap.put("results", results);
                 LOG.debug("Ixbrl validation succeeded", logMap);
 
                 return validationResult;
             } else {
                 Map<String, Object> logMap = new HashMap<>();
-                logMap.put("location", location);
+                logMap.put("location", s3Key);
                 logMap.put("results", results);
                 LOG.error("Ixbrl validation failed", logMap);
 
@@ -94,7 +94,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         } catch (Exception e) {
             Map<String, Object> logMap = new HashMap<>();
             logMap.put("error", "Unable to validate ixbrl");
-            logMap.put("location", location);
+            logMap.put("location", s3Key);
             LOG.error(e, logMap);
 
             return null;
