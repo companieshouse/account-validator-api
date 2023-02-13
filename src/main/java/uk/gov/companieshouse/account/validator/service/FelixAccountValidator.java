@@ -49,6 +49,8 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     public ValidationResult validate(File file) {
 
         String s3Key = file.getName();
+        String url = getIxbrlValidatorUri();
+
         try {
             String encoded = Base64.getEncoder().encodeToString(file.getData());
             byte[] fileContent = encoded.getBytes();
@@ -63,7 +65,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
             LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", s3Key));
-            Results results = restTemplate.postForObject(new URI(FELIX_ENDPOINT), requestEntity, Results.class);
+            Results results = restTemplate.postForObject(new URI(url), requestEntity, Results.class);
             LOG.debug("Call to Felix Ixbrl Validation was successfully made");
 
             //todo combine Results & ValidationResult
