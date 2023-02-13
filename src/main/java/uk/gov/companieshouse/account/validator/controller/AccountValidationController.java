@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
@@ -21,6 +22,7 @@ import javax.validation.Valid;
 import java.util.concurrent.Executor;
 
 @Controller
+@RequestMapping("/validate")
 public class AccountValidationController {
 
     private final AccountValidationStrategy accountValidationStrategy;
@@ -50,7 +52,7 @@ public class AccountValidationController {
      * @param validationRequest the request data
      * @return 404 if no file with that id is found, 200 and PENDING status otherwise
      */
-    @PostMapping("/validate")
+    @PostMapping
     public ResponseEntity<?> submitForValidation(
             @Valid @RequestBody ValidationRequest validationRequest) {
 
@@ -76,7 +78,7 @@ public class AccountValidationController {
      * @param fileId the id of the file for which validation was requested
      * @return 404 if there is no request for a file with that id, 200 and the status otherwise
      */
-    @GetMapping("/validate/check/{fileId}")
+    @GetMapping("/check/{fileId}")
     ResponseEntity<?> getStatus(@PathVariable final String fileId) {
         var requestStatus = statusRepository.findById(fileId);
         if (requestStatus.isEmpty()) {
