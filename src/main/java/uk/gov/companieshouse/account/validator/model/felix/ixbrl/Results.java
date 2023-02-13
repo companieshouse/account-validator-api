@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.account.validator.model.felix.ixbrl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,6 +17,8 @@ public class Results {
     private Data data;
 
     @XmlElement
+    @JsonProperty("errorMessages")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public Errors getErrors() {
         return errors;
     }
