@@ -52,8 +52,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         String url = getIxbrlValidatorUri();
 
         try {
-            String encoded = Base64.getEncoder().encodeToString(file.getData());
-            byte[] fileContent = encoded.getBytes();
+            byte[] fileContent = Base64.getEncoder().encodeToString(file.getData()).getBytes();
 
             //Connect to TNEP validator via http POST using multipart file upload
             LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
@@ -124,18 +123,18 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
     private class FileMessageResource extends ByteArrayResource {
 
-        //        /**
-//         * The filename to be associated with the {@link MimeMessage} in the form data.
-//         */
+        /**
+         * The filename to be associated with the {@link MimeMessage} in the form data.
+         */
         private final String filename;
 
-        //        /**
-//         * Constructs a new {@link FileMessageResource}.
-//         *
-//         * @param byteArray A byte array containing data from a {@link MimeMessage}.
-//         * @param filename  The filename to be associated with the {@link MimeMessage} in
-//         *                  the form data.
-//         */
+        /**
+         * Constructs a new {@link FileMessageResource}.
+         *
+         * @param byteArray A byte array containing data from a {@link MimeMessage}.
+         * @param filename  The filename to be associated with the {@link MimeMessage} in
+         *                  the form data.
+         */
         public FileMessageResource(final byte[] byteArray, final String filename) {
             super(byteArray);
             this.filename = filename;
