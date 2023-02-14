@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class FelixAccountValidator implements AccountValidationStrategy {
 
-    private static final String IXBRL_VALIDATOR_URI = "IXBRL_VALIDATOR_URI";
+    private static final String IXBRL_VALIDATOR_BASE64_URI = "IXBRL_VALIDATOR_BASE64_URI";
 
     private static final Logger LOG = LoggerFactory.getLogger("account.validator.api");
 
@@ -83,7 +83,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
         String ixbrlValidatorUri = getIxbrlValidatorUriEnvVal();
         if (StringUtils.isBlank(ixbrlValidatorUri)) {
-            throw new MissingEnvironmentVariableException("Missing IXBRL_VALIDATOR_URI environment variable");
+            throw new MissingEnvironmentVariableException("Missing  environment variable");
         }
 
         return ixbrlValidatorUri;
@@ -95,7 +95,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      * @return String
      */
     protected String getIxbrlValidatorUriEnvVal() {
-        return System.getenv(IXBRL_VALIDATOR_URI);
+        return System.getenv(IXBRL_VALIDATOR_BASE64_URI);
     }
 
     public void setRestTemplate(RestTemplate restTemplate) {
