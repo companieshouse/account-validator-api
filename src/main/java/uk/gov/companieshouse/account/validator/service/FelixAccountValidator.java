@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A method of validating accounts via the FelixValidator
@@ -39,9 +40,11 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      */
     @Override
     public Results validate(File file) {
-
         String s3Key = file.getName();
         String url = getIxbrlValidatorUri();
+        Map<String, Object> logMap = new HashMap<>();
+
+        logMap.put("location", s3Key);
 
         try {
             byte[] fileContent = Base64.getEncoder().encodeToString(file.getData()).getBytes();
@@ -59,26 +62,13 @@ public class FelixAccountValidator implements AccountValidationStrategy {
             Results results = restTemplate.postForObject(new URI(url), requestEntity, Results.class);
             LOG.debug("Call to Felix Ixbrl Validation was successfully made");
 
-            if (results != null && "OK".equalsIgnoreCase(results.getValidationStatus())) {
-                Map<String, Object> logMap = new HashMap<>();
-                logMap.put("location", s3Key);
-                logMap.put("results", results);
-                LOG.debug("Ixbrl validation succeeded", logMap);
+            String logMessage = "Ixbrl validation " + ((results != null && "OK".equalsIgnoreCase(results.getValidationStatus())) ? "succeeded" : "failed");
+            logMap.put("results", results);
+            LOG.debug(logMessage, logMap);
 
-                return results;
-            } else {
-                Map<String, Object> logMap = new HashMap<>();
-                logMap.put("location", s3Key);
-                logMap.put("results", results);
-                LOG.error("Ixbrl validation failed", logMap);
-
-                return results;
-            }
-
+            return results;
         } catch (Exception e) {
-            Map<String, Object> logMap = new HashMap<>();
             logMap.put("error", "Unable to validate ixbrl");
-            logMap.put("location", s3Key);
             LOG.error(e, logMap);
 
             return null;
@@ -105,7 +95,6 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     }
 
     private class FileMessageResource extends ByteArrayResource {
-
         /**
          * The filename to be associated with the {@link MimeMessage} in the form data.
          */
@@ -126,6 +115,20 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         @Override
         public String getFilename() {
             return filename;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            FileMessageResource that = (FileMessageResource) o;
+            return Objects.equals(filename, that.filename);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), filename);
         }
     }
 }
