@@ -18,7 +18,6 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A method of validating accounts via the FelixValidator
@@ -41,7 +40,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     @Override
     public Results validate(File file) {
         String s3Key = file.getName();
-        String url = getIxbrlValidatorUri();
+        String url = getIxbrlValidatorBase64Uri();
         Map<String, Object> logMap = new HashMap<>();
 
         logMap.put("location", s3Key);
@@ -80,7 +79,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      *
      * @return String
      */
-    protected String getIxbrlValidatorUri() {
+    protected String getIxbrlValidatorBase64Uri() {
 
         String ixbrlValidatorUri = getIxbrlValidatorUriEnvVal();
         if (StringUtils.isBlank(ixbrlValidatorUri)) {
@@ -90,8 +89,17 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         return ixbrlValidatorUri;
     }
 
+    /**
+     * Obtain the URL of the TNEP validator from the environment
+     *
+     * @return String
+     */
     protected String getIxbrlValidatorUriEnvVal() {
         return System.getenv(IXBRL_VALIDATOR_URI);
+    }
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     private class FileMessageResource extends ByteArrayResource {
@@ -115,20 +123,6 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         @Override
         public String getFilename() {
             return filename;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-            FileMessageResource that = (FileMessageResource) o;
-            return Objects.equals(filename, that.filename);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), filename);
         }
     }
 }
