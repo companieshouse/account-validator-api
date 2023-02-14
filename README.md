@@ -28,8 +28,7 @@ CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https:
 
 Name                                   | Description                                                                          | Mandatory | Default | Example
 -------------------------------------- |--------------------------------------------------------------------------------------| --------- | ------- | ----------------------------------------
-IXBRL_VALIDATOR_URI                    | URL to IXBRL validator                                                               | ✓         |         | http://HOST/validate
-FELIX_VALIDATOR_URI                    | URL to FELIX validator                                                               | ✓         |         | http://HOST/validate
+IXBRL_VALIDATOR_BASE64_URI             | URL to IXBRL validator for Base64 encoded files                                      | ✓         |         | http://HOST/validateBase64
 BUCKET_NAME                            | S3 BUCKET NAME                                                                       | ✓         |         | accounts-validator
 DOCUMENT_BUCKET_NAME                   | Bucket name on s3                                                                    | ✓         |         | example-bucket
 DOCUMENT_RENDER_SERVICE_HOST           | [Document render service](https://github.com/companieshouse/document-render-service) | ✓         |         | http://HOST:PORT

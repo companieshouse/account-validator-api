@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.account.validator.security;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +47,7 @@ class UserAuthenticationInterceptorTest {
     void preHandleWhenIdentityTypeNull() {
         when(authHelper.getAuthorisedIdentityType(request)).thenReturn(null);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
     }
@@ -56,7 +56,7 @@ class UserAuthenticationInterceptorTest {
     void preHandleWhenIdentityTypeEmpty() {
         when(authHelper.getAuthorisedIdentityType(request)).thenReturn("");
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
     }
@@ -66,7 +66,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedIdentityType(request)).thenReturn("key");
         when(authHelper.getAuthorisedIdentity(request)).thenReturn(null);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
     }
@@ -76,7 +76,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedIdentityType(request)).thenReturn("key");
         when(authHelper.getAuthorisedIdentity(request)).thenReturn("");
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
     }
@@ -88,7 +88,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.isOauth2IdentityType("none")).thenReturn(false);
         when(authHelper.isApiKeyIdentityType("none")).thenReturn(false);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
     }
@@ -100,7 +100,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.isOauth2IdentityType(OAUTH2_FIELD)).thenReturn(true);
         when(authHelper.getAuthorisedUser(request)).thenReturn(null);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
@@ -113,7 +113,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.isOauth2IdentityType(OAUTH2_FIELD)).thenReturn(true);
         when(authHelper.getAuthorisedUser(request)).thenReturn("");
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(false));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(false));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verifyNoMoreInteractions(request, response);
@@ -130,7 +130,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedUserForename(request)).thenReturn(USER_FORENAME);
         when(authHelper.getAuthorisedUserSurname(request)).thenReturn(USER_SURNAME);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(true));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(true));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(request).setAttribute(USER_EMAIL_FIELD, USER_EMAIL);
         verify(request).setAttribute(USER_FORENAME_FIELD, USER_FORENAME);
@@ -146,7 +146,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedUser(request)).thenReturn(USER_EMAIL);
         when(authHelper.getAuthorisedUserEmail(request)).thenReturn(USER_EMAIL);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(true));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(true));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(request).setAttribute(USER_EMAIL_FIELD, USER_EMAIL);
         verifyNoMoreInteractions(request, response);
@@ -162,7 +162,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedUserEmail(request)).thenReturn(USER_EMAIL);
         when(authHelper.getAuthorisedUserForename(request)).thenReturn(USER_FORENAME);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(true));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(true));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(request).setAttribute(USER_EMAIL_FIELD, USER_EMAIL);
         verify(request).setAttribute(USER_FORENAME_FIELD, USER_FORENAME);
@@ -177,7 +177,7 @@ class UserAuthenticationInterceptorTest {
         when(authHelper.getAuthorisedUser(request)).thenReturn(String.join(";", USER_EMAIL, USER_FORENAME));
         when(authHelper.getAuthorisedUserEmail(request)).thenReturn(USER_EMAIL);
 
-        assertThat(testInterceptor.preHandle(request, response, null), is(true));
+        MatcherAssert.assertThat(testInterceptor.preHandle(request, response, null), is(true));
         verify(request).setAttribute(USER_ID_FIELD, IDENTITY_FIELD);
         verify(request).setAttribute(USER_EMAIL_FIELD, USER_EMAIL);
         verifyNoMoreInteractions(request, response);

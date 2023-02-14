@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.account.validator.model.felix.ixbrl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -13,6 +15,7 @@ public class Data {
     private String companiesHouseRegisteredNumber;
 
     @XmlElement(name = "BalanceSheetDate")
+    @JsonProperty("balance_sheet_date")
     public String getBalanceSheetDate() {
         return balanceSheetDate;
     }
@@ -22,6 +25,7 @@ public class Data {
     }
 
     @XmlElement(name = "AccountsType")
+    @JsonProperty("accounts_type")
     public String getAccountsType() {
         return accountsType;
     }
@@ -31,6 +35,7 @@ public class Data {
     }
 
     @XmlElement(name = "CompaniesHouseRegisteredNumber")
+    @JsonProperty("companieshouse_registered_number")
     public String getCompaniesHouseRegisteredNumber() {
         return companiesHouseRegisteredNumber;
     }

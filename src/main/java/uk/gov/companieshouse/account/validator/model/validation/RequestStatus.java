@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.account.validator.model.validation;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 
 import java.util.Objects;
 
@@ -19,16 +19,15 @@ public final class RequestStatus {
     public static final String STATE_COMPLETE = "complete";
 
     @Id
-    @JsonProperty("file_id")
     private final String fileId;
 
     @Field("status")
     private final String status;
 
     @Field("result")
-    private final ValidationResult result;
+    private final Results result;
 
-    public RequestStatus(String fileId, String status, ValidationResult result) {
+    public RequestStatus(String fileId, String status, Results result) {
         this.fileId = fileId;
         this.status = status;
         this.result = result;
@@ -38,7 +37,7 @@ public final class RequestStatus {
         return new RequestStatus(fileId, STATE_PENDING, null);
     }
 
-    public static RequestStatus complete(String fileId, ValidationResult result) {
+    public static RequestStatus complete(String fileId, Results result) {
         return new RequestStatus(fileId, STATE_COMPLETE, result);
     }
 
@@ -50,7 +49,7 @@ public final class RequestStatus {
         return status;
     }
 
-    public ValidationResult getResult() {
+    public Results getResult() {
         return result;
     }
 
@@ -74,5 +73,4 @@ public final class RequestStatus {
                 "status=" + status + ", " +
                 "result=" + result + ']';
     }
-
 }
