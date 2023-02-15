@@ -62,13 +62,16 @@ public class AccountValidationController {
             return ValidationResponse.fileNotFound();
         }
 
+        RequestStatus pendingStatus = RequestStatus.pending(fileId);
+        statusRepository.save(pendingStatus);
+
         executor.execute(() -> {
             var result = accountValidationStrategy.validate(file.get());
             var requestStatus = RequestStatus.complete(fileId, result);
             statusRepository.save(requestStatus);
         });
 
-        return ValidationResponse.success(RequestStatus.pending(fileId));
+        return ValidationResponse.success(pendingStatus);
     }
 
     /**
