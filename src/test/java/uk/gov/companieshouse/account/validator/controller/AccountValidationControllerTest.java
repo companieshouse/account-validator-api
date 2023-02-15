@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,7 +86,7 @@ class AccountValidationControllerTest {
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
         verify(executor).execute(any(Runnable.class));
         verify(accountValidationStrategy).validate(any(File.class));
-        verify(repository).save(any(RequestStatus.class));
+        verify(repository, times(2)).save(any(RequestStatus.class));
     }
 
 
