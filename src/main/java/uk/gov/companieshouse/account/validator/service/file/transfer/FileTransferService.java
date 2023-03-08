@@ -15,10 +15,18 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.*;
+//import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * An implementation of the FileTransferStrategy utilising the FileTransferService to transfer files
@@ -133,17 +141,29 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private Optional<FileDetails> getFileDetails(final String id) {
-        // For getting file details the file id is the relative path
-        var getFileDetailsUrlTemplate = fileTransferApiUrl + "/files/{id}";
-        ResponseEntity<FileDetails> fileDetailsResponse = get(
-                getFileDetailsUrlTemplate, FileDetails.class, id);
+        InternalApiClient client = ApiSdkManager.getInternalSDK();
+        PrivateModelFileTransferGetDetails transferGetDetails = client.privateFileTransferResourceHandler().details(id);
+        ApiResponse<FileDetailsApi> fileDetailsResponse;
 
+        try {
+            fileDetailsResponse = transferGetDetails.execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+//        // For getting file details the file id is the relative path
+        var getFileDetailsUrlTemplate = fileTransferApiUrl + "/file-transfer-service/{id}";
+//
+//        //getFileDetailsUrlTemplate = fileTransferApiUrl + "curl -v -H \"key : g9yZIA81Zo9J46Kzp3JPbfld6kOqxR47EAYqXbRV\" -H \"ERIC-Authorised-User : tester@example.com;Teddy;Tester\" -H \"Eric-Identity : {{INTERNAL_API_KEY}}\" -H \"Eric-Identity-Type : key\" -H \"ERIC-Authorised-Key-Roles : * \" https://file-transfer-service:8080/file-transfer-service/9963f4e4-f296-4e4d-8632-ac92e2219e04";
+//        ResponseEntity<FileDetails> fileDetailsResponse = get(
+//                getFileDetailsUrlTemplate, FileDetails.class, id);
+//return null;
 
         switch (fileDetailsResponse.getStatusCode()) {
             case NOT_FOUND:
                 return Optional.empty();
-            case OK:
-                return Optional.ofNullable(fileDetailsResponse.getBody());
+//            case OK:
+//                return Optional.ofNullable(fileDetailsResponse.getData().);
             default:
                 var message = "Unexpected response status from file transfer api when getting file details.";
                 logger.error(message, Map.of(
