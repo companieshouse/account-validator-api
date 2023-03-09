@@ -33,10 +33,7 @@
         <!-- internal -->
         <structured-logging.version>1.9.14</structured-logging.version>
         <api-sdk-manager-java-library.version>1.0.5</api-sdk-manager-java-library.version>
-        <api-sdk-java.version>4.3.21</api-sdk-java.version>
-        <private-api-sdk-java.version>2.0.227</private-api-sdk-java.version>
         <api-helper-java-library.version>1.4.5</api-helper-java-library.version>
-        <aws-java-sdk.version>1.12.343</aws-java-sdk.version>
         <api-security-java-version>0.2.17</api-security-java-version>
 
         <!-- java apis libs -->
@@ -45,17 +42,6 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-            <!-- todo needed? -->
-            <dependency>
-                <groupId>uk.gov.companieshouse</groupId>
-                <artifactId>api-sdk-java</artifactId>
-                <version>${api-sdk-java.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.companieshouse</groupId>
-                <artifactId>private-api-sdk-java</artifactId>
-                <version>${private-api-sdk-java.version}</version>
-            </dependency>
             <dependency>
                 <groupId>uk.gov.companieshouse</groupId>
                 <artifactId>api-security-java</artifactId>
@@ -153,11 +139,6 @@
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.companieshouse</groupId>
-            <artifactId>api-sdk-java</artifactId>
-            <version>${api-sdk-java.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
