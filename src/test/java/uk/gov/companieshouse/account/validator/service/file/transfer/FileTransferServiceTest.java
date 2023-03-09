@@ -20,6 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
+import uk.gov.companieshouse.api.model.filetransfer.AvStatusApi;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.model.filetransfer.FileLinksApi;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Optional;
@@ -167,7 +170,7 @@ class FileTransferServiceTest {
         var fileId = "fileID";
         var fileName = "file_name.zip";
         var data = "Hello World!".getBytes();
-        setupFileDetails(fileId, fileName, AvStatus.NOT_SCANNED, data);
+        setupFileDetails(fileId, fileName, AvStatusApi.NOT_SCANNED, data);
         setupRetryStrategy(() -> setupFileDownload(fileId, fileName, data));
 
         // When
@@ -184,13 +187,13 @@ class FileTransferServiceTest {
     void testUnexpectedResponseStatus() {
         // Given
         var fileId = "fileId";
-        var details = createDetails(fileId, "name", AvStatus.CLEAN, new byte[]{});
+        var details = createDetails(fileId, "name", AvStatusApi.CLEAN, new byte[]{});
 
         when(restTemplate.exchange(
                 fileTransferUrl + details.getLinks().getSelf(),
                 HttpMethod.GET,
                 httpEntity,
-                FileDetails.class, fileId))
+                FileDetailsApi.class, fileId))
                 .thenReturn(ResponseEntity.internalServerError().build());
 
         setupRetryStrategy();
@@ -204,32 +207,32 @@ class FileTransferServiceTest {
         verify(logger).error(any(String.class), anyMap());
     }
 
-    private String setupFileDetails(String id, String name, AvStatus avStatus, byte[] data) {
+    private String setupFileDetails(String id, String name, AvStatusApi avStatus, byte[] data) {
         var details = createDetails(id, name, avStatus, data);
 
-        when(restTemplate.exchange(fileTransferUrl + details.getLinks().getSelf(), HttpMethod.GET, httpEntity, FileDetails.class, id))
+        when(restTemplate.exchange(fileTransferUrl + details.getLinks().getSelf(), HttpMethod.GET, httpEntity, FileDetailsApi.class, id))
                 .thenReturn(ResponseEntity.ok(details));
 
         return details.getLinks().getDownload();
     }
 
     @NotNull
-    private FileDetails createDetails(String id, String name, AvStatus avStatus, byte[] data) {
+    private FileDetailsApi createDetails(String id, String name, AvStatusApi avStatus, byte[] data) {
         var getFileDetailsUrl = "/files/{id}";
         var fileDownloadUrl = getFileDetailsUrl + "/download";
 
-        return new FileDetails(id,
+        return new FileDetailsApi(id,
                 "String avTimestamp",
                 avStatus,
                 "String contentType",
                 data.length,
                 name,
                 "String createdOn",
-                new FileLinks(fileDownloadUrl, getFileDetailsUrl));
+                new FileLinksApi(fileDownloadUrl, getFileDetailsUrl));
     }
 
     private void setupFileDownload(String id, String name, byte[] data) {
-        var fileDownloadUrl = setupFileDetails(id, name, AvStatus.CLEAN, data);
+        var fileDownloadUrl = setupFileDetails(id, name, AvStatusApi.CLEAN, data);
 
         when(restTemplate.exchange(fileTransferUrl + fileDownloadUrl, HttpMethod.GET, httpEntity, byte[].class))
                 .thenReturn(ResponseEntity.ok(data));
@@ -238,7 +241,7 @@ class FileTransferServiceTest {
     void setupFileDownloadNotFound(String id) {
         var getFileDetailsUrl = fileTransferUrl + "/files/{id}";
 
-        when(restTemplate.exchange(getFileDetailsUrl, HttpMethod.GET, httpEntity, FileDetails.class, id))
+        when(restTemplate.exchange(getFileDetailsUrl, HttpMethod.GET, httpEntity, FileDetailsApi.class, id))
                 .thenReturn(ResponseEntity.notFound().build());
     }
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -16,16 +17,17 @@ import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.filetransfer.AvStatusApi;
+import uk.gov.companieshouse.api.model.filetransfer.FileApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Map;
 import java.util.Optional;
-
-import static org.springframework.http.HttpStatus.*;
 //import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
@@ -99,10 +101,10 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public Optional<File> get(String id) {
-        Optional<FileDetails> details = retryStrategy.attempt(() -> {
+        Optional<FileDetailsApi> details = retryStrategy.attempt(() -> {
             var maybeFileDetails = getFileDetails(id);
             var stillAwaitingScan = maybeFileDetails
-                    .map(fileDetails -> fileDetails.getAvStatus().equals(AvStatus.NOT_SCANNED))
+                    .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
                     .orElse(false);
 
             if (stillAwaitingScan) {
@@ -118,9 +120,9 @@ public class FileTransferService implements FileTransferStrategy {
             return Optional.empty();
         }
 
-        var downloadUrl = fileTransferApiUrl + details.get().getLinks().getDownload();
-        ResponseEntity<byte[]> fileBytesResponse = get(downloadUrl, byte[].class);
-        var file = new File(id, details.get().getName(), fileBytesResponse.getBody());
+        ApiResponse<FileApi> response = getFileApiResponse(id);
+
+        var file = new File(id, details.get().getName(), response.getData().getBody());
         return Optional.of(file);
     }
 
@@ -132,49 +134,29 @@ public class FileTransferService implements FileTransferStrategy {
                 urlTemplate, method, entity, clazz, urlParams);
     }
 
-    private <T> ResponseEntity<T> get(String urlTemplate, Class<T> clazz, Object... urlParams) {
-        return doRequest(urlTemplate, HttpMethod.GET, clazz, urlParams);
-    }
-
     private void delete(String urlTemplate, Object... urlParams) {
         doRequest(urlTemplate, HttpMethod.DELETE, Void.class, urlParams);
     }
 
-    private Optional<FileDetails> getFileDetails(final String id) {
-        InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateModelFileTransferGetDetails transferGetDetails = client.privateFileTransferResourceHandler().details(id);
-        ApiResponse<FileDetailsApi> fileDetailsResponse;
+    private Optional<FileDetailsApi> getFileDetails(final String id) {
+        ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
-        try {
-            fileDetailsResponse = transferGetDetails.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-//        // For getting file details the file id is the relative path
-        var getFileDetailsUrlTemplate = fileTransferApiUrl + "/file-transfer-service/{id}";
-//
-//        //getFileDetailsUrlTemplate = fileTransferApiUrl + "curl -v -H \"key : g9yZIA81Zo9J46Kzp3JPbfld6kOqxR47EAYqXbRV\" -H \"ERIC-Authorised-User : tester@example.com;Teddy;Tester\" -H \"Eric-Identity : {{INTERNAL_API_KEY}}\" -H \"Eric-Identity-Type : key\" -H \"ERIC-Authorised-Key-Roles : * \" https://file-transfer-service:8080/file-transfer-service/9963f4e4-f296-4e4d-8632-ac92e2219e04";
-//        ResponseEntity<FileDetails> fileDetailsResponse = get(
-//                getFileDetailsUrlTemplate, FileDetails.class, id);
-//return null;
-
-        switch (fileDetailsResponse.getStatusCode()) {
+        HttpStatus status = HttpStatus.resolve(response.getStatusCode());
+        switch (status) {
             case NOT_FOUND:
                 return Optional.empty();
-//            case OK:
-//                return Optional.ofNullable(fileDetailsResponse.getData().);
+            case OK:
+                return Optional.ofNullable(response.getData());
             default:
                 var message = "Unexpected response status from file transfer api when getting file details.";
                 logger.error(message, Map.of(
                         "expected", "200 or 404",
-                        "status", fileDetailsResponse.getStatusCode(),
-                        "url", getFileDetailsUrlTemplate
+                        "status", response.getStatusCode(),
+                        "url", fileTransferApiUrl + "/file-transfer-service/{id}"
                 ));
                 throw new RuntimeException(message);
         }
     }
-
 
     /**
      * Deletes the file from S3 using the file transfer api
@@ -185,5 +167,27 @@ public class FileTransferService implements FileTransferStrategy {
     public void delete(String id) {
         var fileDeleteUrlTemplate = fileTransferApiUrl + "/{id}";
         delete(fileDeleteUrlTemplate, id);
+    }
+
+    private ApiResponse<FileApi> getFileApiResponse(String id) {
+        InternalApiClient client = ApiSdkManager.getInternalSDK();
+        PrivateModelFileTransferDownload transferGetDetails = client.privateFileTransferResourceHandler().download(id);
+
+        try {
+            return transferGetDetails.execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
+        InternalApiClient client = ApiSdkManager.getInternalSDK();
+        PrivateModelFileTransferGetDetails transferGetDetails = client.privateFileTransferResourceHandler().details(id);
+
+        try {
+            return transferGetDetails.execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
