@@ -78,8 +78,6 @@ class FileTransferServiceTest {
     @BeforeEach
     void setUp() {
         fileTransferService = new FileTransferService(
-                fileTransferUrl,
-                fileTransferApiKey,
                 restTemplate,
                 logger, retryStrategy);
 
@@ -95,7 +93,6 @@ class FileTransferServiceTest {
             String fileTransferUrl, String fileTransferApiKey, boolean shouldError) {
 
         Executable createService = () -> new FileTransferService(
-                fileTransferUrl, fileTransferApiKey,
                 null, null, null);
 
         if (shouldError) {

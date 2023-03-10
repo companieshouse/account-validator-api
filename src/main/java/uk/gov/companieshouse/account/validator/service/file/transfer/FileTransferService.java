@@ -37,8 +37,6 @@ import java.util.Optional;
 public class FileTransferService implements FileTransferStrategy {
 
     public static final String API_KEY_HEADER = "x-api-key";
-    private final String fileTransferApiUrl;
-    private final String fileTransferApiKey;
     private final RestTemplate restTemplate;
     private final Logger logger;
     private final RetryStrategy retryStrategy;
@@ -48,18 +46,12 @@ public class FileTransferService implements FileTransferStrategy {
 
     @Autowired
     public FileTransferService(
-            @Value("${file.transfer.api.url}") String fileTransferApiUrl,
-            @Value("${file.transfer.api.key}") String fileTransferApiKey,
             RestTemplate restTemplate, Logger logger,
             @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy) {
 
-        this.fileTransferApiUrl = FileTransferService.normaliseUrl(fileTransferApiUrl);
-        this.fileTransferApiKey = fileTransferApiKey;
         this.restTemplate = restTemplate;
         this.logger = logger;
         this.retryStrategy = retryStrategy;
-
-        validateParams();
     }
 
     /**
@@ -72,25 +64,6 @@ public class FileTransferService implements FileTransferStrategy {
      */
     private static String normaliseUrl(String url) {
         return StringUtils.stripEnd(url, "/");
-    }
-
-    /**
-     * Ensures the API key and URL are present.
-     * It also checks that the URL is in a valid URL format.
-     * If not it throws an exception with a helpful message.
-     */
-    private void validateParams() {
-        if (StringUtils.isBlank(fileTransferApiKey)) {
-            throw new IllegalArgumentException("File transfer API key must not be blank.");
-        }
-
-        if (StringUtils.isBlank(fileTransferApiUrl)) {
-            throw new IllegalArgumentException("File transfer API key must not be blank.");
-        } else if (!urlValidator.isValid(fileTransferApiUrl)) {
-            throw new IllegalArgumentException(String.format(
-                    "File transfer API url must be a valid URL. \"%s\" is not a valid URL.",
-                    fileTransferApiUrl));
-        }
     }
 
     /**
@@ -128,7 +101,6 @@ public class FileTransferService implements FileTransferStrategy {
 
     private <T> ResponseEntity<T> doRequest(String urlTemplate, HttpMethod method, Class<T> clazz, Object... urlParams) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(API_KEY_HEADER, fileTransferApiKey);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         return restTemplate.exchange(
                 urlTemplate, method, entity, clazz, urlParams);
@@ -151,8 +123,7 @@ public class FileTransferService implements FileTransferStrategy {
                 var message = "Unexpected response status from file transfer api when getting file details.";
                 logger.error(message, Map.of(
                         "expected", "200 or 404",
-                        "status", response.getStatusCode(),
-                        "url", fileTransferApiUrl + "/file-transfer-service/{id}"
+                        "status", response.getStatusCode()
                 ));
                 throw new RuntimeException(message);
         }
@@ -165,8 +136,10 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-        var fileDeleteUrlTemplate = fileTransferApiUrl + "/{id}";
-        delete(fileDeleteUrlTemplate, id);
+//        var fileDeleteUrlTemplate = fileTransferApiUrl + "/{id}";
+//        delete(fileDeleteUrlTemplate, id);
+        //todo
+        System.out.println(1);
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
