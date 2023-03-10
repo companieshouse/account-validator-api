@@ -5,7 +5,6 @@ import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +16,7 @@ import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
 import uk.gov.companieshouse.api.model.ApiResponse;
@@ -106,10 +106,6 @@ public class FileTransferService implements FileTransferStrategy {
                 urlTemplate, method, entity, clazz, urlParams);
     }
 
-    private void delete(String urlTemplate, Object... urlParams) {
-        doRequest(urlTemplate, HttpMethod.DELETE, Void.class, urlParams);
-    }
-
     private Optional<FileDetailsApi> getFileDetails(final String id) {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
@@ -136,10 +132,14 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-//        var fileDeleteUrlTemplate = fileTransferApiUrl + "/{id}";
-//        delete(fileDeleteUrlTemplate, id);
-        //todo
-        System.out.println(1);
+        InternalApiClient client = ApiSdkManager.getInternalSDK();
+        PrivateModelFileTransferDelete transferGetDetails = client.privateFileTransferResourceHandler().delete(id);
+
+        try {
+            transferGetDetails.execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
