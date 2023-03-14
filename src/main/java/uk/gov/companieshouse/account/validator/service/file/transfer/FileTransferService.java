@@ -1,21 +1,15 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.routines.RegexValidator;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.filetransfer.PrivateFileTransferResourceHandler;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
@@ -28,7 +22,6 @@ import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Map;
 import java.util.Optional;
-//import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * An implementation of the FileTransferStrategy utilising the FileTransferService to transfer files
@@ -37,19 +30,14 @@ import java.util.Optional;
 public class FileTransferService implements FileTransferStrategy {
 
     public static final String API_KEY_HEADER = "x-api-key";
-    private final RestTemplate restTemplate;
     private final Logger logger;
     private final RetryStrategy retryStrategy;
-    private final UrlValidator urlValidator = new UrlValidator(
-            new RegexValidator(".*"), // Bypasses authority validation check. needed for .local tld
-            0L);
 
     @Autowired
     public FileTransferService(
-            RestTemplate restTemplate, Logger logger,
+            Logger logger,
             @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy) {
 
-        this.restTemplate = restTemplate;
         this.logger = logger;
         this.retryStrategy = retryStrategy;
     }
@@ -99,13 +87,6 @@ public class FileTransferService implements FileTransferStrategy {
         return Optional.of(file);
     }
 
-    private <T> ResponseEntity<T> doRequest(String urlTemplate, HttpMethod method, Class<T> clazz, Object... urlParams) {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(
-                urlTemplate, method, entity, clazz, urlParams);
-    }
-
     private Optional<FileDetailsApi> getFileDetails(final String id) {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
@@ -147,10 +128,11 @@ public class FileTransferService implements FileTransferStrategy {
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateModelFileTransferDownload transferGetDetails = client.privateFileTransferResourceHandler().download(id);
+        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
+        PrivateModelFileTransferDownload download = resourceHandler.download(id);
 
         try {
-            return transferGetDetails.execute();
+            return download.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -158,10 +140,11 @@ public class FileTransferService implements FileTransferStrategy {
 
     private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateModelFileTransferGetDetails transferGetDetails = client.privateFileTransferResourceHandler().details(id);
+        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
+        PrivateModelFileTransferGetDetails details = resourceHandler.details(id);
 
         try {
-            return transferGetDetails.execute();
+            return details.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
