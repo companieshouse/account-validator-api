@@ -114,13 +114,14 @@ public class FileTransferService implements FileTransferStrategy {
     @Override
     public void delete(String id) {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateModelFileTransferDelete transferGetDetails = client.privateFileTransferResourceHandler().delete(id);
+        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
+        PrivateModelFileTransferDelete delete = resourceHandler.delete(id);
 //todo add exceptions to signature and capture in controller
         //todo fix version and unit tests in 3 sdks, raise PRs and merge
         //todo unit testa for FTS & AVA
         //todo tidy up, code analyis etc... don't merge 2 PRs until Harry has approved
         try {
-            transferGetDetails.execute();
+            delete.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
