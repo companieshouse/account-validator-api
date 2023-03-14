@@ -9,6 +9,8 @@ import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.filetransfer.PrivateFileTransferResourceHandler;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
@@ -63,7 +65,14 @@ public class FileTransferService implements FileTransferStrategy {
     @Override
     public Optional<File> get(String id) {
         Optional<FileDetailsApi> details = retryStrategy.attempt(() -> {
-            var maybeFileDetails = getFileDetails(id);
+            Optional<FileDetailsApi> maybeFileDetails = null;
+            try {
+                maybeFileDetails = getFileDetails(id);
+            } catch (ApiErrorResponseException e) {
+                throw new RuntimeException(e);
+            } catch (URIValidationException e) {
+                throw new RuntimeException(e);
+            }
             var stillAwaitingScan = maybeFileDetails
                     .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
                     .orElse(false);
@@ -87,7 +96,7 @@ public class FileTransferService implements FileTransferStrategy {
         return Optional.of(file);
     }
 
-    private Optional<FileDetailsApi> getFileDetails(final String id) {
+    private Optional<FileDetailsApi> getFileDetails(final String id) throws ApiErrorResponseException, URIValidationException {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
         HttpStatus status = HttpStatus.resolve(response.getStatusCode());
@@ -116,10 +125,12 @@ public class FileTransferService implements FileTransferStrategy {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
         PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
         PrivateModelFileTransferDelete delete = resourceHandler.delete(id);
-//todo add exceptions to signature and capture in controller
+
+        //todo add exceptions to signature and capture in controller
         //todo fix version and unit tests in 3 sdks, raise PRs and merge
-        //todo unit testa for FTS & AVA
+        //todo unit test for FTS & AVA
         //todo tidy up, code analyis etc... don't merge 2 PRs until Harry has approved
+
         try {
             delete.execute();
         } catch (Exception e) {
@@ -139,15 +150,11 @@ public class FileTransferService implements FileTransferStrategy {
         }
     }
 
-    private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
+    private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) throws ApiErrorResponseException, URIValidationException {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
         PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
         PrivateModelFileTransferGetDetails details = resourceHandler.details(id);
 
-        try {
             return details.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

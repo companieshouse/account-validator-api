@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -239,31 +241,40 @@ class FileTransferServiceTest {
 ////        verify(retryStrategy).attempt(any());
 //    }
 
-    //    @Test
-//    @DisplayName("Unexpected response status")
-//    void testUnexpectedResponseStatus() {
-//        // Given
-//        var fileId = "fileId";
-//        var details = createDetails(fileId, "name", AvStatusApi.CLEAN, new byte[]{});
-//
-//        when(restTemplate.exchange(
-//                fileTransferUrl + details.getLinks().getSelf(),
-//                HttpMethod.GET,
-//                httpEntity,
-//                FileDetailsApi.class, fileId))
-//                .thenReturn(ResponseEntity.internalServerError().build());
-//
-//        setupRetryStrategy();
-//
-//        // When
-//
-//        assertThrows(RuntimeException.class, () -> fileTransferService.get(fileId));
-//
-//        // Then
-//
-//        verify(logger).error(any(String.class), anyMap());
-//    }
-//
+    @Test
+    @DisplayName("Unexpected response status")
+    void testUnexpectedResponseStatus() throws ApiErrorResponseException, URIValidationException {
+        // given
+        var fileId = "fileID";
+        var fileName = "file_name.zip";
+        var data = "Hello World!".getBytes();
+
+        setupRetryStrategy();
+
+        try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
+            InternalApiClient mockClient = mock(InternalApiClient.class);
+            PrivateFileTransferResourceHandler mockHandler = mock(PrivateFileTransferResourceHandler.class);
+            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+
+            ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(500, null, null);
+
+            // Mock scope
+            mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+
+            when(mockHandler.details(anyString())).thenReturn(mockDetails);
+            when(mockDetails.execute()).thenReturn(detailsResponse);
+
+            //when
+            RuntimeException actual = assertThrows(RuntimeException.class, () -> {
+                fileTransferService.get(fileId);
+            });
+
+            //then
+            assertEquals("Unexpected response status from file transfer api when getting file details.", actual.getMessage());
+        }
+    }
+
     private String setupFileDetails(String id, String name, AvStatusApi avStatus, byte[] data) {
         var details = createDetails(id, name, avStatus, data);
 
