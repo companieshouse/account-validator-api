@@ -142,9 +142,38 @@ class FileTransferServiceTest {
         }
     }
 
-//    @Test
-//    @DisplayName("Attempt to get a file that isn't available")
-//    void getFileNotFound() {
+    @Test
+    @DisplayName("Attempt to get a file that isn't available")
+    void getFileNotFound() throws ApiErrorResponseException, URIValidationException {
+        // given
+        var fileId = "fileID";
+        var fileName = "file_name.zip";
+        var data = "Hello World!".getBytes();
+
+        setupRetryStrategy();
+
+        try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
+            InternalApiClient mockClient = mock(InternalApiClient.class);
+            PrivateFileTransferResourceHandler mockHandler = mock(PrivateFileTransferResourceHandler.class);
+            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+
+            ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(404, null, null);
+
+            // Mock scope
+            mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+
+            when(mockHandler.details(anyString())).thenReturn(mockDetails);
+            when(mockDetails.execute()).thenReturn(detailsResponse);
+
+            //when
+            Optional<File> maybeFile = fileTransferService.get(fileId);
+
+            //then
+            assertTrue(maybeFile.isEmpty());
+        }
+
+
 //        // Given
 //        var id = "fileId";
 //        setupFileDownloadNotFound(id);
@@ -155,7 +184,7 @@ class FileTransferServiceTest {
 //
 //        // Then
 //        assertTrue(maybeFile.isEmpty());
-//    }
+    }
 
     private void setupRetryStrategy() {
         setupRetryStrategy(null);
