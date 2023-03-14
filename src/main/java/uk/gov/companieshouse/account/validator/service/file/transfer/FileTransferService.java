@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
@@ -69,9 +71,9 @@ public class FileTransferService implements FileTransferStrategy {
             try {
                 maybeFileDetails = getFileDetails(id);
             } catch (ApiErrorResponseException e) {
-                throw new RuntimeException(e);
+                throw new ResponseException(e);
             } catch (URIValidationException e) {
-                throw new RuntimeException(e);
+                throw new ValidationException(e);
             }
             var stillAwaitingScan = maybeFileDetails
                     .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
@@ -155,6 +157,6 @@ public class FileTransferService implements FileTransferStrategy {
         PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
         PrivateModelFileTransferGetDetails details = resourceHandler.details(id);
 
-            return details.execute();
+        return details.execute();
     }
 }
