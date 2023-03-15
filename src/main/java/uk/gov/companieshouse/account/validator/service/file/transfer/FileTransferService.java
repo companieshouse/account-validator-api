@@ -9,10 +9,8 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationExcept
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
-import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
-import uk.gov.companieshouse.api.handler.filetransfer.PrivateFileTransferResourceHandler;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
@@ -24,6 +22,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -54,7 +53,7 @@ public class FileTransferService implements FileTransferStrategy {
     @Override
     public Optional<File> get(String id) {
         Optional<FileDetailsApi> details = retryStrategy.attempt(() -> {
-            Optional<FileDetailsApi> maybeFileDetails = null;
+            Optional<FileDetailsApi> maybeFileDetails;
             maybeFileDetails = getFileDetails(id);
             var stillAwaitingScan = maybeFileDetails
                     .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
@@ -83,7 +82,7 @@ public class FileTransferService implements FileTransferStrategy {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
         HttpStatus status = HttpStatus.resolve(response.getStatusCode());
-        switch (status) {
+        switch (Objects.requireNonNull(status)) {
             case NOT_FOUND:
                 return Optional.empty();
             case OK:
@@ -105,44 +104,50 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-        InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
-        PrivateModelFileTransferDelete delete = resourceHandler.delete(id);
+        PrivateModelFileTransferDelete delete = ApiSdkManager.getInternalSDK()
+                .privateFileTransferResourceHandler()
+                .delete(id);
 
         try {
             delete.execute();
-        } catch (ApiErrorResponseException e) {
-            throw new ResponseException(e);
-        } catch (URIValidationException e) {
-            throw new ValidationException(e);
+        } catch (ApiErrorResponseException | URIValidationException e) {
+            throw handleCheckedExceptions(e);
         }
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
-        InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
-        PrivateModelFileTransferDownload download = resourceHandler.download(id);
+        PrivateModelFileTransferDownload download = ApiSdkManager.getInternalSDK()
+                .privateFileTransferResourceHandler()
+                .download(id);
 
         try {
             return download.execute();
-        } catch (ApiErrorResponseException e) {
-            throw new ResponseException(e);
-        } catch (URIValidationException e) {
-            throw new ValidationException(e);
+        } catch (ApiErrorResponseException | URIValidationException e) {
+            throw handleCheckedExceptions(e);
         }
     }
 
     private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
-        InternalApiClient client = ApiSdkManager.getInternalSDK();
-        PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
-        PrivateModelFileTransferGetDetails details = resourceHandler.details(id);
+        PrivateModelFileTransferGetDetails details = ApiSdkManager.getInternalSDK()
+                .privateFileTransferResourceHandler()
+                .details(id);
 
         try {
             return details.execute();
-        } catch (ApiErrorResponseException e) {
-            throw new ResponseException(e);
-        } catch (URIValidationException e) {
-            throw new ValidationException(e);
+        } catch (ApiErrorResponseException | URIValidationException e) {
+            throw handleCheckedExceptions(e);
         }
+    }
+
+    /**
+     * Method to wrap checked exceptions (currently only 2) within a RuntimeException. This is done to -
+     * 1. Prevent modification of upstream method signatures
+     * 2. Be Lambda friendly (Lambda's can't throw checked exceptions)
+     *
+     * @param e checked exception to process
+     * @return wrapped checked exception
+     */
+    private RuntimeException handleCheckedExceptions(Exception e) {
+        return (e instanceof ApiErrorResponseException ? new ResponseException(e) : new ValidationException(e));
     }
 }
