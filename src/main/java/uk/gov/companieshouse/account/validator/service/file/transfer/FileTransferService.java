@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -47,18 +46,6 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     /**
-     * Normalise URL converts a url into the form expected by the code.
-     * Path concatenation will assume the url does not have a trailing slash.
-     * By normalising the url, that assumption is always true.
-     *
-     * @param url A url as a string
-     * @return A url in a normalised form
-     */
-    private static String normaliseUrl(String url) {
-        return StringUtils.stripEnd(url, "/");
-    }
-
-    /**
      * Downloads a file from S3 using the file transfer api
      *
      * @param id the id of the file to get
@@ -68,13 +55,7 @@ public class FileTransferService implements FileTransferStrategy {
     public Optional<File> get(String id) {
         Optional<FileDetailsApi> details = retryStrategy.attempt(() -> {
             Optional<FileDetailsApi> maybeFileDetails = null;
-            try {
-                maybeFileDetails = getFileDetails(id);
-            } catch (ApiErrorResponseException e) {
-                throw new ResponseException(e);
-            } catch (URIValidationException e) {
-                throw new ValidationException(e);
-            }
+            maybeFileDetails = getFileDetails(id);
             var stillAwaitingScan = maybeFileDetails
                     .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
                     .orElse(false);
@@ -98,7 +79,7 @@ public class FileTransferService implements FileTransferStrategy {
         return Optional.of(file);
     }
 
-    private Optional<FileDetailsApi> getFileDetails(final String id) throws ApiErrorResponseException, URIValidationException {
+    private Optional<FileDetailsApi> getFileDetails(final String id) {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
         HttpStatus status = HttpStatus.resolve(response.getStatusCode());
@@ -128,15 +109,12 @@ public class FileTransferService implements FileTransferStrategy {
         PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
         PrivateModelFileTransferDelete delete = resourceHandler.delete(id);
 
-        //todo add exceptions to signature and capture in controller
-        //todo fix version and unit tests in 3 sdks, raise PRs and merge
-        //todo unit test for FTS & AVA
-        //todo tidy up, code analyis etc... don't merge 2 PRs until Harry has approved
-
         try {
             delete.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (ApiErrorResponseException e) {
+            throw new ResponseException(e);
+        } catch (URIValidationException e) {
+            throw new ValidationException(e);
         }
     }
 
@@ -147,16 +125,24 @@ public class FileTransferService implements FileTransferStrategy {
 
         try {
             return download.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (ApiErrorResponseException e) {
+            throw new ResponseException(e);
+        } catch (URIValidationException e) {
+            throw new ValidationException(e);
         }
     }
 
-    private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) throws ApiErrorResponseException, URIValidationException {
+    private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
         InternalApiClient client = ApiSdkManager.getInternalSDK();
         PrivateFileTransferResourceHandler resourceHandler = client.privateFileTransferResourceHandler();
         PrivateModelFileTransferGetDetails details = resourceHandler.details(id);
 
-        return details.execute();
+        try {
+            return details.execute();
+        } catch (ApiErrorResponseException e) {
+            throw new ResponseException(e);
+        } catch (URIValidationException e) {
+            throw new ValidationException(e);
+        }
     }
 }
