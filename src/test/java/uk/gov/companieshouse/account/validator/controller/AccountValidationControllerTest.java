@@ -1,15 +1,5 @@
 package uk.gov.companieshouse.account.validator.controller;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +18,16 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AccountValidationControllerTest {
@@ -152,6 +152,32 @@ class AccountValidationControllerTest {
         // Then
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
         assertThat(response.getBody(), is(equalTo("Request required a body")));
+    }
+
+    @Test
+    @DisplayName("Exception handler when response")
+    void responseException() {
+        // Given
+
+        // When
+        ResponseEntity<?> response = controller.responseException();
+
+        // Then
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
+        assertThat(response.getBody(), is(equalTo("Api Response failed")));
+    }
+
+    @Test
+    @DisplayName("Exception handler when response")
+    void validationException() {
+        // Given
+
+        // When
+        ResponseEntity<?> response = controller.validationException();
+
+        // Then
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
+        assertThat(response.getBody(), is(equalTo("Validation failed")));
     }
 
     @Test

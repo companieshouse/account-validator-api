@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
@@ -99,6 +101,26 @@ public class AccountValidationController {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     ResponseEntity<?> noBodyException() {
         return ResponseEntity.badRequest().body("Request required a body");
+    }
+
+    /**
+     * Handles the exception thrown when there's a response problem
+     *
+     * @return 400 bad request response
+     */
+    @ExceptionHandler({ResponseException.class})
+    ResponseEntity<?> responseException() {
+        return ResponseEntity.badRequest().body("Api Response failed");
+    }
+
+    /**
+     * Handles the exception thrown when there's a validation problem
+     *
+     * @return 400 bad request response
+     */
+    @ExceptionHandler({ValidationException.class})
+    ResponseEntity<?> validationException() {
+        return ResponseEntity.badRequest().body("Validation failed");
     }
 
     /**
