@@ -4,14 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
+import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
@@ -21,6 +17,8 @@ import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransfe
 import uk.gov.companieshouse.logging.Logger;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @Controller
@@ -136,5 +134,24 @@ public class AccountValidationController {
         logger.error("Unhandled exception", ex);
 
         return ResponseEntity.internalServerError().build();
+    }
+
+    /**
+     * handles delete request based on the file status complete.
+     *
+     */
+    @DeleteMapping("/cleanup-submissions")
+    ResponseEntity<List<RequestStatus>> delete() {
+        List<RequestStatus> requestStatus = statusRepository.findByStatus("complete");
+        for (RequestStatus rs:requestStatus) {
+            fileTransferStrategy.delete(rs.getFileId());
+            Optional<File> file = fileTransferStrategy.get(rs.getFileId());
+            if(file.isEmpty()){
+                statusRepository.deleteById(rs.getFileId());
+            }else{
+                logger.error("File has not been deleted from S3 bucket:" + rs.getFileId());
+            }
+        };
+        return ResponseEntity.ok(requestStatus);
     }
 }
