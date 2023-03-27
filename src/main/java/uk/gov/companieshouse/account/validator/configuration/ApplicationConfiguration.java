@@ -38,7 +38,7 @@ public class ApplicationConfiguration {
      * @return the rest template
      */
     @Bean
-    public RestTemplate getRestTemplate() {
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
@@ -48,7 +48,7 @@ public class ApplicationConfiguration {
      * @return the executor
      */
     @Bean
-    public Executor getExecutor() {
+    public Executor executor() {
         return Executors.newSingleThreadExecutor();
     }
 
