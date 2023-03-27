@@ -21,24 +21,28 @@ public final class RequestStatus {
     @Id
     private final String fileId;
 
+    @Field
+    private final String fileName;
+
     @Field("status")
     private final String status;
 
     @Field("result")
     private final Results result;
 
-    public RequestStatus(String fileId, String status, Results result) {
+    public RequestStatus(String fileId, String fileName, String status, Results result) {
         this.fileId = fileId;
+        this.fileName = fileName;
         this.status = status;
         this.result = result;
     }
 
-    public static RequestStatus pending(String fileId) {
-        return new RequestStatus(fileId, STATE_PENDING, null);
+    public static RequestStatus pending(String fileId, String fileName) {
+        return new RequestStatus(fileId, fileName, STATE_PENDING, null);
     }
 
-    public static RequestStatus complete(String fileId, Results result) {
-        return new RequestStatus(fileId, STATE_COMPLETE, result);
+    public static RequestStatus complete(String fileId, String fileName, Results result) {
+        return new RequestStatus(fileId, fileName, STATE_COMPLETE, result);
     }
 
     public String getFileId() {
@@ -51,6 +55,10 @@ public final class RequestStatus {
 
     public Results getResult() {
         return result;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     @Override

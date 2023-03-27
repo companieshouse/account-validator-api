@@ -75,17 +75,19 @@ public class AccountValidationController {
             @Valid @RequestBody ValidationRequest validationRequest) {
 
         var fileId = validationRequest.getId();
-        var file = fileTransferStrategy.get(fileId);
-        if (file.isEmpty()) {
+        var optionalFile = fileTransferStrategy.get(fileId);
+        if (optionalFile.isEmpty()) {
             return ValidationResponse.fileNotFound();
         }
 
-        RequestStatus pendingStatus = RequestStatus.pending(fileId);
+        var file = optionalFile.get();
+
+        RequestStatus pendingStatus = RequestStatus.pending(fileId, file.getName());
         statusRepository.save(pendingStatus);
 
         executor.execute(() -> {
-            var result = accountValidationStrategy.validate(file.get());
-            var requestStatus = RequestStatus.complete(fileId, result);
+            var result = accountValidationStrategy.validate(file);
+            var requestStatus = RequestStatus.complete(fileId, file.getName(), result);
             statusRepository.save(requestStatus);
         });
 
