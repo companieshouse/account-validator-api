@@ -113,6 +113,7 @@ public class AccountValidationController {
 
     /**
      * Handles the request to transform a iXBRL file stored in S3 to PDF
+     * NOTE: getFilename() is overridden as required when posting byte[]
      *
      * @param fileId of remote file
      * @return S3 file as PDF
