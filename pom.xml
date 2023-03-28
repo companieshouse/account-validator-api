@@ -233,6 +233,9 @@
                         <exclude>**/uk.gov.companieshouse.account.validator.Runner.java</exclude>
                     </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
+                    <environmentVariables>
+                        <IXBRL_TO_PDF_URI>http://random.api.url</IXBRL_TO_PDF_URI>
+                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>
