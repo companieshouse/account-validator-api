@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -196,5 +197,17 @@ public class AccountValidationController {
      */
     protected String getIxbrlToPDFEnvVal() {
         return environmentReader.getMandatoryString(IXBRL_TO_PDF_URI_KEY);
+    }
+
+    /**
+     * handles delete request based on the file status complete.
+     */
+    @DeleteMapping("/cleanup-submissions")
+    ResponseEntity<Void> delete() {
+        for (RequestStatus rs : statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)) {
+            fileTransferStrategy.delete(rs.getFileId());
+            statusRepository.deleteById(rs.getFileId());
+        }
+        return ResponseEntity.noContent().build();
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.model.File;
+import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
@@ -22,6 +23,8 @@ import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransfe
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -29,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -270,5 +274,46 @@ class AccountValidationControllerTest {
         // Then
         verify(logger).error("Unhandled exception", e);
         assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+    
+    @Test
+    @DisplayName("Test to delete all files")
+    void deleteFiles() {
+        // Given
+
+        // When
+        when(repository.findByStatus(RequestStatus.STATE_COMPLETE)).thenReturn(setupCompleteRequestStatusList());
+        ResponseEntity<?> response = controller.delete();
+
+        // Then
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
+        verify(fileTransferStrategy, times(5)).delete(any(String.class));
+        verify(repository, times(5)).deleteById(any(String.class));
+
+    }
+
+    @Test
+    @DisplayName("No to delete all files")
+    void noFilesDeleted() {
+        // Given
+
+        // When
+        ResponseEntity<?> response = controller.delete();
+
+        // Then
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
+        verify(fileTransferStrategy, times(0)).delete(any(String.class));
+        verify(repository, times(0)).deleteById(any(String.class));
+    }
+
+    private List<RequestStatus> setupCompleteRequestStatusList(){
+        List<RequestStatus> completeList = new ArrayList<RequestStatus>();
+        for(int i=0; i<5;i++){
+            RequestStatus completeStatus = new RequestStatus("test"+i, "Testing",RequestStatus.STATE_COMPLETE,new Results());
+            completeList.add(completeStatus);
+        }
+        return completeList;
     }
 }
