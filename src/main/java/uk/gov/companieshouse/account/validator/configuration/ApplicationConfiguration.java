@@ -8,6 +8,8 @@ import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
+import uk.gov.companieshouse.environment.EnvironmentReader;
+import uk.gov.companieshouse.environment.impl.EnvironmentReaderImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class ApplicationConfiguration {
      * @return the rest template
      */
     @Bean
-    public RestTemplate getRestTemplate() {
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
@@ -46,7 +48,7 @@ public class ApplicationConfiguration {
      * @return the executor
      */
     @Bean
-    public Executor getExecutor() {
+    public Executor executor() {
         return Executors.newSingleThreadExecutor();
     }
 
@@ -80,6 +82,16 @@ public class ApplicationConfiguration {
     @Bean
     public AccountValidationStrategy accountValidationStrategy() {
         return new FelixAccountValidator();
+    }
+
+    /**
+     * Creates the environment reader bean.
+     *
+     * @return The environment reader
+     */
+    @Bean
+    public EnvironmentReader environmentReader() {
+        return new EnvironmentReaderImpl();
     }
 }
 
