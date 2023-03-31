@@ -20,6 +20,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationReques
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
+import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceStrategy;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -77,6 +78,9 @@ class AccountValidationControllerTest {
 
     AccountValidationController controller;
 
+    @Mock
+    AccountMaintenanceStrategy accountMaintenanceStrategy;
+
     @BeforeEach
     void setUp() {
         controller = new AccountValidationController(accountValidationStrategy,
@@ -85,7 +89,8 @@ class AccountValidationControllerTest {
                 executor,
                 repository,
                 restTemplate,
-                environmentReader);
+                environmentReader,
+                accountMaintenanceStrategy);
     }
 
     @Test
@@ -277,24 +282,21 @@ class AccountValidationControllerTest {
     }
     
     @Test
-    @DisplayName("Test to delete all files")
+    @DisplayName("Test to delete files from S3 bucket & mongodb")
     void deleteFiles() {
         // Given
 
         // When
-        when(repository.findByStatus(RequestStatus.STATE_COMPLETE)).thenReturn(setupCompleteRequestStatusList());
         ResponseEntity<?> response = controller.delete();
 
         // Then
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
-        verify(fileTransferStrategy, times(5)).delete(any(String.class));
-        verify(repository, times(5)).deleteById(any(String.class));
+        verify(accountMaintenanceStrategy, times(1)).deleteFiles();
 
     }
 
     @Test
-    @DisplayName("No to delete all files")
+    @DisplayName("Test to delete files from S3 bucket & mongodb")
     void noFilesDeleted() {
         // Given
 
@@ -303,9 +305,7 @@ class AccountValidationControllerTest {
 
         // Then
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
-        verify(fileTransferStrategy, times(0)).delete(any(String.class));
-        verify(repository, times(0)).deleteById(any(String.class));
+        verify(accountMaintenanceStrategy, times(1)).deleteFiles();
     }
 
     private List<RequestStatus> setupCompleteRequestStatusList(){

@@ -25,6 +25,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationRespon
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
+import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceStrategy;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -46,14 +47,18 @@ public class AccountValidationController {
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
     private final EnvironmentReader environmentReader;
+    private final AccountMaintenanceStrategy accountMaintenanceStrategy;
+
 
     @Autowired
+
     public AccountValidationController(AccountValidationStrategy accountValidationStrategy,
                                        FileTransferStrategy fileTransferStrategy,
                                        Logger logger,
                                        Executor executor,
                                        RequestStatusRepository statusRepository,
-                                       RestTemplate restTemplate, EnvironmentReader environmentReader) {
+                                       RestTemplate restTemplate, EnvironmentReader environmentReader,
+                                       AccountMaintenanceStrategy accountMaintenanceStrategy) {
         this.accountValidationStrategy = accountValidationStrategy;
         this.fileTransferStrategy = fileTransferStrategy;
         this.logger = logger;
@@ -61,6 +66,7 @@ public class AccountValidationController {
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
+        this.accountMaintenanceStrategy = accountMaintenanceStrategy;
     }
 
     /**
@@ -200,14 +206,12 @@ public class AccountValidationController {
     }
 
     /**
-     * handles delete request based on the file status complete.
+     * Handles delete request based on the file status complete.
+     * Delete files from S3 bucket & mongodb
      */
     @DeleteMapping("/cleanup-submissions")
     ResponseEntity<Void> delete() {
-        for (RequestStatus rs : statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)) {
-            fileTransferStrategy.delete(rs.getFileId());
-            statusRepository.deleteById(rs.getFileId());
-        }
+        accountMaintenanceStrategy.deleteFiles();
         return ResponseEntity.noContent().build();
     }
 }
