@@ -7,7 +7,9 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of the AccountMaintenanceService to maintain company's account files
@@ -15,9 +17,9 @@ import java.util.List;
 @Service
 public class AccountMaintenanceService implements AccountMaintenanceStrategy {
 
-    private  FileTransferStrategy fileTransferStrategy;
-    private  Logger logger;
-    private  RequestStatusRepository statusRepository;
+    private final FileTransferStrategy fileTransferStrategy;
+    private final Logger logger;
+    private final RequestStatusRepository statusRepository;
 
 
     @Autowired
@@ -29,12 +31,20 @@ public class AccountMaintenanceService implements AccountMaintenanceStrategy {
 
     @Override
     public void deleteFiles() {
+        logger.info("Inside deleteFiles method");
         List<RequestStatus> completeRequestStatusList = statusRepository.findByStatus(RequestStatus.STATE_COMPLETE);
-        completeRequestStatusList.stream().forEach(requestStatus -> deleteRequest(requestStatus.getFileId()));
+        if(!isEmptyOrNull(completeRequestStatusList)) {
+            completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.getFileId()));
+        }
+        logger.info("Exit deleteFiles method");
     }
 
     private void deleteRequest(String fileId){
         fileTransferStrategy.delete(fileId);
         statusRepository.deleteById(fileId);
+    }
+
+    public static boolean isEmptyOrNull(Collection < ? > collection) {
+        return (collection == null || collection.isEmpty());
     }
 }
