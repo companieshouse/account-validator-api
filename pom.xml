@@ -15,11 +15,12 @@
         <java.version>11</java.version>
 
         <maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
-        <spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>2.6.4</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>2.7.10</spring-boot-maven-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
+        <dependency-check-plugin.version>8.2.1</dependency-check-plugin.version>
         <!-- tests -->
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
@@ -342,6 +343,18 @@
                                 <source>src/feature/java</source>
                             </sources>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency-check-plugin.version}</version>
+                <executions>
+                    <execution>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
                     </execution>
                 </executions>
             </plugin>
