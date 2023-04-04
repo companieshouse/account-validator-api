@@ -40,7 +40,7 @@ public class AccountMaintenanceServiceTest {
         // When
         when(statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)).thenReturn(createRequestStatusList());
 
-        accountMaintenanceService.deleteFiles();
+        accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
         verify(statusRepository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
@@ -56,7 +56,7 @@ public class AccountMaintenanceServiceTest {
         // When
         when(statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)).thenReturn(new ArrayList<>());
 
-        accountMaintenanceService.deleteFiles();
+        accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
         verify(statusRepository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
@@ -65,14 +65,14 @@ public class AccountMaintenanceServiceTest {
     }
 
     @Test
-    @DisplayName("Throw RunTimeException when Mongodb connection is impacted")
-    void throwRunTimeException() {
+    @DisplayName("Throw DeleteCompleteSubException when Mongodb/ Aws S3 connection is impacted")
+    void throwDeleteCompleteSubException() {
         // Given
 
         // When
         when(statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)).thenThrow(new RuntimeException());
 
-        assertThrows(RuntimeException.class, () -> accountMaintenanceService.deleteFiles());
+        assertThrows(RuntimeException.class, () -> accountMaintenanceService.deleteCompleteSubmissions());
         // Then
         verify(statusRepository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
     }

@@ -19,7 +19,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationReques
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
-import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceStrategy;
+import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -27,7 +27,9 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.*;
@@ -69,7 +71,7 @@ class AccountValidationControllerTest {
     AccountValidationController controller;
 
     @Mock
-    AccountMaintenanceStrategy accountMaintenanceStrategy;
+    AccountMaintenanceService accountMaintenanceService;
 
     @BeforeEach
     void setUp() {
@@ -80,7 +82,7 @@ class AccountValidationControllerTest {
                 repository,
                 restTemplate,
                 environmentReader,
-                accountMaintenanceStrategy);
+                accountMaintenanceService);
     }
 
     @Test
@@ -281,7 +283,18 @@ class AccountValidationControllerTest {
 
         // Then
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(accountMaintenanceStrategy, times(1)).deleteFiles();
+        verify(accountMaintenanceService, times(1)).deleteCompleteSubmissions();
+    }
+
+    @Test
+    @DisplayName("Exception handler when delete complete submission activity failed and returns 500")
+    void deleteCompleteSubExceptionHandler() {
+
+        ResponseEntity<?> response = controller.deleteCompleteSubException();
+
+        // Then
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.INTERNAL_SERVER_ERROR)));
+        assertThat(response.getBody(), is(equalTo("Delete complete submission activity failed")));
     }
 
 }
