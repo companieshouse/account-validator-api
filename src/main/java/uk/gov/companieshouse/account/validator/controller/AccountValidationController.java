@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.companieshouse.account.validator.exceptionhandler.DeleteCompleteSubException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
@@ -27,6 +28,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationRespon
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
+import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -46,6 +48,8 @@ public class AccountValidationController {
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
     private final EnvironmentReader environmentReader;
+    private final AccountMaintenanceService accountMaintenanceService;
+
 
     @Autowired
     public AccountValidationController(AccountValidationStrategy accountValidationStrategy,
@@ -53,7 +57,8 @@ public class AccountValidationController {
                                        Logger logger,
                                        Executor executor,
                                        RequestStatusRepository statusRepository,
-                                       RestTemplate restTemplate, EnvironmentReader environmentReader) {
+                                       RestTemplate restTemplate, EnvironmentReader environmentReader,
+                                       AccountMaintenanceService accountMaintenanceService) {
         this.accountValidationStrategy = accountValidationStrategy;
         this.fileTransferStrategy = fileTransferStrategy;
         this.logger = logger;
@@ -61,6 +66,7 @@ public class AccountValidationController {
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
+        this.accountMaintenanceService = accountMaintenanceService;
     }
 
     /**
@@ -201,14 +207,22 @@ public class AccountValidationController {
     }
 
     /**
-     * handles delete request based on the file status complete.
+     * Handles delete request based on the file status complete.
+     * Delete files from S3 bucket & mongodb
      */
     @DeleteMapping("/cleanup-submissions")
     ResponseEntity<Void> delete() {
-        for (RequestStatus rs : statusRepository.findByStatus(RequestStatus.STATE_COMPLETE)) {
-            fileTransferStrategy.delete(rs.getFileId());
-            statusRepository.deleteById(rs.getFileId());
-        }
+        accountMaintenanceService.deleteCompleteSubmissions();
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Handles the exception thrown when there's a validation problem
+     *
+     * @return 500 internal server error response
+     */
+    @ExceptionHandler({DeleteCompleteSubException.class})
+    ResponseEntity<?> deleteCompleteSubException() {
+        return ResponseEntity.internalServerError().body("Delete complete submission activity failed");
     }
 }

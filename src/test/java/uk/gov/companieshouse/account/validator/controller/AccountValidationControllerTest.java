@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.account.validator.controller;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,17 +29,15 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.model.File;
-import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
+import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -78,6 +76,9 @@ class AccountValidationControllerTest {
 
     AccountValidationController controller;
 
+    @Mock
+    AccountMaintenanceService accountMaintenanceService;
+
     @BeforeEach
     void setUp() {
         controller = new AccountValidationController(accountValidationStrategy,
@@ -86,7 +87,8 @@ class AccountValidationControllerTest {
                 executor,
                 repository,
                 restTemplate,
-                environmentReader);
+                environmentReader,
+                accountMaintenanceService);
     }
 
     @Test
@@ -207,7 +209,7 @@ class AccountValidationControllerTest {
         when(environmentReader.getMandatoryString(anyString())).thenReturn(null);
 
         // Then
-        Assert.assertThrows(MissingEnvironmentVariableException.class, () -> controller.render("fileId"));
+        assertThrows(MissingEnvironmentVariableException.class, () -> controller.render("fileId"));
     }
 
     @Test
@@ -247,7 +249,7 @@ class AccountValidationControllerTest {
 
         // Then
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
-        assertThat(response.getBody(), is(equalTo("Api Response failed")));
+        assertThat((String) response.getBody(), containsString("Api Response failed.")); //
     }
 
     @Test
@@ -276,45 +278,29 @@ class AccountValidationControllerTest {
         verify(logger).error("Unhandled exception", e);
         assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
-    
+
     @Test
-    @DisplayName("Test to delete all files")
+    @DisplayName("Test to delete files from S3 bucket & mongodb")
     void deleteFiles() {
         // Given
 
         // When
-        when(repository.findByStatus(RequestStatus.STATE_COMPLETE)).thenReturn(setupCompleteRequestStatusList());
         ResponseEntity<?> response = controller.delete();
 
         // Then
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
-        verify(fileTransferStrategy, times(5)).delete(any(String.class));
-        verify(repository, times(5)).deleteById(any(String.class));
-
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(accountMaintenanceService, times(1)).deleteCompleteSubmissions();
     }
 
     @Test
-    @DisplayName("No to delete all files")
-    void noFilesDeleted() {
-        // Given
+    @DisplayName("Exception handler when delete complete submission activity failed and returns 500")
+    void deleteCompleteSubExceptionHandler() {
 
-        // When
-        ResponseEntity<?> response = controller.delete();
+        ResponseEntity<?> response = controller.deleteCompleteSubException();
 
         // Then
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
-        verify(fileTransferStrategy, times(0)).delete(any(String.class));
-        verify(repository, times(0)).deleteById(any(String.class));
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.INTERNAL_SERVER_ERROR)));
+        assertThat(response.getBody(), is(equalTo("Delete complete submission activity failed")));
     }
 
-    private List<RequestStatus> setupCompleteRequestStatusList(){
-        List<RequestStatus> completeList = new ArrayList<RequestStatus>();
-        for(int i=0; i<5;i++){
-            RequestStatus completeStatus = new RequestStatus("test"+i, "Testing",RequestStatus.STATE_COMPLETE,new Results());
-            completeList.add(completeStatus);
-        }
-        return completeList;
-    }
 }
