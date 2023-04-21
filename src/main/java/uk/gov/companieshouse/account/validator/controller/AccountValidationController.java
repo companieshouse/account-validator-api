@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.account.validator.controller;
 
+import static org.springframework.http.MediaType.APPLICATION_PDF;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -31,10 +33,8 @@ import uk.gov.companieshouse.logging.Logger;
 import javax.validation.Valid;
 import java.util.concurrent.Executor;
 
-import static org.springframework.http.MediaType.APPLICATION_PDF;
-
 @Controller
-@RequestMapping("/validate")
+@RequestMapping("/account-validator/validate")
 public class AccountValidationController {
 
     private static final String IXBRL_TO_PDF_URI_KEY = "IXBRL_TO_PDF_URI";
@@ -163,8 +163,9 @@ public class AccountValidationController {
      * @return 400 bad request response
      */
     @ExceptionHandler({ResponseException.class})
-    ResponseEntity<?> responseException() {
-        return ResponseEntity.badRequest().body("Api Response failed");
+    ResponseEntity<?> responseException(ResponseException e) {
+        logger.error("Unhandled response exception", e);
+        return ResponseEntity.badRequest().body("Api Response failed. " + e.getMessage());
     }
 
     /**

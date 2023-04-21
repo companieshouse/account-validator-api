@@ -8,6 +8,8 @@ import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.environment.impl.EnvironmentReaderImpl;
 import uk.gov.companieshouse.logging.Logger;
@@ -92,6 +94,23 @@ public class ApplicationConfiguration {
     @Bean
     public EnvironmentReader environmentReader() {
         return new EnvironmentReaderImpl();
+    }
+
+    @Bean
+    public InternalApiClient internalApiClient(
+            @Value("${api.base.path}") String apiBasePath,
+            @Value("${internal.api.base.path}") String internalApiBasePath,
+            @Value("${payments.api.base.path}") String paymentsApiBasePath,
+            @Value("${internal.api.key}") String internalApiKey
+    ) {
+        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(internalApiKey);
+        InternalApiClient internalApiClient = new InternalApiClient(httpClient);
+
+        internalApiClient.setBasePath(internalApiBasePath);
+        internalApiClient.setBasePaymentsPath(paymentsApiBasePath);
+        internalApiClient.setInternalBasePath(internalApiBasePath);
+
+        return internalApiClient;
     }
 }
 

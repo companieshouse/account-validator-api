@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @XmlRootElement(name = "results")
 public class Results {
 
-    private Errors errors;
+    private List<Errors> errors;
 
     private String validationStatus;
 
@@ -19,11 +20,11 @@ public class Results {
     @XmlElement
     @JsonProperty("errorMessages")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Errors getErrors() {
+    public List<Errors> getErrors() {
         return errors;
     }
 
-    public void setErrors(Errors errors) {
+    public void setErrors(List<Errors> errors) {
         this.errors = errors;
     }
 

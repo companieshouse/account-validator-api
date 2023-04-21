@@ -1,7 +1,7 @@
 app_name: account-validator-api
-group: api
+group: internalapi
 weight: 999998
 routes:
   1: ^/actuator/health
-  2: ^/account-validator/validate
+  2: ^/account-validator.*
 
