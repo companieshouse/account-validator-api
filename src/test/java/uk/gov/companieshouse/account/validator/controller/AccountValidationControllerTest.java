@@ -1,5 +1,19 @@
 package uk.gov.companieshouse.account.validator.controller;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
@@ -25,15 +40,6 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AccountValidationControllerTest {
@@ -239,11 +245,11 @@ class AccountValidationControllerTest {
         // Given
 
         // When
-        ResponseEntity<?> response = controller.responseException();
+        ResponseEntity<?> response = controller.responseException(new ResponseException());
 
         // Then
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
-        assertThat(response.getBody(), is(equalTo("Api Response failed")));
+        assertThat((String) response.getBody(), containsString("Api Response failed.")); //
     }
 
     @Test
@@ -272,7 +278,7 @@ class AccountValidationControllerTest {
         verify(logger).error("Unhandled exception", e);
         assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
-    
+
     @Test
     @DisplayName("Test to delete files from S3 bucket & mongodb")
     void deleteFiles() {

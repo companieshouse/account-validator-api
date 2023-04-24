@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.account.validator.service.maintenance;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +20,6 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountMaintenanceServiceTest {
@@ -77,9 +80,9 @@ public class AccountMaintenanceServiceTest {
         verify(statusRepository, times(1)).findByStatus(RequestStatus.STATE_COMPLETE);
     }
 
-    private List<RequestStatus> createRequestStatusList(){
+    private List<RequestStatus> createRequestStatusList() {
         List<RequestStatus> requestStatusList = new ArrayList<RequestStatus>();
-        for(int i=0;i<5;i++){
+        for (int i = 0; i < 5; i++) {
             RequestStatus completeRequestStatus = new RequestStatus("mockId-" + i, "MockFilename", RequestStatus.STATE_COMPLETE, new Results());
             requestStatusList.add(completeRequestStatus);
         }

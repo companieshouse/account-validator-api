@@ -9,6 +9,7 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationExcept
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
+import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
@@ -19,7 +20,6 @@ import uk.gov.companieshouse.api.model.filetransfer.AvStatusApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Map;
 import java.util.Objects;
@@ -31,17 +31,19 @@ import java.util.Optional;
 @Component
 public class FileTransferService implements FileTransferStrategy {
 
-    public static final String API_KEY_HEADER = "x-api-key";
     private final Logger logger;
     private final RetryStrategy retryStrategy;
+    private final InternalApiClient internalApiClient;
 
     @Autowired
     public FileTransferService(
             Logger logger,
-            @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy) {
+            @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy,
+            InternalApiClient internalApiClient) {
 
         this.logger = logger;
         this.retryStrategy = retryStrategy;
+        this.internalApiClient = internalApiClient;
     }
 
     /**
@@ -104,7 +106,7 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-        PrivateModelFileTransferDelete delete = ApiSdkManager.getInternalSDK()
+        PrivateModelFileTransferDelete delete = internalApiClient
                 .privateFileTransferResourceHandler()
                 .delete(id);
 
@@ -116,7 +118,7 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
-        PrivateModelFileTransferDownload download = ApiSdkManager.getInternalSDK()
+        PrivateModelFileTransferDownload download = internalApiClient
                 .privateFileTransferResourceHandler()
                 .download(id);
 
@@ -128,7 +130,7 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
-        PrivateModelFileTransferGetDetails details = ApiSdkManager.getInternalSDK()
+        PrivateModelFileTransferGetDetails details = internalApiClient
                 .privateFileTransferResourceHandler()
                 .details(id);
 
