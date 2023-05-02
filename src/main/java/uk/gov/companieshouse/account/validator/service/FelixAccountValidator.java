@@ -57,18 +57,18 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
 
-            LOG.debug(String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", s3Key));
+            LOG.debugContext(file.getId(), String.format("Calling Felix Ixbrl Validation with file downloaded from S3 with key '%s'", s3Key), logMap);
             Results results = restTemplate.postForObject(new URI(url), requestEntity, Results.class);
-            LOG.debug("Call to Felix Ixbrl Validation was successfully made");
+            LOG.debugContext(file.getId(), "Call to Felix Ixbrl Validation was successfully made", null);
 
             String logMessage = "Ixbrl validation " + ((results != null && "OK".equalsIgnoreCase(results.getValidationStatus())) ? "succeeded" : "failed");
             logMap.put("results", results);
-            LOG.debug(logMessage, logMap);
+            LOG.debugContext(file.getId(), logMessage, logMap);
 
             return results;
         } catch (Exception e) {
             logMap.put("error", "Unable to validate ixbrl");
-            LOG.error(e, logMap);
+            LOG.errorContext(file.getId(), e, logMap);
 
             return null;
         }
@@ -104,15 +104,15 @@ public class FelixAccountValidator implements AccountValidationStrategy {
 
     private class FileMessageResource extends ByteArrayResource {
         /**
-         * The filename to be associated with the {@link MimeMessage} in the form data.
+         * The filename to be associated with the  MimeMessage in the form data.
          */
         private final String filename;
 
         /**
          * Constructs a new {@link FileMessageResource}.
          *
-         * @param byteArray A byte array containing data from a {@link MimeMessage}.
-         * @param filename  The filename to be associated with the {@link MimeMessage} in
+         * @param byteArray A byte array containing data from a MimeMessage.
+         * @param filename  The filename to be associated with the MimeMessage in
          *                  the form data.
          */
         public FileMessageResource(final byte[] byteArray, final String filename) {
