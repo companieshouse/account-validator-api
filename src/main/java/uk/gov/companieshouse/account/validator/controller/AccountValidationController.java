@@ -33,6 +33,8 @@ import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Controller
@@ -82,23 +84,43 @@ public class AccountValidationController {
             @Valid @RequestBody ValidationRequest validationRequest) {
 
         var fileId = validationRequest.getId();
-        var optionalFile = fileTransferStrategy.get(fileId);
-        if (optionalFile.isEmpty()) {
+        Map<String, Object> loginfo = new HashMap<>();
+        loginfo.put("fileId", fileId);
+        logger.debugContext(fileId, "Getting file details", loginfo);
+
+        var optionalFileDetails = fileTransferStrategy.getDetails(fileId);
+        if (optionalFileDetails.isEmpty()) {
             return ValidationResponse.fileNotFound();
         }
 
-        var file = optionalFile.get();
-
-        RequestStatus pendingStatus = RequestStatus.pending(fileId, file.getName());
+        RequestStatus pendingStatus = RequestStatus.pending(fileId, optionalFileDetails.get().getName());
         statusRepository.save(pendingStatus);
 
-        executor.execute(() -> {
+        // Asynchronously start validation
+        executor.execute(validateFile(fileId));
+
+        logger.debugContext(fileId, "Returning pending status", loginfo);
+        return ValidationResponse.success(pendingStatus);
+    }
+
+    private Runnable validateFile(String fileId) {
+        return () -> {
+            Map<String, Object> loginfo = new HashMap<>();
+            loginfo.put("fileId", fileId);
+
+            var optionalFile = fileTransferStrategy.get(fileId);
+            if (optionalFile.isEmpty()) {
+                throw new RuntimeException(String.format("No file with id [%s] found", fileId));
+            }
+
+            var file = optionalFile.get();
             var result = accountValidationStrategy.validate(file);
             var requestStatus = RequestStatus.complete(fileId, file.getName(), result);
+            loginfo.put("result", requestStatus);
+            logger.debugContext(fileId, "Saving result to db", loginfo);
             statusRepository.save(requestStatus);
-        });
-
-        return ValidationResponse.success(pendingStatus);
+            logger.debugContext(fileId, "Result saved to db", loginfo);
+        };
     }
 
     /**

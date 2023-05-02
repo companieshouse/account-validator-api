@@ -61,6 +61,8 @@ public class FileTransferService implements FileTransferStrategy {
                     .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
                     .orElse(false);
 
+            logger.debugContext(id, "File still awaiting scan. Retrying.", null);
+
             if (stillAwaitingScan) {
                 // AvScan has still not been completed. Attempt to retry
                 throw new RetryException();
@@ -80,6 +82,11 @@ public class FileTransferService implements FileTransferStrategy {
         return Optional.of(file);
     }
 
+    @Override
+    public Optional<FileDetailsApi> getDetails(String id) {
+        return getFileDetails(id);
+    }
+
     private Optional<FileDetailsApi> getFileDetails(final String id) {
         ApiResponse<FileDetailsApi> response = getFileDetailsApiResponse(id);
 
@@ -91,7 +98,7 @@ public class FileTransferService implements FileTransferStrategy {
                 return Optional.ofNullable(response.getData());
             default:
                 var message = "Unexpected response status from file transfer api when getting file details.";
-                logger.error(message, Map.of(
+                logger.errorContext(id, message, null, Map.of(
                         "expected", "200 or 404",
                         "status", response.getStatusCode()
                 ));

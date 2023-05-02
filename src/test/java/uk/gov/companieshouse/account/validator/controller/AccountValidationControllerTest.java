@@ -35,6 +35,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -129,7 +130,12 @@ class AccountValidationControllerTest {
 
     private void setupFile(String id, File file) {
         when(validationRequest.getId()).thenReturn(id);
-        when(fileTransferStrategy.get(id)).thenReturn(Optional.ofNullable(file));
+
+        var maybeFile = Optional.ofNullable(file);
+        when(fileTransferStrategy.getDetails(id)).thenReturn(maybeFile.map(f -> new FileDetailsApi()));
+        if (maybeFile.isPresent()) {
+            when(fileTransferStrategy.get(id)).thenReturn(maybeFile);
+        }
     }
 
     private void setupFile(String id) {
