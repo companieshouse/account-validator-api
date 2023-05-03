@@ -1,14 +1,14 @@
 package uk.gov.companieshouse.account.validator.model.felix.ixbrl;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@XmlRootElement(name = "errors")
+@JacksonXmlRootElement(localName = "errors")
 public class Errors {
 
     private String errorMessage;
 
-    @XmlElement(name = "ErrorMessage")
+    @JacksonXmlProperty(localName = "ErrorMessage")
     public String getErrorMessage() {
         return errorMessage;
     }
