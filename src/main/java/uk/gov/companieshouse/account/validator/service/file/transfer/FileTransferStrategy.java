@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
 import uk.gov.companieshouse.account.validator.model.File;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 
 import java.util.Optional;
 
@@ -16,6 +17,15 @@ public interface FileTransferStrategy {
      * @return Empty, if there is no such file, otherwise the File wrapped in an optional
      */
     Optional<File> get(String id);
+
+
+    /**
+     * Gets the metadata of a file without downloading
+     *
+     * @param id teh file id to get the metadata of
+     * @return the metadata or "details"
+     */
+    Optional<FileDetailsApi> getDetails(String id);
 
     /*
      * Deletes the file with the given id

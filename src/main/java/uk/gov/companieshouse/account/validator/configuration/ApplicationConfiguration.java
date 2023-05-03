@@ -51,7 +51,7 @@ public class ApplicationConfiguration {
      */
     @Bean
     public Executor executor() {
-        return Executors.newSingleThreadExecutor();
+        return Executors.newWorkStealingPool();
     }
 
     /**
