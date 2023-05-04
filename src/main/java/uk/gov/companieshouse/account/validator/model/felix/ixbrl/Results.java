@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.account.validator.model.felix.ixbrl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -16,9 +17,9 @@ public class Results {
 
     private Data data;
 
-    @JacksonXmlElementWrapper(localName = "errorMessages")
-    @JacksonXmlProperty(localName = "error")
+    @JacksonXmlElementWrapper(localName = "errors")
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("errorMessages")
     public List<Errors> getErrors() {
         return errors;
     }
