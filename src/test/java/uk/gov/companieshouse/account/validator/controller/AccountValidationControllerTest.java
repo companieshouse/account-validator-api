@@ -28,6 +28,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
@@ -94,7 +95,7 @@ class AccountValidationControllerTest {
 
     @Test
     @DisplayName("Submit file for validation")
-    void submitForValidation() {
+    void submitForValidation() throws XBRLValidationException {
         // Given
         setupFile("fileId", file);
         doAnswer(a -> {

@@ -1,20 +1,21 @@
 package uk.gov.companieshouse.account.validator.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
-import uk.gov.companieshouse.account.validator.model.File;
-import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
+import uk.gov.companieshouse.account.validator.model.File;
+import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 
 class FelixAccountValidatorTest {
 
@@ -60,7 +61,7 @@ class FelixAccountValidatorTest {
     }
 
     @Test
-    void validationSuccess() {
+    void validationSuccess() throws XBRLValidationException {
         File f = new File("anything", "anything", "anything".getBytes());
 
         mockServer.expect(requestTo(TNEP_BASE64_URL))
@@ -76,7 +77,7 @@ class FelixAccountValidatorTest {
     }
 
     @Test
-    void validationFailure() {
+    void validationFailure() throws XBRLValidationException {
         File f = new File("anything", "anything", "anything".getBytes());
 
         mockServer.expect(requestTo(TNEP_BASE64_URL))
@@ -92,7 +93,7 @@ class FelixAccountValidatorTest {
     }
 
     @Test
-    void invalidResponse() {
+    void invalidResponse() throws XBRLValidationException {
         File f = new File("anything", "anything", "anything".getBytes());
 
         mockServer.expect(requestTo(TNEP_BASE64_URL))
@@ -107,7 +108,7 @@ class FelixAccountValidatorTest {
     }
 
     @Test
-    void checkMissingEnvVar() {
+    void checkMissingEnvVar() throws XBRLValidationException {
         File f = new File("anything", "anything", "anything".getBytes());
 
         underTest = new FelixAccountValidator() {

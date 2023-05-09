@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.DeleteCompleteSubException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
-import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
@@ -107,19 +107,23 @@ public class AccountValidationController {
         return () -> {
             Map<String, Object> loginfo = new HashMap<>();
             loginfo.put("fileId", fileId);
+            try {
+                var optionalFile = fileTransferStrategy.get(fileId);
+                if (optionalFile.isEmpty()) {
+                    throw new RuntimeException(String.format("No file with id [%s] found", fileId));
+                }
 
-            var optionalFile = fileTransferStrategy.get(fileId);
-            if (optionalFile.isEmpty()) {
-                throw new RuntimeException(String.format("No file with id [%s] found", fileId));
+                var file = optionalFile.get();
+                var result = accountValidationStrategy.validate(file);
+                var requestStatus = RequestStatus.complete(fileId, file.getName(), result);
+                loginfo.put("result", requestStatus);
+                logger.debugContext(fileId, "Saving result to db", loginfo);
+                statusRepository.save(requestStatus);
+                logger.debugContext(fileId, "Result saved to db", loginfo);
+            } catch (Exception e) {
+                logger.errorContext(fileId, "Encountered exception while validating file. Saving error status to submission", e, loginfo);
+                statusRepository.save(RequestStatus.error(fileId));
             }
-
-            var file = optionalFile.get();
-            var result = accountValidationStrategy.validate(file);
-            var requestStatus = RequestStatus.complete(fileId, file.getName(), result);
-            loginfo.put("result", requestStatus);
-            logger.debugContext(fileId, "Saving result to db", loginfo);
-            statusRepository.save(requestStatus);
-            logger.debugContext(fileId, "Result saved to db", loginfo);
         };
     }
 
@@ -201,7 +205,7 @@ public class AccountValidationController {
      *
      * @return 400 bad request response
      */
-    @ExceptionHandler({ValidationException.class})
+    @ExceptionHandler({UriValidationException.class})
     ResponseEntity<?> validationException() {
         return ResponseEntity.badRequest().body("Validation failed");
     }

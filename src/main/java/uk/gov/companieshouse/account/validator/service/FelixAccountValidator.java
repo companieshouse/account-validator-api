@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.logging.Logger;
@@ -38,7 +39,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      * @return the result of the validation
      */
     @Override
-    public Results validate(File file) {
+    public Results validate(File file) throws XBRLValidationException {
         String s3Key = file.getName();
         String url = getIxbrlValidatorBase64Uri();
         Map<String, Object> logMap = new HashMap<>();
