@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
-import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
@@ -157,6 +157,6 @@ public class FileTransferService implements FileTransferStrategy {
      * @return wrapped checked exception
      */
     private RuntimeException handleCheckedExceptions(Exception e) {
-        return (e instanceof ApiErrorResponseException ? new ResponseException(e) : new ValidationException(e));
+        return (e instanceof ApiErrorResponseException ? new ResponseException(e) : new UriValidationException(e));
     }
 }

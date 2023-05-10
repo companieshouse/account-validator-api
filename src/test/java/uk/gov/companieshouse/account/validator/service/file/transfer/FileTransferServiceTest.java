@@ -1,5 +1,18 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
-import uk.gov.companieshouse.account.validator.exceptionhandler.ValidationException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
@@ -28,19 +41,6 @@ import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FileTransferServiceTest {
@@ -195,7 +195,7 @@ class FileTransferServiceTest {
             // when
 
             // then
-            assertThrows(ValidationException.class, () -> fileTransferService.get(TEST_FILE_ID));
+            assertThrows(UriValidationException.class, () -> fileTransferService.get(TEST_FILE_ID));
         }
     }
 
@@ -280,7 +280,7 @@ class FileTransferServiceTest {
             // when
 
             // then
-            assertThrows(ValidationException.class, () -> fileTransferService.get(TEST_FILE_ID));
+            assertThrows(UriValidationException.class, () -> fileTransferService.get(TEST_FILE_ID));
         }
     }
 
@@ -347,7 +347,7 @@ class FileTransferServiceTest {
             // when
 
             // then
-            assertThrows(ValidationException.class, () -> fileTransferService.delete(TEST_FILE_ID));
+            assertThrows(UriValidationException.class, () -> fileTransferService.delete(TEST_FILE_ID));
         }
     }
 

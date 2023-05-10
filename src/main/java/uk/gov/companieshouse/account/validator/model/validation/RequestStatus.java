@@ -17,6 +17,7 @@ public final class RequestStatus {
 
     public static final String STATE_PENDING = "pending";
     public static final String STATE_COMPLETE = "complete";
+    public static final String STATE_ERROR = "error";
 
     @Id
     private final String fileId;
@@ -43,6 +44,10 @@ public final class RequestStatus {
 
     public static RequestStatus complete(String fileId, String fileName, Results result) {
         return new RequestStatus(fileId, fileName, STATE_COMPLETE, result);
+    }
+
+    public static RequestStatus error(String fileId) {
+        return new RequestStatus(fileId, "", STATE_ERROR, null);
     }
 
     public String getFileId() {

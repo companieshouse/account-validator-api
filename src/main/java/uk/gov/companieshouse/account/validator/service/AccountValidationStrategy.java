@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.account.validator.service;
 
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 
@@ -13,5 +14,5 @@ public interface AccountValidationStrategy {
      * @param file An IXBRL file or a ZIP file containing the accounts
      * @return The result of the validation
      */
-    Results validate(File file);
+    Results validate(File file) throws XBRLValidationException;
 }
