@@ -13,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,8 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.DeleteCompleteSu
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
+import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
@@ -29,6 +32,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -81,50 +85,29 @@ public class AccountValidationController {
      */
     @PostMapping
     public ResponseEntity<?> submitForValidation(
-            @Valid @RequestBody ValidationRequest validationRequest) {
+            @Valid @RequestBody ValidationRequest validationRequest) throws XBRLValidationException {
 
         var fileId = validationRequest.getId();
-        Map<String, Object> loginfo = new HashMap<>();
-        loginfo.put("fileId", fileId);
-        logger.debugContext(fileId, "Getting file details", loginfo);
+        Map<String, Object> logInfo = new HashMap<>();
+        logInfo.put("fileId", fileId);
+        logger.debugContext(fileId, "Getting file details", logInfo);
 
         var optionalFileDetails = fileTransferStrategy.getDetails(fileId);
         if (optionalFileDetails.isEmpty()) {
             return ValidationResponse.fileNotFound();
         }
 
-        RequestStatus pendingStatus = RequestStatus.pending(fileId, optionalFileDetails.get().getName());
+        FileDetailsApi fileDetails = optionalFileDetails.get();
+
+        RequestStatus pendingStatus = RequestStatus.pending(fileId, fileDetails.getName());
         statusRepository.save(pendingStatus);
 
         // Asynchronously start validation
-        executor.execute(validateFile(fileId));
+        logger.infoContext(fileId, "Sending file to felix.", logInfo);
+        accountValidationStrategy.startValidation(fileDetails);
 
-        logger.debugContext(fileId, "Returning pending status", loginfo);
+        logger.debugContext(fileId, "Returning pending status", logInfo);
         return ValidationResponse.success(pendingStatus);
-    }
-
-    private Runnable validateFile(String fileId) {
-        return () -> {
-            Map<String, Object> loginfo = new HashMap<>();
-            loginfo.put("fileId", fileId);
-            try {
-                var optionalFile = fileTransferStrategy.get(fileId);
-                if (optionalFile.isEmpty()) {
-                    throw new RuntimeException(String.format("No file with id [%s] found", fileId));
-                }
-
-                var file = optionalFile.get();
-                var result = accountValidationStrategy.validate(file);
-                var requestStatus = RequestStatus.complete(fileId, file.getName(), result);
-                loginfo.put("result", requestStatus);
-                logger.debugContext(fileId, "Saving result to db", loginfo);
-                statusRepository.save(requestStatus);
-                logger.debugContext(fileId, "Result saved to db", loginfo);
-            } catch (Exception e) {
-                logger.errorContext(fileId, "Encountered exception while validating file. Saving error status to submission", e, loginfo);
-                statusRepository.save(RequestStatus.error(fileId));
-            }
-        };
     }
 
     /**
@@ -142,6 +125,12 @@ public class AccountValidationController {
         }
 
         return ValidationResponse.success(requestStatus.get());
+    }
+
+    @PatchMapping("/{fileId}")
+    ResponseEntity<?> saveStatus(@PathVariable final String fileId, @RequestBody Results results) {
+        accountValidationStrategy.saveResults(fileId, results);
+        return ResponseEntity.ok("");
     }
 
     /**

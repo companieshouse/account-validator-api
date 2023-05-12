@@ -5,25 +5,30 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.account.validator.model.validation.RequestStatus.STATE_PENDING;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironmentVariableException;
@@ -81,6 +86,12 @@ class AccountValidationControllerTest {
     @Mock
     AccountMaintenanceService accountMaintenanceService;
 
+    @Captor
+    ArgumentCaptor<RequestStatus> requestStatusCaptor;
+
+    @Captor
+    ArgumentCaptor<FileDetailsApi> detailsApiArgumentCaptor;
+
     @BeforeEach
     void setUp() {
         controller = new AccountValidationController(accountValidationStrategy,
@@ -97,28 +108,35 @@ class AccountValidationControllerTest {
     @DisplayName("Submit file for validation")
     void submitForValidation() throws XBRLValidationException {
         // Given
-        setupFile("fileId", file);
-        doAnswer(a -> {
-            Runnable fn = a.getArgument(0);
-            fn.run();
-            return null;
-        }).when(executor).execute(any(Runnable.class));
+        String fileId = "fileId";
+        setupFile(fileId, file);
 
         // When
         var resp = controller.submitForValidation(validationRequest);
 
         // Then
-        assertThat(resp.getStatusCode(), is(HttpStatus.OK));
+
+        // pending status was returned
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
-        verify(executor).execute(any(Runnable.class));
-        verify(accountValidationStrategy).validate(any(File.class));
-        verify(repository, times(2)).save(any(RequestStatus.class));
+        RequestStatus body = (RequestStatus) resp.getBody();
+        assertNotNull(body);
+        assertEquals(body.getStatus(), STATE_PENDING);
+
+        // Pending status was saved to the database
+        verify(repository).save(requestStatusCaptor.capture());
+        RequestStatus requestStatus = requestStatusCaptor.getValue();
+        assertEquals(requestStatus.getStatus(), STATE_PENDING);
+
+        // Validation was started
+        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture());
+        assertEquals(detailsApiArgumentCaptor.getValue().getId(), fileId);
+
     }
 
 
     @Test
     @DisplayName("Returns 404 when the request file is not available")
-    void submitForValidationFileNotFound() {
+    void submitForValidationFileNotFound() throws XBRLValidationException {
         // Given
         setupFile("fileId");
 
@@ -133,9 +151,10 @@ class AccountValidationControllerTest {
         when(validationRequest.getId()).thenReturn(id);
 
         var maybeFile = Optional.ofNullable(file);
-        when(fileTransferStrategy.getDetails(id)).thenReturn(maybeFile.map(f -> new FileDetailsApi()));
+        var maybeFileDetails = maybeFile.map(f -> new FileDetailsApi());
+        when(fileTransferStrategy.getDetails(id)).thenReturn(maybeFileDetails);
         if (maybeFile.isPresent()) {
-            when(fileTransferStrategy.get(id)).thenReturn(maybeFile);
+            ReflectionTestUtils.setField(maybeFileDetails.get(), "id", id);
         }
     }
 

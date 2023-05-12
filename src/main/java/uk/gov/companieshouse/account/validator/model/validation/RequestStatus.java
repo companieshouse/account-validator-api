@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.account.validator.model.validation;
 
+import static uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results.STATUS_ERROR;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -48,6 +50,14 @@ public final class RequestStatus {
 
     public static RequestStatus error(String fileId) {
         return new RequestStatus(fileId, "", STATE_ERROR, null);
+    }
+
+    public static RequestStatus fromResults(String fileId, Results results, String fileName) {
+        if (results.getValidationStatus().equals(STATUS_ERROR)) {
+            return error(fileId);
+        } else {
+            return complete(fileId, fileName, results);
+        }
     }
 
     public String getFileId() {

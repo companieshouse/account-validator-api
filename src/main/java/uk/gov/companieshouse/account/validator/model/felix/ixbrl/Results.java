@@ -11,6 +11,10 @@ import java.util.List;
 @JacksonXmlRootElement(localName = "results")
 public class Results {
 
+    public static String STATUS_OK = "OK";
+    public static String STATUS_FAIL = "FAILED";
+    public static String STATUS_ERROR = "ERROR";
+
     private List<Errors> errors;
 
     private String validationStatus;
