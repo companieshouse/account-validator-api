@@ -1,17 +1,30 @@
 package uk.gov.companieshouse.account.validator.configuration;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.TestPropertySource;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.springframework.web.client.RestTemplate;
+import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
+import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(properties = {"file.transfer.retry.base.delay.seconds=99"})
 class ApplicationConfigurationTest {
+
+    @Mock
+    Logger logger;
+
+    @Mock
+    RequestStatusRepository statusRepository;
+
+    @Mock
+    RestTemplate restTemplate;
 
     private ApplicationConfiguration undertest;
 
@@ -47,7 +60,7 @@ class ApplicationConfigurationTest {
     @Test
     @DisplayName("Test AccountValidationStrategy Bean creates correct type")
     void testAccountValidationStrategyCreation() {
-        assertNotNull(undertest.accountValidationStrategy());
+        assertNotNull(undertest.accountValidationStrategy(logger, statusRepository, restTemplate));
     }
 
     @Test

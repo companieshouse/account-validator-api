@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
@@ -82,8 +83,10 @@ public class ApplicationConfiguration {
      * @return The account validator strategy to use
      */
     @Bean
-    public AccountValidationStrategy accountValidationStrategy() {
-        return new FelixAccountValidator();
+    public AccountValidationStrategy accountValidationStrategy(Logger logger,
+                                                               RequestStatusRepository statusRepository,
+                                                               RestTemplate restTemplate) {
+        return new FelixAccountValidator(logger, statusRepository, restTemplate);
     }
 
     /**
