@@ -32,6 +32,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
+import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
@@ -39,7 +40,6 @@ import uk.gov.companieshouse.logging.Logger;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 @Controller
 @RequestMapping("/account-validator/validate")
@@ -50,7 +50,6 @@ public class AccountValidationController {
     private final AccountValidationStrategy accountValidationStrategy;
     private final FileTransferStrategy fileTransferStrategy;
     private final Logger logger;
-    private final Executor executor;
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
     private final EnvironmentReader environmentReader;
@@ -61,14 +60,13 @@ public class AccountValidationController {
     public AccountValidationController(AccountValidationStrategy accountValidationStrategy,
                                        FileTransferStrategy fileTransferStrategy,
                                        Logger logger,
-                                       Executor executor,
                                        RequestStatusRepository statusRepository,
-                                       RestTemplate restTemplate, EnvironmentReader environmentReader,
+                                       RestTemplate restTemplate,
+                                       EnvironmentReader environmentReader,
                                        AccountMaintenanceService accountMaintenanceService) {
         this.accountValidationStrategy = accountValidationStrategy;
         this.fileTransferStrategy = fileTransferStrategy;
         this.logger = logger;
-        this.executor = executor;
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
@@ -99,7 +97,9 @@ public class AccountValidationController {
 
         FileDetailsApi fileDetails = optionalFileDetails.get();
 
-        RequestStatus pendingStatus = RequestStatus.pending(fileId, fileDetails.getName());
+        RequestStatus pendingStatus = RequestStatus.pending(fileId,
+                fileDetails.getName(),
+                ValidationStatusApi.UPLOADED_TO_FTS);
         statusRepository.save(pendingStatus);
 
         // Asynchronously start validation
@@ -128,9 +128,12 @@ public class AccountValidationController {
     }
 
     @PatchMapping("/{fileId}")
-    ResponseEntity<?> saveStatus(@PathVariable final String fileId, @RequestBody Results results) {
+    ResponseEntity<Void> saveStatus(
+            @PathVariable final String fileId,
+            @RequestBody Results results) {
+
         accountValidationStrategy.saveResults(fileId, results);
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok().build();
     }
 
     /**

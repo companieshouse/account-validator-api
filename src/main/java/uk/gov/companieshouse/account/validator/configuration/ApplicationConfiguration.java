@@ -10,6 +10,7 @@ import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.environment.impl.EnvironmentReaderImpl;
@@ -24,6 +25,9 @@ import java.util.concurrent.Executors;
 public class ApplicationConfiguration {
     @Value("${application.namespace}")
     private String applicationNameSpace;
+
+    @Value("${felix.validator.url}")
+    private String felixValidatorUrl;
 
     /**
      * Creates the logger used by the application.
@@ -85,8 +89,9 @@ public class ApplicationConfiguration {
     @Bean
     public AccountValidationStrategy accountValidationStrategy(Logger logger,
                                                                RequestStatusRepository statusRepository,
-                                                               RestTemplate restTemplate) {
-        return new FelixAccountValidator(logger, statusRepository, restTemplate);
+                                                               RestTemplate restTemplate,
+                                                               PrivateFelixValidatorResourceHandler felixClient) {
+        return new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient);
     }
 
     /**
@@ -98,7 +103,6 @@ public class ApplicationConfiguration {
     public EnvironmentReader environmentReader() {
         return new EnvironmentReaderImpl();
     }
-
     @Bean
     public InternalApiClient internalApiClient(
             @Value("${api.base.path}") String apiBasePath,
@@ -114,6 +118,12 @@ public class ApplicationConfiguration {
         internalApiClient.setInternalBasePath(internalApiBasePath);
 
         return internalApiClient;
+    }
+
+
+    @Bean
+    PrivateFelixValidatorResourceHandler felixClient(InternalApiClient internalApiClient) {
+        return internalApiClient.privateFelixValidatorResourceHandler(felixValidatorUrl);
     }
 }
 

@@ -5,19 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "results")
 public class Results {
 
-    public static String STATUS_OK = "OK";
-    public static String STATUS_FAIL = "FAILED";
-    public static String STATUS_ERROR = "ERROR";
-
     private List<Errors> errors;
 
-    private String validationStatus;
+    private ValidationStatusApi validationStatus;
 
     private Data data;
 
@@ -42,11 +39,11 @@ public class Results {
     }
 
     @JacksonXmlProperty(isAttribute = true, localName = "validationStatus")
-    public String getValidationStatus() {
+    public ValidationStatusApi getValidationStatus() {
         return validationStatus;
     }
 
-    public void setValidationStatus(String validationStatus) {
+    public void setValidationStatus(ValidationStatusApi validationStatus) {
         this.validationStatus = validationStatus;
     }
 
