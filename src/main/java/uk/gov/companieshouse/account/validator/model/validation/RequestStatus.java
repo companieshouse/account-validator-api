@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.account.validator.model.validation;
 
-import static uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results.STATUS_ERROR;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
+import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
 import java.util.Objects;
 
@@ -40,8 +39,10 @@ public final class RequestStatus {
         this.result = result;
     }
 
-    public static RequestStatus pending(String fileId, String fileName) {
-        return new RequestStatus(fileId, fileName, STATE_PENDING, null);
+    public static RequestStatus pending(String fileId, String fileName, ValidationStatusApi status) {
+        Results results = new Results();
+        results.setValidationStatus(status);
+        return new RequestStatus(fileId, fileName, STATE_PENDING, results);
     }
 
     public static RequestStatus complete(String fileId, String fileName, Results result) {
@@ -53,10 +54,14 @@ public final class RequestStatus {
     }
 
     public static RequestStatus fromResults(String fileId, Results results, String fileName) {
-        if (results.getValidationStatus().equals(STATUS_ERROR)) {
-            return error(fileId);
-        } else {
-            return complete(fileId, fileName, results);
+        switch (results.getValidationStatus()) {
+            case ERROR:
+                return error(fileId);
+            case FAILED:
+            case OK:
+                return complete(fileId, fileName, results);
+            default:
+                return pending(fileId, fileName, results.getValidationStatus());
         }
     }
 

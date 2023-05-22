@@ -46,7 +46,6 @@ import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 @ExtendWith(MockitoExtension.class)
 class AccountValidationControllerTest {
@@ -59,9 +58,6 @@ class AccountValidationControllerTest {
 
     @Mock
     Logger logger;
-
-    @Mock
-    Executor executor;
 
     @Mock
     RequestStatusRepository repository;
@@ -94,10 +90,10 @@ class AccountValidationControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new AccountValidationController(accountValidationStrategy,
+        controller = new AccountValidationController(
+                accountValidationStrategy,
                 fileTransferStrategy,
                 logger,
-                executor,
                 repository,
                 restTemplate,
                 environmentReader,

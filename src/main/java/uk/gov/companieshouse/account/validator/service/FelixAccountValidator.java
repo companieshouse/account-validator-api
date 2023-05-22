@@ -2,17 +2,14 @@ package uk.gov.companieshouse.account.validator.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -31,6 +28,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     private final Logger logger;
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
+    private final PrivateFelixValidatorResourceHandler felixClient;
 
     @Value("${internal.api.base.path}")
     private String internalApiUrl;
@@ -39,10 +37,14 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     private String felixValidatorUrl;
 
     @Autowired
-    public FelixAccountValidator(Logger logger, RequestStatusRepository statusRepository, RestTemplate restTemplate) {
+    public FelixAccountValidator(Logger logger,
+                                 RequestStatusRepository statusRepository,
+                                 RestTemplate restTemplate,
+                                 PrivateFelixValidatorResourceHandler felixClient) {
         this.logger = logger;
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;
+        this.felixClient = felixClient;
     }
 
     /**
@@ -53,26 +55,15 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      */
     @Override
     public void startValidation(FileDetailsApi file) throws XBRLValidationException {
-        RestTemplate restTemplate = new RestTemplate();
+        String fileId = file.getId();
+        String callbackUrl = getCallbackUrl(file.getId());
 
-        HttpHeaders headers = new HttpHeaders();
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("fileId", file.getId());
-        body.add("callbackUrl", getCallbackUrl(file.getId()));
-        body.add("isBase64", "false");
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        String url = felixValidatorUrl + "/validate-async";
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new XBRLValidationException("Failed to validate the file. Response: " + response);
+        try {
+            felixClient.validateAsync(callbackUrl, fileId).execute();
+        } catch (URIValidationException e) {
+            throw new RuntimeException(e);
+        } catch (ApiErrorResponseException e) {
+            throw new XBRLValidationException("Failed to validate the file. ApiErrorResponse", e);
         }
     }
 
@@ -102,5 +93,4 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     private String getCallbackUrl(String fileId) {
         return internalApiUrl + Paths.get("/account-validator/validate", fileId).toString();
     }
-
 }
