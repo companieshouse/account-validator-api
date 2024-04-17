@@ -1,6 +1,90 @@
 package uk.gov.companieshouse.account.validator.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestTemplate;
+
+import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
+import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
+import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
+import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
+import uk.gov.companieshouse.api.handler.felixvalidator.request.PrivateModelFelixValidatorValidateAsync;
+import uk.gov.companieshouse.api.model.felixvalidator.AsyncValidationRequestApi;
+import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
+import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.logging.Logger;
+
+@ExtendWith(MockitoExtension.class)
 class FelixAccountValidatorTest {
+
+    @Mock
+    private PrivateFelixValidatorResourceHandler felixClient;
+
+    @Mock
+    private Logger logger;
+
+    @Mock
+    private RequestStatusRepository statusRepository;
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
+    private FileDetailsApi file;
+
+    @Mock
+    private FileAccountContent fileContent;
+
+    @Captor
+    private ArgumentCaptor<AsyncValidationRequestApi> asyncValidationRequestApiCaptor;
+
+    @Mock
+    private PrivateModelFelixValidatorValidateAsync validateAsync;
+
+
+    private FelixAccountValidator felixAccountValidator;
+
+    @BeforeEach
+    void beforeEach() {
+        felixAccountValidator = new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient);
+    }
+
+    @Test
+    @DisplayName("FelixAccountValidator with packageType")
+    void testWithPackageType() throws XBRLValidationException {
+        when(file.getId()).thenReturn("null");
+        when(fileContent.getPackageType()).thenReturn(PackageTypeApi.UKSEF);
+        when(felixClient.validateAsync(asyncValidationRequestApiCaptor.capture())).thenReturn(validateAsync);
+        felixAccountValidator.startValidation(file, fileContent);
+
+        verify(felixClient, times(1)).validateAsync(asyncValidationRequestApiCaptor.capture());
+        assertEquals("null", asyncValidationRequestApiCaptor.getValue().getFileId());
+        assertEquals(PackageTypeApi.UKSEF, asyncValidationRequestApiCaptor.getValue().getPackageType());
+    }
+
+    @Test
+    @DisplayName("FelixAccountValidator without packageType")
+    void testWithoutPackageType() throws XBRLValidationException {
+        when(file.getId()).thenReturn("null");
+        when(fileContent.getPackageType()).thenReturn(null);
+        when(felixClient.validateAsync(asyncValidationRequestApiCaptor.capture())).thenReturn(validateAsync);
+        felixAccountValidator.startValidation(file, fileContent);
+
+        verify(felixClient, times(1)).validateAsync(asyncValidationRequestApiCaptor.capture());
+        assertEquals("null", asyncValidationRequestApiCaptor.getValue().getFileId());
+        assertEquals(null, asyncValidationRequestApiCaptor.getValue().getPackageType());
+    }
 
 //    private FelixAccountValidator underTest;
 //

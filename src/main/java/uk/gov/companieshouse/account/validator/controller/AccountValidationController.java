@@ -24,6 +24,7 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironme
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
+import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
@@ -32,6 +33,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
+import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
@@ -86,8 +88,12 @@ public class AccountValidationController {
             @Valid @RequestBody ValidationRequest validationRequest) throws XBRLValidationException {
 
         var fileId = validationRequest.getId();
+        PackageTypeApi packageType = validationRequest.getPackageType();
+        FileAccountContent fileContent = new FileAccountContent(packageType);
+
         Map<String, Object> logInfo = new HashMap<>();
         logInfo.put("fileId", fileId);
+        logInfo.put("packageType", packageType);
         logger.debugContext(fileId, "Getting file details", logInfo);
 
         var optionalFileDetails = fileTransferStrategy.getDetails(fileId);
@@ -104,7 +110,7 @@ public class AccountValidationController {
 
         // Asynchronously start validation
         logger.infoContext(fileId, "Sending file to felix.", logInfo);
-        accountValidationStrategy.startValidation(fileDetails);
+        accountValidationStrategy.startValidation(fileDetails, fileContent);
 
         logger.debugContext(fileId, "Returning pending status", logInfo);
         return ValidationResponse.success(pendingStatus);

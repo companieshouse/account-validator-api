@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,12 +36,14 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironme
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
+import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
+import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
@@ -49,6 +52,10 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class AccountValidationControllerTest {
+
+    FileAccountContent fileAccountContent;
+
+    FileAccountContent fileAccountContentWithoutPackage;
 
     @Mock
     AccountValidationStrategy accountValidationStrategy;
@@ -98,6 +105,9 @@ class AccountValidationControllerTest {
                 restTemplate,
                 environmentReader,
                 accountMaintenanceService);
+        fileAccountContent = new FileAccountContent(PackageTypeApi.UKSEF);
+        fileAccountContentWithoutPackage = new FileAccountContent();
+        
     }
 
     @Test
@@ -108,6 +118,7 @@ class AccountValidationControllerTest {
         setupFile(fileId, file);
 
         // When
+        when(validationRequest.getPackageType()).thenReturn(PackageTypeApi.UKSEF);
         var resp = controller.submitForValidation(validationRequest);
 
         // Then
@@ -124,7 +135,37 @@ class AccountValidationControllerTest {
         assertEquals(requestStatus.getStatus(), STATE_PENDING);
 
         // Validation was started
-        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture());
+        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(fileAccountContent));
+        assertEquals(detailsApiArgumentCaptor.getValue().getId(), fileId);
+
+    }
+
+    @Test
+    @DisplayName("Submit file for validation without package type")
+    void submitForValidationWithoutPackageType() throws XBRLValidationException {
+        // Given
+        String fileId = "fileId";
+        setupFile(fileId, file);
+
+        // When
+        when(validationRequest.getPackageType()).thenReturn(null);
+        var resp = controller.submitForValidation(validationRequest);
+
+        // Then
+
+        // pending status was returned
+        assertThat(resp.getBody(), instanceOf(RequestStatus.class));
+        RequestStatus body = (RequestStatus) resp.getBody();
+        assertNotNull(body);
+        assertEquals(body.getStatus(), STATE_PENDING);
+
+        // Pending status was saved to the database
+        verify(repository).save(requestStatusCaptor.capture());
+        RequestStatus requestStatus = requestStatusCaptor.getValue();
+        assertEquals(requestStatus.getStatus(), STATE_PENDING);
+
+        // Validation was started
+        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(fileAccountContentWithoutPackage));
         assertEquals(detailsApiArgumentCaptor.getValue().getId(), fileId);
 
     }
