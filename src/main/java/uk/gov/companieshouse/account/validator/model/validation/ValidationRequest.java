@@ -50,7 +50,7 @@ public final class ValidationRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, id, customerId);
+        return Objects.hash(fileName, id, customerId, packageType);
     }
 
     @Override
