@@ -61,9 +61,8 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     public void startValidation(FileDetailsApi file, AccountsDetails fileContent) throws XBRLValidationException {
         String fileId = file.getId();
         String callbackUrl = getCallbackUrl(file.getId());
-        PackageTypeApi packageType = fileContent.getPackageType();
         AsyncValidationRequestApi asyncValidationRequestApi = new AsyncValidationRequestApi(fileId, callbackUrl,
-                packageType);
+                fileContent.getPackageType());
                 
         try {
             logRequestApiInfo(asyncValidationRequestApi);
