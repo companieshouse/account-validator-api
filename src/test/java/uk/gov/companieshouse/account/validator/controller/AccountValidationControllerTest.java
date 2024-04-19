@@ -36,7 +36,7 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironme
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.File;
-import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
+import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
@@ -53,9 +53,9 @@ import java.util.Optional;
 @ExtendWith(MockitoExtension.class)
 class AccountValidationControllerTest {
 
-    FileAccountContent fileAccountContent;
+    AccountsDetails accountsDetails;
 
-    FileAccountContent fileAccountContentWithoutPackage;
+    AccountsDetails accountsDetailsWithoutPackage;
 
     @Mock
     AccountValidationStrategy accountValidationStrategy;
@@ -105,8 +105,8 @@ class AccountValidationControllerTest {
                 restTemplate,
                 environmentReader,
                 accountMaintenanceService);
-        fileAccountContent = new FileAccountContent(PackageTypeApi.UKSEF);
-        fileAccountContentWithoutPackage = new FileAccountContent();
+        accountsDetails = new AccountsDetails(PackageTypeApi.UKSEF);
+        accountsDetailsWithoutPackage = new AccountsDetails();
         
     }
 
@@ -135,7 +135,7 @@ class AccountValidationControllerTest {
         assertEquals(requestStatus.getStatus(), STATE_PENDING);
 
         // Validation was started
-        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(fileAccountContent));
+        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetails));
         assertEquals(detailsApiArgumentCaptor.getValue().getId(), fileId);
 
     }
@@ -165,7 +165,7 @@ class AccountValidationControllerTest {
         assertEquals(requestStatus.getStatus(), STATE_PENDING);
 
         // Validation was started
-        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(fileAccountContentWithoutPackage));
+        verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetailsWithoutPackage));
         assertEquals(detailsApiArgumentCaptor.getValue().getId(), fileId);
 
     }

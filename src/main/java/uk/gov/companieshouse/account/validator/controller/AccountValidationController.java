@@ -24,7 +24,7 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.MissingEnvironme
 import uk.gov.companieshouse.account.validator.exceptionhandler.ResponseException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.UriValidationException;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
-import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
+import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
@@ -89,7 +89,7 @@ public class AccountValidationController {
 
         var fileId = validationRequest.getId();
         PackageTypeApi packageType = validationRequest.getPackageType();
-        FileAccountContent fileContent = new FileAccountContent(packageType);
+        AccountsDetails fileContent = new AccountsDetails(packageType);
 
         Map<String, Object> logInfo = new HashMap<>();
         logInfo.put("fileId", fileId);

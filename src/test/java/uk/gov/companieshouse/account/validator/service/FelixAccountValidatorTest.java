@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
-import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
+import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.api.handler.felixvalidator.request.PrivateModelFelixValidatorValidateAsync;
@@ -44,7 +44,7 @@ class FelixAccountValidatorTest {
     private FileDetailsApi file;
 
     @Mock
-    private FileAccountContent fileContent;
+    private AccountsDetails fileContent;
 
     @Captor
     private ArgumentCaptor<AsyncValidationRequestApi> asyncValidationRequestApiCaptor;

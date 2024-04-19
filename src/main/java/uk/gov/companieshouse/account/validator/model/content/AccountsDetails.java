@@ -2,14 +2,14 @@ package uk.gov.companieshouse.account.validator.model.content;
 
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
 
-public class FileAccountContent {
+public class AccountsDetails {
     
     private PackageTypeApi packageType;
 
-    public FileAccountContent() {
+    public AccountsDetails() {
     }
 
-    public FileAccountContent(PackageTypeApi packageType) {
+    public AccountsDetails(PackageTypeApi packageType) {
         this.packageType = packageType;
     }
 
@@ -33,7 +33,7 @@ public class FileAccountContent {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FileAccountContent other = (FileAccountContent) obj;
+        AccountsDetails other = (AccountsDetails) obj;
         if (packageType != other.packageType)
             return false;
         return true;

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
-import uk.gov.companieshouse.account.validator.model.content.FileAccountContent;
+import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
@@ -58,7 +58,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
      * @return the result of the validation
      */
     @Override
-    public void startValidation(FileDetailsApi file, FileAccountContent fileContent) throws XBRLValidationException {
+    public void startValidation(FileDetailsApi file, AccountsDetails fileContent) throws XBRLValidationException {
         String fileId = file.getId();
         String callbackUrl = getCallbackUrl(file.getId());
         PackageTypeApi packageType = fileContent.getPackageType();
