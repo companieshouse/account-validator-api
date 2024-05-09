@@ -2,17 +2,17 @@ package uk.gov.companieshouse.account.validator.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 import uk.gov.companieshouse.logging.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Checks each request to the service to verify that the user is authorised to use the service.
  */
 @Component
-public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
+public class UserAuthenticationInterceptor implements HandlerInterceptor {
 
     private final Logger logger;
     private final AuthenticationHelper authHelper;

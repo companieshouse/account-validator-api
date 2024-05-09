@@ -213,6 +213,13 @@ class AccountValidationControllerTest {
         assertThat(resp.getStatusCode(), is(HttpStatus.NOT_FOUND));
     }
 
+
+    @Test
+    void myTest() {
+        var fileId = "bf8c2c6b-8215-4969-9595-3738abc1c278";
+        System.out.println(controller.getStatus(fileId));
+    }
+
     @Test
     @DisplayName("When a file is present, 200 is returned along with the request status")
     void getStatus() {
