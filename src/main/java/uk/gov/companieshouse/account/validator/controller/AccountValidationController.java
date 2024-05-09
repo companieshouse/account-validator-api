@@ -124,7 +124,8 @@ public class AccountValidationController {
      * @return 404 if there is no request for a file with that id, 200 and the status otherwise
      */
     @GetMapping("/check/{fileId}")
-    ResponseEntity<?> getStatus(@PathVariable final String fileId) {
+    ResponseEntity<?> getStatus(@PathVariable("fileId") final String fileId) {
+        System.out.println("fileId"+ fileId);
         var requestStatus = statusRepository.findById(fileId);
         if (requestStatus.isEmpty()) {
             return ValidationResponse.requestNotFound();
@@ -135,7 +136,7 @@ public class AccountValidationController {
 
     @PatchMapping("/{fileId}")
     ResponseEntity<Void> saveStatus(
-            @PathVariable final String fileId,
+            @PathVariable("fileId") final String fileId,
             @RequestBody Results results) {
 
         accountValidationStrategy.saveResults(fileId, results);
@@ -150,7 +151,7 @@ public class AccountValidationController {
      * @return S3 file as PDF
      */
     @GetMapping(path = "/render/{fileId}")
-    public ResponseEntity<?> render(@PathVariable String fileId) {
+    public ResponseEntity<?> render(@PathVariable("fileId") String fileId) {
         var file = fileTransferStrategy.get(fileId);
         if (file.isEmpty()) {
             return ValidationResponse.fileNotFound();

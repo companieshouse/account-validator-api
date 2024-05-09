@@ -5,39 +5,40 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.4</version>
+        <version>2.1.5</version>
     </parent>
     <artifactId>account-validator-api</artifactId>
     <version>unversioned</version>
     <name>account-validator-api</name>
     <description>Handles accounts XBRL Validator</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>21</java.version>
 
-        <maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
-        <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>2.7.10</spring-boot-maven-plugin.version>
+        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+        <spring-boot-dependencies.version>3.3.0</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.3.0</spring-boot-maven-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <!-- tests -->
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
-        <test-containers.version>1.16.3</test-containers.version>
-        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.3.0</maven-surefire-plugin.version>
+        <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
+        <test-containers.version>1.19.8</test-containers.version>
+        <maven-failsafe-plugin.version>3.3.0</maven-failsafe-plugin.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
-        <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
-        <mockito.version>4.8.0</mockito.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <mockito.version>5.2.0</mockito.version>
 
         <!-- internal -->
-        <structured-logging.version>1.9.14</structured-logging.version>
-        <api-sdk-manager-java-library.version>1.0.12</api-sdk-manager-java-library.version>
-        <api-helper-java-library.version>1.4.5</api-helper-java-library.version>
-        <api-security-java-version>0.2.17</api-security-java-version>
+        <structured-logging.version>3.0.8</structured-logging.version>
+        <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
+        <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
+        <api-security-java-version>2.0.4</api-security-java-version>
 
         <!-- java apis libs -->
         <jaxb-api.version>2.3.1</jaxb-api.version>
-        <istack-commons-runtime.version>4.1.1</istack-commons-runtime.version>
+        <istack-commons-runtime.version>4.2.0</istack-commons-runtime.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -101,6 +102,10 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
@@ -147,7 +152,7 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>private-api-sdk-java</artifactId>
-            <version>2.0.390</version>
+            <version>2.0.394</version>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
@@ -225,6 +230,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
+                    <parameters>true</parameters>
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                     <argLine>${surefireArgLine}</argLine>
                     <excludes>
@@ -324,6 +330,22 @@
                     </execution>
                 </executions>
             </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>${maven-compiler-plugin.version}</version>
+              <configuration>
+                  <source>${java.version}</source>
+                  <target>${java.version}</target>
+                  <fork>true</fork>
+                  <meminitial>128m</meminitial>
+                  <encoding>${project.build.sourceEncoding}</encoding>
+                  <maxmem>512m</maxmem>
+                  <compilerArgs>
+                      <arg>-parameters</arg>
+                  </compilerArgs>
+              </configuration>
+          </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
