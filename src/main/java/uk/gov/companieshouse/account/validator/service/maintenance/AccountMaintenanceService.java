@@ -38,7 +38,7 @@ public class AccountMaintenanceService {
         try {
             List<RequestStatus> completeRequestStatusList = statusRepository.findByStatus(RequestStatus.STATE_COMPLETE);
             if (!isEmptyOrNull(completeRequestStatusList)) {
-                completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.getFileId()));
+                completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.get_id()));
             }
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);

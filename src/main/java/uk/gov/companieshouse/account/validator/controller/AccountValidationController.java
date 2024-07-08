@@ -125,7 +125,6 @@ public class AccountValidationController {
      */
     @GetMapping("/check/{fileId}")
     ResponseEntity<?> getStatus(@PathVariable("fileId") final String fileId) {
-        System.out.println("fileId"+ fileId);
         var requestStatus = statusRepository.findById(fileId);
         if (requestStatus.isEmpty()) {
             return ValidationResponse.requestNotFound();
