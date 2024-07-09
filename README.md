@@ -5,7 +5,7 @@ This application is written using the [Spring Boot](http://projects.spring.io/sp
 ## Requirements
 In order to run the API locally you'll need the following installed on your machine:
 
-- [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+- [Java 21](https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.tar.gz)
 - [Maven](https://maven.apache.org/download.cgi)
 - [Git](https://git-scm.com/downloads)
 - [MongoDB](https://www.mongodb.com)
