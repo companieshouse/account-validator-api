@@ -45,6 +45,6 @@ public class WebSecurityConfig {
      */
     @Bean
     WebSecurityCustomizer ignoringCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/actuator/**");
+        return (web) -> web.ignoring().requestMatchers("/**/healthcheck");
     }
 }
