@@ -1,7 +1,6 @@
 #!/bin/bash
-#
-# Start script for docs.developer.ch.gov.uk
+
+# Start script for account-validator-api
 
 PORT=8080
-
-exec java -jar -Dserver.port="${PORT}" "account-validator.api.ch.gov.uk.jar"
+exec java -jar -Dserver.port="${PORT}" "account-validator-api.jar"

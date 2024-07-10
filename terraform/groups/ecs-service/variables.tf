@@ -43,6 +43,16 @@ variable "required_memory" {
   default = 512 # defaulted low for node service in dev environments, override for production
 }
 
+variable "eric_cpus" {
+  type = number
+  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
+  default = 256
+}
+variable "eric_memory" {
+  type = number
+  description = "The required memory for eric"
+  default = 512
+}
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
@@ -98,6 +108,7 @@ variable "cloudwatch_alarms_enabled" {
 # ------------------------------------------------------------------------------
 # Service environment variable configs
 # ------------------------------------------------------------------------------
+
 variable "ssm_version_prefix" {
   type        = string
   description = "String to use as a prefix to the names of the variables containing variables and secrets version."
@@ -107,14 +118,14 @@ variable "ssm_version_prefix" {
 variable "use_set_environment_files" {
   type        = bool
   default     = false
-  description = "Toggle default global and shared  environment files"
+  description = "Toggle default global and shared environment files"
 }
-variable "log_level" {
-  default     = "info"
-  type        = string
-  description = "The log level for services to use: trace, debug, info or error"
-}
+
 variable "account_validator_api_version" {
   type        = string
-  description = "The version of the account-validator.api.ch.gov.uk container to run."
+  description = "The version of the account-validator-api container to run."
+}
+variable "eric_version" {
+  type        = string
+  description = "The version of the eric container to run."
 }
