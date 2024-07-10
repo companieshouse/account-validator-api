@@ -9,8 +9,8 @@ locals {
   docker_repo                = "account-validator-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority  = 42
-  lb_listener_paths          = ["/item-groups", "/item-groups*", "/item-groups/*/items/*", "//healthcheck"]
-  healthcheck_path           = "/healthcheck" # healthcheck path for account-validator-api
+  lb_listener_paths          = ["/account-validator*", "/account-validator/validate/healthcheck"]
+  healthcheck_path           = "/account-validator/validate/healthcheck" # healthcheck path for account-validator-api
   healthcheck_matcher        = "200"
   vpc_name                   = local.stack_secrets["vpc_name"]
   s3_config_bucket           = data.vault_generic_secret.shared_s3.data["config_bucket_name"]

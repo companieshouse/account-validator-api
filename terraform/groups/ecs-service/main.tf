@@ -54,7 +54,7 @@ module "ecs-service" {
   # Docker container details
   docker_registry   = var.docker_registry
   docker_repo       = local.docker_repo
-  container_version = var.item_group_workflow_api_version
+  container_version = var.account_validator_api_version
   container_port    = local.container_port
 
   # Service configuration
