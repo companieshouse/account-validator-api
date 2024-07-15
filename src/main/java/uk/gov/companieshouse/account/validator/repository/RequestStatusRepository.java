@@ -8,4 +8,5 @@ import java.util.List;
 public interface RequestStatusRepository extends MongoRepository<RequestStatus, String> {
 
     List<RequestStatus> findByStatus(String status);
+
 }
