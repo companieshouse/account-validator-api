@@ -3,7 +3,7 @@ package uk.gov.companieshouse.account.validator.security;
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Helper class for user authentication.
