@@ -352,8 +352,8 @@
                     <from>
                         <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21:latest</image>
                     </from>
-                    <to>//Once the pipeline is moved to shared services need to update this to image reference from shared services
-                        <image>169942020521.dkr.ecr.eu-west-2.amazonaws.com/local/account-validator-api:latest</image>
+                    <to>
+                        <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/account-validator-api:latest</image>
                     </to>
                 </configuration>
             </plugin>
