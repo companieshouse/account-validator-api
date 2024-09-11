@@ -61,7 +61,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         String fileId = file.getId();
         String callbackUrl = getCallbackUrl(file.getId());
         AsyncValidationRequestApi asyncValidationRequestApi = new AsyncValidationRequestApi(fileId, callbackUrl,
-                fileContent.getPackageType());
+                fileContent.getPackageType(), fileContent.getCompanyNumber());
                 
         try {
             logRequestApiInfo(asyncValidationRequestApi);
