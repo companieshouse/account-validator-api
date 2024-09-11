@@ -148,8 +148,7 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>private-api-sdk-java</artifactId>
-            <version>unversioned</version>
-<!--            TODO: replace with correct version once private-api-sdkjava deployed-->
+            <version>2.0.434</version>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
