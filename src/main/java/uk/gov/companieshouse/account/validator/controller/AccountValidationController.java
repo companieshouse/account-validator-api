@@ -89,7 +89,8 @@ public class AccountValidationController {
 
         var fileId = validationRequest.getId();
         PackageTypeApi packageType = validationRequest.getPackageType();
-        AccountsDetails fileContent = new AccountsDetails(packageType);
+        String companyNumber = validationRequest.getCompanyNumber();
+        AccountsDetails fileContent = new AccountsDetails(packageType, companyNumber);
 
         Map<String, Object> logInfo = new HashMap<>();
         logInfo.put("fileId", fileId);

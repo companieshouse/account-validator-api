@@ -95,6 +95,8 @@ class AccountValidationControllerTest {
     @Captor
     ArgumentCaptor<FileDetailsApi> detailsApiArgumentCaptor;
 
+    private static final String COMPANY_NUMBER = "00006400";
+
     @BeforeEach
     void setUp() {
         controller = new AccountValidationController(
@@ -105,9 +107,8 @@ class AccountValidationControllerTest {
                 restTemplate,
                 environmentReader,
                 accountMaintenanceService);
-        accountsDetails = new AccountsDetails(PackageTypeApi.UKSEF);
+        accountsDetails = new AccountsDetails(PackageTypeApi.UKSEF, COMPANY_NUMBER);
         accountsDetailsWithoutPackage = new AccountsDetails();
-        
     }
 
     @Test
@@ -119,6 +120,7 @@ class AccountValidationControllerTest {
 
         // When
         when(validationRequest.getPackageType()).thenReturn(PackageTypeApi.UKSEF);
+        when(validationRequest.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
         var resp = controller.submitForValidation(validationRequest);
 
         // Then
