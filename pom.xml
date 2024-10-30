@@ -15,8 +15,8 @@
         <java.version>21</java.version>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring-boot-dependencies.version>3.3.1</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.3.0</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.3.5</spring-boot-maven-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <!-- tests -->
