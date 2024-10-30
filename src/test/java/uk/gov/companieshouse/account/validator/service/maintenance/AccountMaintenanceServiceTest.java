@@ -18,6 +18,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +83,9 @@ public class AccountMaintenanceServiceTest {
 
     private List<RequestStatus> createRequestStatusList() {
         List<RequestStatus> requestStatusList = new ArrayList<RequestStatus>();
+        LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < 5; i++) {
-            RequestStatus completeRequestStatus = new RequestStatus("mockId-" + i, "MockFilename", RequestStatus.STATE_COMPLETE, new Results());
+            RequestStatus completeRequestStatus = new RequestStatus("mockId-" + i, "MockFilename", RequestStatus.STATE_COMPLETE, new Results(), now, LocalDateTime.now());
             requestStatusList.add(completeRequestStatus);
         }
         return requestStatusList;

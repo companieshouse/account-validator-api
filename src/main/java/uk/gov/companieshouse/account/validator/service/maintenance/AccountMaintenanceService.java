@@ -34,17 +34,17 @@ public class AccountMaintenanceService {
     }
 
     public void deleteCompleteSubmissions() {
-        logger.info("Inside deleteFiles method");
+        logger.debug("Inside deleteFiles method");
         try {
             List<RequestStatus> completeRequestStatusList = statusRepository.findByStatus(RequestStatus.STATE_COMPLETE);
             if (!isEmptyOrNull(completeRequestStatusList)) {
-                completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.getFileId()));
+                completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
             }
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 
         }
-        logger.info("Exit deleteFiles method");
+        logger.debug("Exit deleteFiles method");
     }
 
     private void deleteRequest(String fileId) {
