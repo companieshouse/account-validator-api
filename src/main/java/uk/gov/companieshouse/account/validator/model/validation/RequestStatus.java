@@ -4,10 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
-import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
-
 /*
  * Request status defines what stage the request is in.
  * @see CompleteStatus
@@ -32,37 +31,19 @@ public final class RequestStatus {
     @Field("result")
     private final Results result;
 
-    public RequestStatus(String fileId, String fileName, String status, Results result) {
+    @Field("created")
+    private final LocalDateTime createdDate;
+
+    @Field("modified")
+    private final LocalDateTime modifiedDate;
+
+    public RequestStatus(String fileId, String fileName, String status, Results result, LocalDateTime createdDate, LocalDateTime modifiedDate) {
         this.fileId = fileId;
         this.fileName = fileName;
         this.status = status;
         this.result = result;
-    }
-
-    public static RequestStatus pending(String fileId, String fileName, ValidationStatusApi status) {
-        Results results = new Results();
-        results.setValidationStatus(status);
-        return new RequestStatus(fileId, fileName, STATE_PENDING, results);
-    }
-
-    public static RequestStatus complete(String fileId, String fileName, Results result) {
-        return new RequestStatus(fileId, fileName, STATE_COMPLETE, result);
-    }
-
-    public static RequestStatus error(String fileId) {
-        return new RequestStatus(fileId, "", STATE_ERROR, null);
-    }
-
-    public static RequestStatus fromResults(String fileId, Results results, String fileName) {
-        switch (results.getValidationStatus()) {
-            case ERROR:
-                return error(fileId);
-            case FAILED:
-            case OK:
-                return complete(fileId, fileName, results);
-            default:
-                return pending(fileId, fileName, results.getValidationStatus());
-        }
+        this.createdDate = createdDate;
+        this.modifiedDate = modifiedDate;
     }
 
     public String getFileId() {
@@ -79,6 +60,14 @@ public final class RequestStatus {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public LocalDateTime getModifiedDate() {
+        return modifiedDate;
     }
 
     @Override
