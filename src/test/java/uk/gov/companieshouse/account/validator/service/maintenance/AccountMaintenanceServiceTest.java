@@ -24,6 +24,7 @@ import uk.gov.companieshouse.logging.Logger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class AccountMaintenanceServiceTest {
 
     private final static LocalDate BOUNDARY_DATE = LocalDate.now().minusDays(30);
 
+    private static final List<String> STATUSES_TO_REMOVE = Arrays.asList(RequestStatus.STATE_COMPLETE,
+            RequestStatus.STATE_ERROR);
+
     @BeforeEach
     void before() {
         ReflectionTestUtils.setField(accountMaintenanceService, "DAYS_TO_DELETE", 30);
@@ -53,19 +57,20 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE, BOUNDARY_DATE))
+        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
                 .thenReturn(createRequestStatusList());
-        when(statusRepository.findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE)).thenReturn(
-                Collections.singletonList(new RequestStatus("mockId-null", "MockFilename", RequestStatus.STATE_COMPLETE,
+        when(statusRepository.findByCreatedDateTimeIsNull()).thenReturn(
+                Collections.singletonList(new RequestStatus("mockId-null", "MockFilename",
+                        RequestStatus.STATE_COMPLETE,
                         new Results(), null, null)));
 
         accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
-        verify(statusRepository, times(1)).findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE,
+        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
                 BOUNDARY_DATE);
-        verify(fileTransferStrategy, times(6)).delete(anyString());
-        verify(statusRepository, times(6)).deleteById(anyString());
+        verify(fileTransferStrategy, times(7)).delete(anyString());
+        verify(statusRepository, times(7)).deleteById(anyString());
     }
 
     @Test
@@ -74,17 +79,17 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE, BOUNDARY_DATE))
+        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
                 .thenReturn(new ArrayList<>());
-        when(statusRepository.findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE))
+        when(statusRepository.findByCreatedDateTimeIsNull())
                 .thenReturn(Collections.emptyList());
 
         accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
-        verify(statusRepository, times(1)).findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE,
+        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
                 BOUNDARY_DATE);
-        verify(statusRepository, times(1)).findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE);
+        verify(statusRepository, times(1)).findByCreatedDateTimeIsNull();
         verify(fileTransferStrategy, times(0)).delete(anyString());
         verify(statusRepository, times(0)).deleteById(anyString());
     }
@@ -95,15 +100,15 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE, BOUNDARY_DATE))
+        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
                 .thenReturn(new ArrayList<>());
-        when(statusRepository.findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE))
+        when(statusRepository.findByCreatedDateTimeIsNull())
                 .thenThrow(new RuntimeException());
 
         assertThrows(RuntimeException.class, () -> accountMaintenanceService.deleteCompleteSubmissions());
         // Then
-        verify(statusRepository, times(1)).findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE);
-        verify(statusRepository, times(1)).findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE,
+        verify(statusRepository, times(1)).findByCreatedDateTimeIsNull();
+        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
                 BOUNDARY_DATE);
         verify(fileTransferStrategy, times(0)).delete(anyString());
         verify(statusRepository, times(0)).deleteById(anyString());
@@ -111,10 +116,16 @@ public class AccountMaintenanceServiceTest {
 
     private List<RequestStatus> createRequestStatusList() {
         List<RequestStatus> requestStatusList = new ArrayList<RequestStatus>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             LocalDateTime offsetDate = LocalDateTime.now().minusDays(31 + i);
             RequestStatus completeRequestStatus = new RequestStatus("mockId-" + i, "MockFilename",
                     RequestStatus.STATE_COMPLETE, new Results(), offsetDate, offsetDate);
+            requestStatusList.add(completeRequestStatus);
+        }
+        for (int i = 0; i < 3; i++) {
+            LocalDateTime offsetDate = LocalDateTime.now().minusDays(31 + i);
+            RequestStatus completeRequestStatus = new RequestStatus("mockId-" + i, "MockFilename",
+                    RequestStatus.STATE_ERROR, new Results(), offsetDate, offsetDate);
             requestStatusList.add(completeRequestStatus);
         }
 

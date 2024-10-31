@@ -11,6 +11,8 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +31,9 @@ public class AccountMaintenanceService {
 
     @Value("${delete.files.older.than.days}")
     private int DAYS_TO_DELETE;
+
+    private static final List<String> STATUSES_TO_REMOVE = Arrays.asList(RequestStatus.STATE_COMPLETE,
+            RequestStatus.STATE_ERROR);
 
     @Autowired
     public AccountMaintenanceService(Logger logger, FileTransferStrategy fileTransferStrategy,
@@ -50,19 +55,13 @@ public class AccountMaintenanceService {
         infoContext.put("Deletion requested at", now);
         logger.info("Deletion date range for old accounts", infoContext);
         try {
-            List<RequestStatus> completeRequestStatusList = statusRepository
-                    .findByStatusAndModifiedDateTimeLessThan(RequestStatus.STATE_COMPLETE, date);
-            if (!isEmptyOrNull(completeRequestStatusList)) {
-                completeRequestStatusList.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
-            }
-            List<RequestStatus> nullCreatedDateRequestStatuses = statusRepository
-                    .findByStatusAndCreatedDateTimeIsNull(RequestStatus.STATE_COMPLETE);
-            if (!isEmptyOrNull(nullCreatedDateRequestStatuses)) {
-                nullCreatedDateRequestStatuses.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
+            List<RequestStatus> distinctRequestStatusesToRemove = allRequestStatusesToBeRemoved(date).stream()
+                    .distinct().toList();
+            if (!isEmptyOrNull(distinctRequestStatusesToRemove)) {
+                distinctRequestStatusesToRemove.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
             }
             infoContext.put("Completed at", LocalDateTime.now());
-            infoContext.put("Number of complete removed", completeRequestStatusList.size());
-            infoContext.put("Number of createdDate null removed", nullCreatedDateRequestStatuses.size());
+            infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 
@@ -78,5 +77,16 @@ public class AccountMaintenanceService {
     private void deleteRequest(String fileId) {
         fileTransferStrategy.delete(fileId);
         statusRepository.deleteById(fileId);
+    }
+
+    private List<RequestStatus> allRequestStatusesToBeRemoved(LocalDate deleteLessThan) {
+
+        List<RequestStatus> completeRequestStatusList = statusRepository
+                .findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, deleteLessThan);
+        List<RequestStatus> nullCreatedDateRequestStatuses = statusRepository
+                .findByCreatedDateTimeIsNull();
+        List<RequestStatus> toRemoveRequestStatuses = new ArrayList<>(completeRequestStatusList);
+        toRemoveRequestStatuses.addAll(nullCreatedDateRequestStatuses);
+        return toRemoveRequestStatuses;
     }
 }
