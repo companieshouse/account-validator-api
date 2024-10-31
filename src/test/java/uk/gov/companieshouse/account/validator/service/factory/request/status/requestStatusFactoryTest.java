@@ -61,7 +61,7 @@ public class requestStatusFactoryTest {
         assertEquals(result, resultStatus.result());
         assertEquals(COMPLETE, resultStatus.status());
         assertEquals(createTime, resultStatus.createdDateTime());
-        assertNotEquals(createTime, resultStatus.modifiedDateTime());
+        assertNotEquals(createTime, resultStatus.updatedDateTime());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class requestStatusFactoryTest {
         assertNull(resultStatus.result());
         assertEquals(ERROR, resultStatus.status());
         assertEquals(createTime, resultStatus.createdDateTime());
-        assertNotEquals(createTime, resultStatus.modifiedDateTime());
+        assertNotEquals(createTime, resultStatus.updatedDateTime());
     }
 
     @Test
@@ -86,12 +86,12 @@ public class requestStatusFactoryTest {
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
         assertEquals(PENDING, resultStatus.status());
         assertEquals(LocalDateTime.class, resultStatus.createdDateTime().getClass());
-        assertEquals(LocalDateTime.class, resultStatus.modifiedDateTime().getClass());
-        assertEquals(resultStatus.modifiedDateTime(), resultStatus.createdDateTime());
+        assertEquals(LocalDateTime.class, resultStatus.updatedDateTime().getClass());
+        assertEquals(resultStatus.updatedDateTime(), resultStatus.createdDateTime());
     }
 
     @Test
-    public void requestStatusPendingWithExistingModifiedDateTimeTest() {
+    public void requestStatusPendingWithExistingUpdatedDateTimeTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, PENDING, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
         RequestStatus resultStatus = requestStatusFactory.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
@@ -100,8 +100,8 @@ public class requestStatusFactoryTest {
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
         assertEquals(PENDING, resultStatus.status());
         assertEquals(LocalDateTime.class, resultStatus.createdDateTime().getClass());
-        assertEquals(LocalDateTime.class, resultStatus.modifiedDateTime().getClass());
-        assertNotEquals(resultStatus.modifiedDateTime(), resultStatus.createdDateTime());
+        assertEquals(LocalDateTime.class, resultStatus.updatedDateTime().getClass());
+        assertNotEquals(resultStatus.updatedDateTime(), resultStatus.createdDateTime());
     }
 
     @Test
@@ -113,8 +113,8 @@ public class requestStatusFactoryTest {
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
         assertEquals(PENDING, resultStatus.status());
         assertEquals(LocalDateTime.class, resultStatus.createdDateTime().getClass());
-        assertEquals(LocalDateTime.class, resultStatus.modifiedDateTime().getClass());
-        assertEquals(resultStatus.modifiedDateTime(), resultStatus.createdDateTime());
+        assertEquals(LocalDateTime.class, resultStatus.updatedDateTime().getClass());
+        assertEquals(resultStatus.updatedDateTime(), resultStatus.createdDateTime());
     }
 
     @Test
@@ -128,7 +128,7 @@ public class requestStatusFactoryTest {
         assertEquals(result, resultStatus.result());
         assertEquals(COMPLETE, resultStatus.status());
         assertEquals(createTime, resultStatus.createdDateTime());
-        assertNotEquals(createTime, resultStatus.modifiedDateTime());
+        assertNotEquals(createTime, resultStatus.updatedDateTime());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class requestStatusFactoryTest {
         assertNull(resultStatus.result());
         assertEquals(ERROR, resultStatus.status());
         assertEquals(createTime, resultStatus.createdDateTime());
-        assertNotEquals(createTime, resultStatus.modifiedDateTime());
+        assertNotEquals(createTime, resultStatus.updatedDateTime());
     }
 
     @Test
@@ -156,6 +156,6 @@ public class requestStatusFactoryTest {
         assertEquals(result, resultStatus.result());
         assertEquals(COMPLETE, resultStatus.status());
         assertEquals(createTime, resultStatus.createdDateTime());
-        assertNotEquals(createTime, resultStatus.modifiedDateTime());
+        assertNotEquals(createTime, resultStatus.updatedDateTime());
     }
 }
