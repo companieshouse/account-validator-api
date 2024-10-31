@@ -41,9 +41,11 @@ import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
+import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
@@ -84,6 +86,9 @@ class AccountValidationControllerTest {
     @Mock
     File file;
 
+    @Mock
+    RequestStatusFactory requestStatusFactory;
+
     AccountValidationController controller;
 
     @Mock
@@ -106,7 +111,8 @@ class AccountValidationControllerTest {
                 repository,
                 restTemplate,
                 environmentReader,
-                accountMaintenanceService);
+                accountMaintenanceService,
+                requestStatusFactory);
         accountsDetails = new AccountsDetails(PackageTypeApi.UKSEF, COMPANY_NUMBER);
         accountsDetailsWithoutPackage = new AccountsDetails();
     }
@@ -121,6 +127,8 @@ class AccountValidationControllerTest {
         // When
         when(validationRequest.getPackageType()).thenReturn(PackageTypeApi.UKSEF);
         when(validationRequest.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(requestStatusFactory.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
+        when(requestStatus.status()).thenReturn(STATE_PENDING);
         var resp = controller.submitForValidation(validationRequest);
 
         // Then
@@ -129,12 +137,12 @@ class AccountValidationControllerTest {
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
         RequestStatus body = (RequestStatus) resp.getBody();
         assertNotNull(body);
-        assertEquals(body.getStatus(), STATE_PENDING);
+        assertEquals(body.status(), STATE_PENDING);
 
         // Pending status was saved to the database
         verify(repository).save(requestStatusCaptor.capture());
         RequestStatus requestStatus = requestStatusCaptor.getValue();
-        assertEquals(requestStatus.getStatus(), STATE_PENDING);
+        assertEquals(requestStatus.status(), STATE_PENDING);
 
         // Validation was started
         verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetails));
@@ -151,6 +159,8 @@ class AccountValidationControllerTest {
 
         // When
         when(validationRequest.getPackageType()).thenReturn(null);
+        when(requestStatusFactory.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
+        when(requestStatus.status()).thenReturn(STATE_PENDING);
         var resp = controller.submitForValidation(validationRequest);
 
         // Then
@@ -159,12 +169,12 @@ class AccountValidationControllerTest {
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
         RequestStatus body = (RequestStatus) resp.getBody();
         assertNotNull(body);
-        assertEquals(body.getStatus(), STATE_PENDING);
+        assertEquals(body.status(), STATE_PENDING);
 
         // Pending status was saved to the database
         verify(repository).save(requestStatusCaptor.capture());
         RequestStatus requestStatus = requestStatusCaptor.getValue();
-        assertEquals(requestStatus.getStatus(), STATE_PENDING);
+        assertEquals(requestStatus.status(), STATE_PENDING);
 
         // Validation was started
         verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetailsWithoutPackage));

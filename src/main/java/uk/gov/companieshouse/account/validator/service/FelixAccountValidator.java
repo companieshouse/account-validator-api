@@ -8,6 +8,7 @@ import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
@@ -25,11 +26,11 @@ import java.util.Optional;
  */
 public class FelixAccountValidator implements AccountValidationStrategy {
 
-    private static final String IXBRL_VALIDATOR_BASE64_URI = "IXBRL_VALIDATOR_BASE64_URI";
     private final Logger logger;
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
     private final PrivateFelixValidatorResourceHandler felixClient;
+    private final RequestStatusFactory statusFactory;
 
     @Value("${internal.api.base.path}")
     private String internalApiUrl;
@@ -41,11 +42,13 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     public FelixAccountValidator(Logger logger,
             RequestStatusRepository statusRepository,
             RestTemplate restTemplate,
-            PrivateFelixValidatorResourceHandler felixClient) {
+            PrivateFelixValidatorResourceHandler felixClient,
+            RequestStatusFactory statusFactory) {
         this.logger = logger;
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;
         this.felixClient = felixClient;
+        this.statusFactory = statusFactory;
     }
 
     /**
@@ -89,10 +92,10 @@ public class FelixAccountValidator implements AccountValidationStrategy {
         logger.info("Saving status for file id " + fileId, logInfo);
 
         String fileName = getStatus(fileId)
-                .map(RequestStatus::getFileName)
+                .map(RequestStatus::fileName)
                 .orElse("");
 
-        var requestStatus = RequestStatus.fromResults(fileId, results, fileName);
+        var requestStatus = statusFactory.fromResults(fileId, results, fileName);
         logInfo.put("result", requestStatus);
         statusRepository.save(requestStatus);
         logger.debugContext(fileId, "Result saved to db", logInfo);

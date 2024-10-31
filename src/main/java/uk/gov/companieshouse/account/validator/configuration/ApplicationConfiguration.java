@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -82,16 +84,18 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Creates the account validator bean. This can be used to specify the specific strategy required
+     * Creates the account validator bean. This can be used to specify the specific
+     * strategy required
      *
      * @return The account validator strategy to use
      */
     @Bean
     public AccountValidationStrategy accountValidationStrategy(Logger logger,
-                                                               RequestStatusRepository statusRepository,
-                                                               RestTemplate restTemplate,
-                                                               PrivateFelixValidatorResourceHandler felixClient) {
-        return new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient);
+            RequestStatusRepository statusRepository,
+            RestTemplate restTemplate,
+            PrivateFelixValidatorResourceHandler felixClient,
+            RequestStatusFactory statusFactory) {
+        return new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient, statusFactory);
     }
 
     /**
@@ -103,13 +107,13 @@ public class ApplicationConfiguration {
     public EnvironmentReader environmentReader() {
         return new EnvironmentReaderImpl();
     }
+
     @Bean
     public InternalApiClient internalApiClient(
             @Value("${api.base.path}") String apiBasePath,
             @Value("${internal.api.base.path}") String internalApiBasePath,
             @Value("${payments.api.base.path}") String paymentsApiBasePath,
-            @Value("${internal.api.key}") String internalApiKey
-    ) {
+            @Value("${internal.api.key}") String internalApiKey) {
         ApiKeyHttpClient httpClient = new ApiKeyHttpClient(internalApiKey);
         InternalApiClient internalApiClient = new InternalApiClient(httpClient);
 
@@ -120,10 +124,8 @@ public class ApplicationConfiguration {
         return internalApiClient;
     }
 
-
     @Bean
     PrivateFelixValidatorResourceHandler felixClient(InternalApiClient internalApiClient) {
         return internalApiClient.privateFelixValidatorResourceHandler(felixValidatorUrl);
     }
 }
-

@@ -10,7 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
+
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -29,6 +31,9 @@ class ApplicationConfigurationTest {
 
     @Mock
     PrivateFelixValidatorResourceHandler felixClient;
+
+    @Mock
+    RequestStatusFactory statusFactory;
 
     private ApplicationConfiguration undertest;
 
@@ -64,7 +69,7 @@ class ApplicationConfigurationTest {
     @Test
     @DisplayName("Test AccountValidationStrategy Bean creates correct type")
     void testAccountValidationStrategyCreation() {
-        assertNotNull(undertest.accountValidationStrategy(logger, statusRepository, restTemplate, felixClient));
+        assertNotNull(undertest.accountValidationStrategy(logger, statusRepository, restTemplate, felixClient, statusFactory));
     }
 
     @Test

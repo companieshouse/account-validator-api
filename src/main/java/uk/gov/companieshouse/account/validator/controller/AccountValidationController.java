@@ -31,6 +31,7 @@ import uk.gov.companieshouse.account.validator.model.validation.ValidationReques
 import uk.gov.companieshouse.account.validator.model.validation.ValidationResponse;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
@@ -56,6 +57,7 @@ public class AccountValidationController {
     private final RestTemplate restTemplate;
     private final EnvironmentReader environmentReader;
     private final AccountMaintenanceService accountMaintenanceService;
+    private final RequestStatusFactory requestStatusFactory;
 
 
     @Autowired
@@ -65,7 +67,8 @@ public class AccountValidationController {
                                        RequestStatusRepository statusRepository,
                                        RestTemplate restTemplate,
                                        EnvironmentReader environmentReader,
-                                       AccountMaintenanceService accountMaintenanceService) {
+                                       AccountMaintenanceService accountMaintenanceService,
+                                       RequestStatusFactory requestStatusFactory) {
         this.accountValidationStrategy = accountValidationStrategy;
         this.fileTransferStrategy = fileTransferStrategy;
         this.logger = logger;
@@ -73,6 +76,7 @@ public class AccountValidationController {
         this.restTemplate = restTemplate;
         this.environmentReader = environmentReader;
         this.accountMaintenanceService = accountMaintenanceService;
+        this.requestStatusFactory = requestStatusFactory;
     }
 
     /**
@@ -104,7 +108,7 @@ public class AccountValidationController {
 
         FileDetailsApi fileDetails = optionalFileDetails.get();
 
-        RequestStatus pendingStatus = RequestStatus.pending(fileId,
+        RequestStatus pendingStatus = requestStatusFactory.pending(fileId,
                 fileDetails.getName(),
                 ValidationStatusApi.UPLOADED_TO_FTS);
         statusRepository.save(pendingStatus);
