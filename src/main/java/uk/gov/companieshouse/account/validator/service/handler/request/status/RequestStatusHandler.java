@@ -24,9 +24,11 @@ public class RequestStatusHandler {
     public RequestStatus pending(String fileId, String fileName, ValidationStatusApi status) {
         Results results = new Results();
         results.setValidationStatus(status);
-        LocalDateTime createdDateTime = getCreatedDateTime(fileId);
-        // Either it does not exist - set to createdDate or set new localDateTime
-        LocalDateTime modifiedDateTime = isModifiedDateTimePresenter(fileId) ? LocalDateTime.now() : createdDateTime;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdDateTime = statusRepository.findById(fileId)
+                .map(RequestStatus::createdDateTime)
+                .orElse(now);
+        LocalDateTime modifiedDateTime = now;
         return new RequestStatus(fileId, fileName, RequestStatus.STATE_PENDING, results, createdDateTime,
                 modifiedDateTime);
     }
