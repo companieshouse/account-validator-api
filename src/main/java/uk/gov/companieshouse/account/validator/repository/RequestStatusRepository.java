@@ -4,12 +4,13 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface RequestStatusRepository extends MongoRepository<RequestStatus, String> {
 
-    List<RequestStatus> findByStatusAndModifiedDateTimeLessThan(String status, LocalDate modified);
+    List<RequestStatus> findByStatusInAndUpdatedDateTimeLessThan(Collection<String> status, LocalDate updated);
 
-    List<RequestStatus> findByStatusAndCreatedDateTimeIsNull(String status);
+    List<RequestStatus> findByCreatedDateTimeIsNull();
 
 }
