@@ -18,7 +18,7 @@ public record RequestStatus(
     @Field String status, 
     @Field Results result, 
     @Field("created") LocalDateTime createdDateTime, 
-    @Field("modified") LocalDateTime modifiedDateTime)  {
+    @Field("update") LocalDateTime updatedDateTime)  {
 
     public static final String STATE_PENDING = "pending";
     public static final String STATE_COMPLETE = "complete";

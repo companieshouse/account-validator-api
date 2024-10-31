@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationException;
 import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
-import uk.gov.companieshouse.account.validator.service.handler.request.status.RequestStatusHandler;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.api.handler.felixvalidator.request.PrivateModelFelixValidatorValidateAsync;
 import uk.gov.companieshouse.api.model.felixvalidator.AsyncValidationRequestApi;
@@ -54,14 +54,14 @@ class FelixAccountValidatorTest {
     private PrivateModelFelixValidatorValidateAsync validateAsync;
     
     @Mock
-    private RequestStatusHandler requestStatusHandler;
+    private RequestStatusFactory requestStatusFactory;
 
 
     private FelixAccountValidator felixAccountValidator;
 
     @BeforeEach
     void beforeEach() {
-        felixAccountValidator = new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient, requestStatusHandler);
+        felixAccountValidator = new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient, requestStatusFactory);
     }
 
     @Test

@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
-import uk.gov.companieshouse.account.validator.service.handler.request.status.RequestStatusHandler;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -94,7 +94,7 @@ public class ApplicationConfiguration {
             RequestStatusRepository statusRepository,
             RestTemplate restTemplate,
             PrivateFelixValidatorResourceHandler felixClient,
-            RequestStatusHandler statusFactory) {
+            RequestStatusFactory statusFactory) {
         return new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient, statusFactory);
     }
 

@@ -8,7 +8,7 @@ import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
-import uk.gov.companieshouse.account.validator.service.handler.request.status.RequestStatusHandler;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
@@ -30,7 +30,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
     private final RequestStatusRepository statusRepository;
     private final RestTemplate restTemplate;
     private final PrivateFelixValidatorResourceHandler felixClient;
-    private final RequestStatusHandler statusFactory;
+    private final RequestStatusFactory statusFactory;
 
     @Value("${internal.api.base.path}")
     private String internalApiUrl;
@@ -43,7 +43,7 @@ public class FelixAccountValidator implements AccountValidationStrategy {
             RequestStatusRepository statusRepository,
             RestTemplate restTemplate,
             PrivateFelixValidatorResourceHandler felixClient,
-            RequestStatusHandler statusFactory) {
+            RequestStatusFactory statusFactory) {
         this.logger = logger;
         this.statusRepository = statusRepository;
         this.restTemplate = restTemplate;

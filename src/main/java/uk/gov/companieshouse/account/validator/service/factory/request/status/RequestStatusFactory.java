@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.service.handler.request.status;
+package uk.gov.companieshouse.account.validator.service.factory.request.status;
 
 import java.time.LocalDateTime;
 
@@ -11,12 +11,12 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
 @Component
-public class RequestStatusHandler {
+public class RequestStatusFactory {
 
     private final RequestStatusRepository statusRepository;
 
     @Autowired
-    public RequestStatusHandler(
+    public RequestStatusFactory(
             RequestStatusRepository statusRepository) {
         this.statusRepository = statusRepository;
     }
@@ -24,20 +24,19 @@ public class RequestStatusHandler {
     public RequestStatus pending(String fileId, String fileName, ValidationStatusApi status) {
         Results results = new Results();
         results.setValidationStatus(status);
-        LocalDateTime createdDateTime = getCreatedDateTime(fileId);
-        // Either it does not exist - set to createdDate or set new localDateTime
-        LocalDateTime modifiedDateTime = isModifiedDateTimePresenter(fileId) ? LocalDateTime.now() : createdDateTime;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdDateTime = getCreatedDateTime(fileId, now);
         return new RequestStatus(fileId, fileName, RequestStatus.STATE_PENDING, results, createdDateTime,
-                modifiedDateTime);
+                now);
     }
 
     public RequestStatus complete(String fileId, String fileName, Results result) {
-        return new RequestStatus(fileId, fileName, RequestStatus.STATE_COMPLETE, result, getCreatedDateTime(fileId),
+        return new RequestStatus(fileId, fileName, RequestStatus.STATE_COMPLETE, result, getCreatedDateTime(fileId, LocalDateTime.now()),
                 LocalDateTime.now());
     }
 
     public RequestStatus error(String fileId) {
-        return new RequestStatus(fileId, "", RequestStatus.STATE_ERROR, null, getCreatedDateTime(fileId),
+        return new RequestStatus(fileId, "", RequestStatus.STATE_ERROR, null, getCreatedDateTime(fileId, LocalDateTime.now()),
                 LocalDateTime.now());
     }
 
@@ -53,15 +52,10 @@ public class RequestStatusHandler {
         }
     }
 
-    private LocalDateTime getCreatedDateTime(String fileId) {
+    private LocalDateTime getCreatedDateTime(String fileId, LocalDateTime defaultDateTime) {
         return statusRepository.findById(fileId)
                 .map(RequestStatus::createdDateTime)
-                .orElse(LocalDateTime.now());
+                .orElse(defaultDateTime);
     }
 
-    private boolean isModifiedDateTimePresenter(String fileId) {
-        return statusRepository.findById(fileId)
-                .map(RequestStatus::modifiedDateTime)
-                .isPresent();
-    }
 }

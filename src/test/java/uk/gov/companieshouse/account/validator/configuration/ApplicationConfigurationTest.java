@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
-import uk.gov.companieshouse.account.validator.service.handler.request.status.RequestStatusHandler;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -33,7 +33,7 @@ class ApplicationConfigurationTest {
     PrivateFelixValidatorResourceHandler felixClient;
 
     @Mock
-    RequestStatusHandler statusFactory;
+    RequestStatusFactory statusFactory;
 
     private ApplicationConfiguration undertest;
 
