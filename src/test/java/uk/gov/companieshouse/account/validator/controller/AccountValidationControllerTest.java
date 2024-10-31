@@ -41,8 +41,8 @@ import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
 import uk.gov.companieshouse.account.validator.model.validation.ValidationRequest;
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
+import uk.gov.companieshouse.account.validator.service.factory.request.status.RequestStatusFactory;
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
-import uk.gov.companieshouse.account.validator.service.handler.request.status.RequestStatusHandler;
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
@@ -87,7 +87,7 @@ class AccountValidationControllerTest {
     File file;
 
     @Mock
-    RequestStatusHandler requestStatusHandler;
+    RequestStatusFactory requestStatusFactory;
 
     AccountValidationController controller;
 
@@ -112,7 +112,7 @@ class AccountValidationControllerTest {
                 restTemplate,
                 environmentReader,
                 accountMaintenanceService,
-                requestStatusHandler);
+                requestStatusFactory);
         accountsDetails = new AccountsDetails(PackageTypeApi.UKSEF, COMPANY_NUMBER);
         accountsDetailsWithoutPackage = new AccountsDetails();
     }
@@ -127,7 +127,7 @@ class AccountValidationControllerTest {
         // When
         when(validationRequest.getPackageType()).thenReturn(PackageTypeApi.UKSEF);
         when(validationRequest.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
-        when(requestStatusHandler.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
+        when(requestStatusFactory.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
         when(requestStatus.status()).thenReturn(STATE_PENDING);
         var resp = controller.submitForValidation(validationRequest);
 
@@ -159,7 +159,7 @@ class AccountValidationControllerTest {
 
         // When
         when(validationRequest.getPackageType()).thenReturn(null);
-        when(requestStatusHandler.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
+        when(requestStatusFactory.pending(fileId, null, ValidationStatusApi.UPLOADED_TO_FTS)).thenReturn(requestStatus);
         when(requestStatus.status()).thenReturn(STATE_PENDING);
         var resp = controller.submitForValidation(validationRequest);
 

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.account.validator.service.handler.request.status;
+package uk.gov.companieshouse.account.validator.service.factory.request.status;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -20,7 +20,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
 @ExtendWith(MockitoExtension.class)
-public class RequestStatusHandlerTest {
+public class requestStatusFactoryTest {
 
     private static final String COMPLETE = RequestStatus.STATE_COMPLETE;
 
@@ -44,18 +44,18 @@ public class RequestStatusHandlerTest {
     @Mock
     RequestStatusRepository statusRepository;
 
-    RequestStatusHandler requestStatusHandler;
+    RequestStatusFactory requestStatusFactory;
 
     @BeforeEach
     public void before() {
-        requestStatusHandler = new RequestStatusHandler(statusRepository);
+        requestStatusFactory = new RequestStatusFactory(statusRepository);
     }
 
     @Test
     public void requestStatusCompleteTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.complete(FILE_ID, FILE_NAME, result);
+        RequestStatus resultStatus = requestStatusFactory.complete(FILE_ID, FILE_NAME, result);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(result, resultStatus.result());
@@ -68,7 +68,7 @@ public class RequestStatusHandlerTest {
     public void requestStatusErrorTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.error(FILE_ID);
+        RequestStatus resultStatus = requestStatusFactory.error(FILE_ID);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals("", resultStatus.fileName());
         assertNull(resultStatus.result());
@@ -80,7 +80,7 @@ public class RequestStatusHandlerTest {
     @Test
     public void requestStatusPendingTest() {
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.empty());
-        RequestStatus resultStatus = requestStatusHandler.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
+        RequestStatus resultStatus = requestStatusFactory.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
@@ -94,7 +94,7 @@ public class RequestStatusHandlerTest {
     public void requestStatusPendingWithExistingModifiedDateTimeTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, PENDING, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
+        RequestStatus resultStatus = requestStatusFactory.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
@@ -107,7 +107,7 @@ public class RequestStatusHandlerTest {
     @Test
     public void requestStatusFromResultsPending() {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.SENT_TO_TNDP);
-        RequestStatus resultStatus = requestStatusHandler.fromResults(FILE_ID, result, FILE_NAME);
+        RequestStatus resultStatus = requestStatusFactory.fromResults(FILE_ID, result, FILE_NAME);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(ValidationStatusApi.SENT_TO_TNDP, resultStatus.result().getValidationStatus());
@@ -122,7 +122,7 @@ public class RequestStatusHandlerTest {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.OK);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.fromResults(FILE_ID, result, FILE_NAME);
+        RequestStatus resultStatus = requestStatusFactory.fromResults(FILE_ID, result, FILE_NAME);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(result, resultStatus.result());
@@ -136,7 +136,7 @@ public class RequestStatusHandlerTest {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.ERROR);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.fromResults(FILE_ID, result, FILE_NAME);
+        RequestStatus resultStatus = requestStatusFactory.fromResults(FILE_ID, result, FILE_NAME);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals("", resultStatus.fileName());
         assertNull(resultStatus.result());
@@ -150,7 +150,7 @@ public class RequestStatusHandlerTest {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.FAILED);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
-        RequestStatus resultStatus = requestStatusHandler.fromResults(FILE_ID, result, FILE_NAME);
+        RequestStatus resultStatus = requestStatusFactory.fromResults(FILE_ID, result, FILE_NAME);
         assertEquals(FILE_ID, resultStatus.fileId());
         assertEquals(FILE_NAME, resultStatus.fileName());
         assertEquals(result, resultStatus.result());
