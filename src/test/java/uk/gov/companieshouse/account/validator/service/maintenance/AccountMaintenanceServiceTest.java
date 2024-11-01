@@ -57,7 +57,7 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
+        when(statusRepository.findByUpdatedDateTimeLessThan(BOUNDARY_DATE))
                 .thenReturn(createRequestStatusList());
         when(statusRepository.findByCreatedDateTimeIsNull()).thenReturn(
                 Collections.singletonList(new RequestStatus("mockId-null", "MockFilename",
@@ -67,7 +67,7 @@ public class AccountMaintenanceServiceTest {
         accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
-        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
+        verify(statusRepository, times(1)).findByUpdatedDateTimeLessThan(
                 BOUNDARY_DATE);
         verify(fileTransferStrategy, times(7)).delete(anyString());
         verify(statusRepository, times(7)).deleteById(anyString());
@@ -79,7 +79,7 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
+        when(statusRepository.findByUpdatedDateTimeLessThan(BOUNDARY_DATE))
                 .thenReturn(new ArrayList<>());
         when(statusRepository.findByCreatedDateTimeIsNull())
                 .thenReturn(Collections.emptyList());
@@ -87,7 +87,7 @@ public class AccountMaintenanceServiceTest {
         accountMaintenanceService.deleteCompleteSubmissions();
 
         // Then
-        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
+        verify(statusRepository, times(1)).findByUpdatedDateTimeLessThan(
                 BOUNDARY_DATE);
         verify(statusRepository, times(1)).findByCreatedDateTimeIsNull();
         verify(fileTransferStrategy, times(0)).delete(anyString());
@@ -100,7 +100,7 @@ public class AccountMaintenanceServiceTest {
         // Given
 
         // When
-        when(statusRepository.findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, BOUNDARY_DATE))
+        when(statusRepository.findByUpdatedDateTimeLessThan(BOUNDARY_DATE))
                 .thenReturn(new ArrayList<>());
         when(statusRepository.findByCreatedDateTimeIsNull())
                 .thenThrow(new RuntimeException());
@@ -108,7 +108,7 @@ public class AccountMaintenanceServiceTest {
         assertThrows(RuntimeException.class, () -> accountMaintenanceService.deleteCompleteSubmissions());
         // Then
         verify(statusRepository, times(1)).findByCreatedDateTimeIsNull();
-        verify(statusRepository, times(1)).findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE,
+        verify(statusRepository, times(1)).findByUpdatedDateTimeLessThan(
                 BOUNDARY_DATE);
         verify(fileTransferStrategy, times(0)).delete(anyString());
         verify(statusRepository, times(0)).deleteById(anyString());
