@@ -12,7 +12,6 @@ import uk.gov.companieshouse.logging.Logger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,9 +30,6 @@ public class AccountMaintenanceService {
 
     @Value("${delete.files.older.than.days}")
     private int DAYS_TO_DELETE;
-
-    private static final List<String> STATUSES_TO_REMOVE = Arrays.asList(RequestStatus.STATE_COMPLETE,
-            RequestStatus.STATE_ERROR);
 
     @Autowired
     public AccountMaintenanceService(Logger logger, FileTransferStrategy fileTransferStrategy,
@@ -82,7 +78,7 @@ public class AccountMaintenanceService {
     private List<RequestStatus> allRequestStatusesToBeRemoved(LocalDate deleteLessThan) {
 
         List<RequestStatus> completeRequestStatusList = statusRepository
-                .findByStatusInAndUpdatedDateTimeLessThan(STATUSES_TO_REMOVE, deleteLessThan);
+                .findByUpdatedDateTimeLessThan(deleteLessThan);
         List<RequestStatus> nullCreatedDateRequestStatuses = statusRepository
                 .findByCreatedDateTimeIsNull();
         List<RequestStatus> toRemoveRequestStatuses = new ArrayList<>(completeRequestStatusList);
