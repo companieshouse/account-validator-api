@@ -17,6 +17,7 @@ data "aws_vpc" "vpc" {
   }
 }
 
+
 # Get application subnet IDs
 data "aws_subnets" "application" {
   filter {
