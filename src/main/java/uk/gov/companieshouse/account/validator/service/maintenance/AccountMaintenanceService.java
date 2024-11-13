@@ -47,7 +47,7 @@ public class AccountMaintenanceService {
         LocalDateTime now = LocalDateTime.now();
         LocalDate date = getBoundaryDate(now, DAYS_TO_DELETE);
         Map<String, Object> infoContext = new HashMap<>();
-        infoContext.put("Deletion to (exclusive)", date);
+        infoContext.put("Deletion of submissions older than", date);
         infoContext.put("Deletion requested at", now);
         logger.info("Deletion date range for old accounts", infoContext);
         try {
