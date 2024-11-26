@@ -28,37 +28,40 @@ variable "docker_registry" {
 # Service performance and scaling configs
 # ------------------------------------------------------------------------------
 variable "desired_task_count" {
-  type = number
+  type        = number
   description = "The desired ECS task count for this service"
-  default = 1 # defaulted low for dev environments, override for production
+  default     = 1 # defaulted low for dev environments, override for production
 }
-variable "required_cpus" {
-  type = number
-  description = "The required cpu resource for this service. 1024 here is 1 vCPU"
-  default = 256 # defaulted low for dev environments, override for production
-}
-variable "required_memory" {
-  type = number
-  description = "The required memory for this service"
-  default = 512 # defaulted low for node service in dev environments, override for production
-}
-
-variable "eric_cpus" {
-  type = number
-  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
-  default = 256
-}
-variable "eric_memory" {
-  type = number
-  description = "The required memory for eric"
-  default = 512
+variable "min_task_count" {
+  type        = number
+  description = "The maximum number of tasks for this service."
+  default     = 1
 }
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
   default     = 3
 }
-
+variable "required_cpus" {
+  type        = number
+  description = "The required cpu resource for this service. 1024 here is 1 vCPU"
+  default     = 256 # defaulted low for dev environments, override for production
+}
+variable "required_memory" {
+  type        = number
+  description = "The required memory for this service"
+  default     = 512 # defaulted low for node service in dev environments, override for production
+}
+variable "eric_cpus" {
+  type        = number
+  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
+  default     = 256
+}
+variable "eric_memory" {
+  type        = number
+  description = "The required memory for eric"
+  default     = 512
+}
 variable "use_fargate" {
   type        = bool
   description = "If true, sets the required capabilities for all containers in the task definition to use FARGATE, false uses EC2"
@@ -85,7 +88,7 @@ variable "service_scaledown_schedule" {
   # Typically used to stop all tasks in a service to save resource costs overnight.
   # E.g. a value of '55 19 * * ? *' would be Mon-Sun 7:55pm.  An empty string indicates that no schedule should be created.
 
-  default     = ""
+  default = ""
 }
 variable "service_scaleup_schedule" {
   type        = string
@@ -93,7 +96,7 @@ variable "service_scaleup_schedule" {
   # Typically used to start all tasks in a service after it has been shutdown overnight.
   # E.g. a value of '5 6 * * ? *' would be Mon-Sun 6:05am.  An empty string indicates that no schedule should be created.
 
-  default     = ""
+  default = ""
 }
 
 # ----------------------------------------------------------------------
@@ -117,7 +120,7 @@ variable "ssm_version_prefix" {
 
 variable "use_set_environment_files" {
   type        = bool
-  default     = false
+  default     = true
   description = "Toggle default global and shared environment files"
 }
 

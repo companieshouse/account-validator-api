@@ -28,7 +28,7 @@ module "secrets" {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.293"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.294"
 
   # Environmental configuration
   environment             = var.environment
@@ -44,8 +44,8 @@ module "ecs-service" {
   lb_listener_paths                 = local.lb_listener_paths
   health_check_grace_period_seconds = 240
   healthcheck_healthy_threshold     = "2"
-  multilb_setup                   = false
-  
+  multilb_setup                     = false
+
   # ECS Task container health check
   use_task_container_healthcheck = true
   healthcheck_path               = local.healthcheck_path
@@ -61,6 +61,7 @@ module "ecs-service" {
   service_name                       = local.service_name
   name_prefix                        = local.name_prefix
   desired_task_count                 = var.desired_task_count
+  min_task_count                     = var.min_task_count
   max_task_count                     = var.max_task_count
   required_cpus                      = var.required_cpus
   required_memory                    = var.required_memory
@@ -81,7 +82,7 @@ module "ecs-service" {
   app_environment_filename  = local.app_environment_filename
   use_set_environment_files = local.use_set_environment_files
   read_only_root_filesystem = false
-  
+
   # eric options for eric running API module
   use_eric_reverse_proxy    = true
   eric_version              = var.eric_version
