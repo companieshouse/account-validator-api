@@ -40,24 +40,31 @@ public class AccountMaintenanceService {
     }
 
     public static boolean isEmptyOrNull(Collection<?> collection) {
-        return (collection == null || collection.isEmpty());
+        return collection == null || collection.isEmpty();
     }
 
     public void deleteCompleteSubmissions() {
         LocalDateTime now = LocalDateTime.now();
         LocalDate date = getBoundaryDate(now, DAYS_TO_DELETE);
+
         Map<String, Object> infoContext = new HashMap<>();
         infoContext.put("Deletion of submissions older than", date);
         infoContext.put("Deletion requested at", now);
-        logger.info("Deletion date range for old accounts", infoContext);
+
+        logger.info("Deletion date range for old accounts: " + infoContext);
+
         try {
-            List<RequestStatus> distinctRequestStatusesToRemove = allRequestStatusesToBeRemoved(date).stream()
-                    .distinct().toList();
+            List<RequestStatus> distinctRequestStatusesToRemove = Optional.ofNullable(allRequestStatusesToBeRemoved(date))
+                    .orElse(Collections.emptyList()) 
+                    .stream()
+                    .distinct()
+                    .toList();
+
+            
             if (!isEmptyOrNull(distinctRequestStatusesToRemove)) {
-                distinctRequestStatusesToRemove.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
-            }
-            infoContext.put("Completed at", LocalDateTime.now());
-            infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
+                distinctRequestStatusesToRemove.forEach(requestStatus -> {
+                    if (requestStatus != null && requestStatus.fileId() != null) {
+                        deleteRequest(requestStatus.fileId());
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 
