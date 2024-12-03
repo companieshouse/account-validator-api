@@ -65,6 +65,9 @@ public class AccountMaintenanceService {
                 distinctRequestStatusesToRemove.forEach(requestStatus -> {
                     if (requestStatus != null && requestStatus.fileId() != null) {
                         deleteRequest(requestStatus.fileId());
+                    }
+                });
+            }
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 
