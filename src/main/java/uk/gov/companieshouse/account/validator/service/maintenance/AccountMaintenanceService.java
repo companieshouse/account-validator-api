@@ -9,13 +9,8 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 
 /**
  * An implementation of the AccountMaintenanceService to maintain company's
@@ -55,7 +50,7 @@ public class AccountMaintenanceService {
 
         try {
             List<RequestStatus> distinctRequestStatusesToRemove = Optional.ofNullable(allRequestStatusesToBeRemoved(date))
-                    .orElse(Collections.emptyList()) 
+                    .orElse(Collections.emptyList())
                     .stream()
                     .distinct()
                     .toList();
