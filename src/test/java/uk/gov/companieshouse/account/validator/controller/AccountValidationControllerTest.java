@@ -137,12 +137,12 @@ class AccountValidationControllerTest {
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
         RequestStatus body = (RequestStatus) resp.getBody();
         assertNotNull(body);
-        assertEquals(body.status(), STATE_PENDING);
+        assertEquals(STATE_PENDING, body.status());
 
         // Pending status was saved to the database
         verify(repository).save(requestStatusCaptor.capture());
         RequestStatus requestStatus = requestStatusCaptor.getValue();
-        assertEquals(requestStatus.status(), STATE_PENDING);
+        assertEquals(STATE_PENDING, requestStatus.status());
 
         // Validation was started
         verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetails));
@@ -169,12 +169,12 @@ class AccountValidationControllerTest {
         assertThat(resp.getBody(), instanceOf(RequestStatus.class));
         RequestStatus body = (RequestStatus) resp.getBody();
         assertNotNull(body);
-        assertEquals(body.status(), STATE_PENDING);
+        assertEquals(STATE_PENDING, body.status());
 
         // Pending status was saved to the database
         verify(repository).save(requestStatusCaptor.capture());
         RequestStatus requestStatus = requestStatusCaptor.getValue();
-        assertEquals(requestStatus.status(), STATE_PENDING);
+        assertEquals(STATE_PENDING, requestStatus.status());
 
         // Validation was started
         verify(accountValidationStrategy).startValidation(detailsApiArgumentCaptor.capture(), eq(accountsDetailsWithoutPackage));

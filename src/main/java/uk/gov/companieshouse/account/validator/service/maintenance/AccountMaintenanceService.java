@@ -24,7 +24,7 @@ public class AccountMaintenanceService {
     private final RequestStatusRepository statusRepository;
 
     @Value("${delete.files.older.than.days}")
-    private int DAYS_TO_DELETE;
+    private int daysToDelete;
 
     @Autowired
     public AccountMaintenanceService(Logger logger, FileTransferStrategy fileTransferStrategy,
@@ -40,7 +40,7 @@ public class AccountMaintenanceService {
 
     public void deleteCompleteSubmissions() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDate date = getBoundaryDate(now, DAYS_TO_DELETE);
+        LocalDate date = getBoundaryDate(now, daysToDelete);
 
         Map<String, Object> infoContext = new HashMap<>();
         infoContext.put("Deletion of submissions older than", date);

@@ -20,7 +20,7 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
 
 @ExtendWith(MockitoExtension.class)
-public class requestStatusFactoryTest {
+class requestStatusFactoryTest {
 
     private static final String COMPLETE = RequestStatus.STATE_COMPLETE;
 
@@ -52,7 +52,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusCompleteTest() {
+    void requestStatusCompleteTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
         RequestStatus resultStatus = requestStatusFactory.complete(FILE_ID, FILE_NAME, result);
@@ -65,7 +65,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusErrorTest() {
+    void requestStatusErrorTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
         RequestStatus resultStatus = requestStatusFactory.error(FILE_ID);
@@ -78,7 +78,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusPendingTest() {
+    void requestStatusPendingTest() {
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.empty());
         RequestStatus resultStatus = requestStatusFactory.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
         assertEquals(FILE_ID, resultStatus.fileId());
@@ -91,7 +91,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusPendingWithExistingUpdatedDateTimeTest() {
+    void requestStatusPendingWithExistingUpdatedDateTimeTest() {
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, PENDING, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
         RequestStatus resultStatus = requestStatusFactory.pending(FILE_ID, FILE_NAME, ValidationStatusApi.SENT_TO_TNDP);
@@ -105,7 +105,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusFromResultsPending() {
+    void requestStatusFromResultsPending() {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.SENT_TO_TNDP);
         RequestStatus resultStatus = requestStatusFactory.fromResults(FILE_ID, result, FILE_NAME);
         assertEquals(FILE_ID, resultStatus.fileId());
@@ -118,7 +118,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusFromResultsOK() {
+    void requestStatusFromResultsOK() {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.OK);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
@@ -132,7 +132,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusFromResultsERROR() {
+    void requestStatusFromResultsERROR() {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.ERROR);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));
@@ -146,7 +146,7 @@ public class requestStatusFactoryTest {
     }
 
     @Test
-    public void requestStatusFromResultsFAILED() {
+    void requestStatusFromResultsFAILED() {
         when(result.getValidationStatus()).thenReturn(ValidationStatusApi.FAILED);
         RequestStatus requestStatus = new RequestStatus(FILE_NAME, FILE_ID, COMPLETE, result, createTime, createTime);
         when(statusRepository.findById(FILE_ID)).thenReturn(Optional.of(requestStatus));

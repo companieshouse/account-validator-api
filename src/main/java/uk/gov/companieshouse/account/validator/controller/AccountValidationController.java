@@ -173,9 +173,8 @@ public class AccountValidationController {
             }
         };
 
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>() {{
-            add("instance", contentsAsResource);
-        }};
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("instance", contentsAsResource);
 
         byte[] bytes = restTemplate.postForObject(iXbrlToPdfUri, map, byte[].class);
 
