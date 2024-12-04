@@ -64,7 +64,9 @@ public class AccountMaintenanceService {
                 });
             }
             infoContext.put("Completed at", LocalDateTime.now());
-            infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
+            if (distinctRequestStatusesToRemove != null) {
+                infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
+            }
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 
