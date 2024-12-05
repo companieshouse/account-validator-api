@@ -94,7 +94,7 @@ public class AccountValidationController {
         var fileId = validationRequest.getId();
         PackageTypeApi packageType = validationRequest.getPackageType();
         String companyNumber = validationRequest.getCompanyNumber();
-        AccountsDetails fileContent = new AccountsDetails(packageType, companyNumber);
+        var fileContent = new AccountsDetails(packageType, companyNumber);
 
         Map<String, Object> logInfo = new HashMap<>();
         logInfo.put("fileId", fileId);
@@ -108,7 +108,7 @@ public class AccountValidationController {
 
         FileDetailsApi fileDetails = optionalFileDetails.get();
 
-        RequestStatus pendingStatus = requestStatusFactory.pending(fileId,
+        var pendingStatus = requestStatusFactory.pending(fileId,
                 fileDetails.getName(),
                 ValidationStatusApi.UPLOADED_TO_FTS);
         statusRepository.save(pendingStatus);
@@ -139,7 +139,7 @@ public class AccountValidationController {
     }
 
     @PatchMapping("/{fileId}")
-    ResponseEntity<Void> saveStatus(
+    public ResponseEntity<Void> saveStatus(
             @PathVariable("fileId") final String fileId,
             @RequestBody Results results) {
 
@@ -173,9 +173,8 @@ public class AccountValidationController {
             }
         };
 
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>() {{
-            add("instance", contentsAsResource);
-        }};
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("instance", contentsAsResource);
 
         byte[] bytes = restTemplate.postForObject(iXbrlToPdfUri, map, byte[].class);
 

@@ -9,13 +9,8 @@ import uk.gov.companieshouse.account.validator.repository.RequestStatusRepositor
 import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransferStrategy;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 
 /**
  * An implementation of the AccountMaintenanceService to maintain company's
@@ -29,7 +24,7 @@ public class AccountMaintenanceService {
     private final RequestStatusRepository statusRepository;
 
     @Value("${delete.files.older.than.days}")
-    private int DAYS_TO_DELETE;
+    private int daysToDelete;
 
     @Autowired
     public AccountMaintenanceService(Logger logger, FileTransferStrategy fileTransferStrategy,
@@ -40,24 +35,38 @@ public class AccountMaintenanceService {
     }
 
     public static boolean isEmptyOrNull(Collection<?> collection) {
-        return (collection == null || collection.isEmpty());
+        return collection == null || collection.isEmpty();
     }
 
     public void deleteCompleteSubmissions() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDate date = getBoundaryDate(now, DAYS_TO_DELETE);
+        LocalDate date = getBoundaryDate(now, daysToDelete);
+
         Map<String, Object> infoContext = new HashMap<>();
         infoContext.put("Deletion of submissions older than", date);
         infoContext.put("Deletion requested at", now);
-        logger.info("Deletion date range for old accounts", infoContext);
+
+        logger.info("Deletion date range for old accounts: " + infoContext);
+
         try {
-            List<RequestStatus> distinctRequestStatusesToRemove = allRequestStatusesToBeRemoved(date).stream()
-                    .distinct().toList();
+            List<RequestStatus> distinctRequestStatusesToRemove = Optional.ofNullable(allRequestStatusesToBeRemoved(date))
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .distinct()
+                    .toList();
+
+            
             if (!isEmptyOrNull(distinctRequestStatusesToRemove)) {
-                distinctRequestStatusesToRemove.forEach(requestStatus -> deleteRequest(requestStatus.fileId()));
+                distinctRequestStatusesToRemove.forEach(requestStatus -> {
+                    if (requestStatus != null && requestStatus.fileId() != null) {
+                        deleteRequest(requestStatus.fileId());
+                    }
+                });
             }
             infoContext.put("Completed at", LocalDateTime.now());
-            infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
+            if (distinctRequestStatusesToRemove != null) {
+                infoContext.put("Number of request statuses removed", distinctRequestStatusesToRemove.size());
+            }
         } catch (RuntimeException ex) {
             throw new DeleteCompleteSubException(ex);
 

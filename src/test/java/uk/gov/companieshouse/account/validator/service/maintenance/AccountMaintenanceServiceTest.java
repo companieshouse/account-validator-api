@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountMaintenanceServiceTest {
+class AccountMaintenanceServiceTest {
 
     @Mock
     private FileTransferStrategy fileTransferStrategy;
@@ -41,14 +41,14 @@ public class AccountMaintenanceServiceTest {
     @InjectMocks
     private AccountMaintenanceService accountMaintenanceService;
 
-    private final static LocalDate BOUNDARY_DATE = LocalDate.now().minusDays(30);
+    private static final LocalDate BOUNDARY_DATE = LocalDate.now().minusDays(30);
 
     private static final List<String> STATUSES_TO_REMOVE = Arrays.asList(RequestStatus.STATE_COMPLETE,
             RequestStatus.STATE_ERROR);
 
     @BeforeEach
     void before() {
-        ReflectionTestUtils.setField(accountMaintenanceService, "DAYS_TO_DELETE", 30);
+        ReflectionTestUtils.setField(accountMaintenanceService, "daysToDelete", 30);
     }
 
     @Test

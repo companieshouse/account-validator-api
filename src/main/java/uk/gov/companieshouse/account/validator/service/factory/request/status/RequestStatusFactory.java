@@ -44,8 +44,7 @@ public class RequestStatusFactory {
         switch (results.getValidationStatus()) {
             case ERROR:
                 return error(fileId);
-            case FAILED:
-            case OK:
+            case FAILED,OK:
                 return complete(fileId, fileName, results);
             default:
                 return pending(fileId, fileName, results.getValidationStatus());
