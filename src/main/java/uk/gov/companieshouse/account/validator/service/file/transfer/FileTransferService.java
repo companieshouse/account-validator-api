@@ -24,6 +24,7 @@ import uk.gov.companieshouse.logging.Logger;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * An implementation of the FileTransferStrategy utilising the FileTransferService to transfer files
@@ -33,17 +34,18 @@ public class FileTransferService implements FileTransferStrategy {
 
     private final Logger logger;
     private final RetryStrategy retryStrategy;
-    private final InternalApiClient internalApiClient;
+
+    private final Supplier<InternalApiClient> apiClientSupplier;
 
     @Autowired
     public FileTransferService(
             Logger logger,
             @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy,
-            InternalApiClient internalApiClient) {
+            Supplier<InternalApiClient> apiClientSupplier) {
 
         this.logger = logger;
         this.retryStrategy = retryStrategy;
-        this.internalApiClient = internalApiClient;
+        this.apiClientSupplier = apiClientSupplier;
     }
 
     /**
@@ -113,7 +115,7 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-        PrivateModelFileTransferDelete delete = internalApiClient
+        PrivateModelFileTransferDelete delete = getInternalApiClient()
                 .privateFileTransferResourceHandler()
                 .delete(id);
 
@@ -125,7 +127,7 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
-        PrivateModelFileTransferDownload download = internalApiClient
+        PrivateModelFileTransferDownload download = getInternalApiClient()
                 .privateFileTransferResourceHandler()
                 .download(id);
 
@@ -137,7 +139,7 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
-        PrivateModelFileTransferGetDetails details = internalApiClient
+        PrivateModelFileTransferGetDetails details = getInternalApiClient()
                 .privateFileTransferResourceHandler()
                 .details(id);
 
@@ -146,6 +148,10 @@ public class FileTransferService implements FileTransferStrategy {
         } catch (ApiErrorResponseException | URIValidationException e) {
             throw handleCheckedExceptions(e);
         }
+    }
+
+    private InternalApiClient getInternalApiClient() {
+        return apiClientSupplier.get();
     }
 
     /**
