@@ -1,18 +1,5 @@
 package uk.gov.companieshouse.account.validator.service.file.transfer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +29,19 @@ import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class FileTransferServiceTest {
 
@@ -59,6 +59,9 @@ class FileTransferServiceTest {
 
     @Mock
     private PrivateFileTransferResourceHandler mockHandler;
+
+    @Mock
+    private Supplier<InternalApiClient> internalApiClientSupplier;
 
     @InjectMocks
     private FileTransferService fileTransferService;
@@ -82,6 +85,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -99,6 +103,10 @@ class FileTransferServiceTest {
         }
     }
 
+    private void setupMockClient() {
+        when(internalApiClientSupplier.get()).thenReturn(mockClient);
+    }
+
     @Test
     @DisplayName("Attempt to get a file that isn't available")
     void getFileNotFound() throws ApiErrorResponseException, URIValidationException {
@@ -113,6 +121,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -140,6 +149,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -164,6 +174,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenThrow(mock(ApiErrorResponseException.class));
@@ -188,6 +199,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenThrow(mock(URIValidationException.class));
@@ -213,6 +225,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -242,6 +255,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -271,6 +285,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
@@ -296,6 +311,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler);
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);
 
@@ -318,6 +334,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);
             when(mockDelete.execute()).thenThrow(mock(ApiErrorResponseException.class));
@@ -340,6 +357,7 @@ class FileTransferServiceTest {
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
+            setupMockClient();
             when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockDelete.execute()).thenThrow(mock(URIValidationException.class));
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);

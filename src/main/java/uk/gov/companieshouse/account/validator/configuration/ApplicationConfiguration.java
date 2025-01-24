@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-
 import uk.gov.companieshouse.account.validator.repository.RequestStatusRepository;
 import uk.gov.companieshouse.account.validator.service.AccountValidationStrategy;
 import uk.gov.companieshouse.account.validator.service.FelixAccountValidator;
@@ -22,6 +21,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 @Configuration
 public class ApplicationConfiguration {
@@ -91,10 +91,10 @@ public class ApplicationConfiguration {
      */
     @Bean
     public AccountValidationStrategy accountValidationStrategy(Logger logger,
-            RequestStatusRepository statusRepository,
-            RestTemplate restTemplate,
-            PrivateFelixValidatorResourceHandler felixClient,
-            RequestStatusFactory statusFactory) {
+                                                               RequestStatusRepository statusRepository,
+                                                               RestTemplate restTemplate,
+                                                               PrivateFelixValidatorResourceHandler felixClient,
+                                                               RequestStatusFactory statusFactory) {
         return new FelixAccountValidator(logger, statusRepository, restTemplate, felixClient, statusFactory);
     }
 
@@ -123,6 +123,22 @@ public class ApplicationConfiguration {
 
         return internalApiClient;
     }
+
+
+    @Bean
+    public Supplier<InternalApiClient> internalApiClientSupplier(
+            @Value("${internal.api.key}") String internalApiKey,
+            @Value("${file.transfer.api.base.path}") String fileTransferBasePath
+    ) {
+
+        return () -> {
+            ApiKeyHttpClient httpClient = new ApiKeyHttpClient(internalApiKey);
+            InternalApiClient internalApiClient = new InternalApiClient(httpClient);
+            internalApiClient.setBasePath(fileTransferBasePath);
+            return internalApiClient;
+        };
+    }
+
 
     @Bean
     PrivateFelixValidatorResourceHandler felixClient(InternalApiClient internalApiClient) {
