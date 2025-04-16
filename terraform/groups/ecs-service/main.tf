@@ -43,7 +43,7 @@ module "ecs-service" {
   task_healthcheck_interval     = var.task_healthcheck_interval
   task_healthcheck_timeout      = var.task_healthcheck_timeout
   task_healthcheck_retries      = var.task_healthcheck_retries
-  task_healthcheck_startPeriod  = var.task_healthcheck_startPeriod
+  task_healthcheck_start_period  = var.task_healthcheck_startPeriod
 
   # Load balancer configuration
   lb_listener_arn                   = data.aws_lb_listener.service_lb_listener.arn
