@@ -4,14 +4,6 @@ aws_profile = "development-eu-west-2"
 # service configs
 log_level = "debug"
 
-# service configs
-use_set_environment_files = true
-
-# use_task_container_healthcheck
-task_healthcheck_interval = "60"
-task_healthcheck_timeout = "5"
-task_healthcheck_retries = "3"
-task_healthcheck_startPeriod = "120"
 
 # Scheduled scaling of tasks
 service_autoscale_enabled  = true
