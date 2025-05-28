@@ -76,7 +76,7 @@ dependency-check:
 		fi; \
 	fi; \
 	printf -- 'suppressions_home="%s"\n' "$${suppressions_home}"; \
-	DEPENDENCY_CHECK_SUPPRESSIONS_HOME="$${suppressions_home}" "$${suppressions_home}/scripts/depcheck" --repo-name=TodoMyRepoName
+	DEPENDENCY_CHECK_SUPPRESSIONS_HOME="$${suppressions_home}" "$${suppressions_home}/scripts/depcheck" --repo-name=account-validator-api
 
 .PHONY: security-check
 security-check: dependency-check
