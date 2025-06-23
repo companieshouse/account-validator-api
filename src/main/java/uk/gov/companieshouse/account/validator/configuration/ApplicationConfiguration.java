@@ -12,6 +12,8 @@ import uk.gov.companieshouse.account.validator.service.retry.IncrementalBackoff;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorResourceHandler;
+import uk.gov.companieshouse.api.handler.filetransfer.FileTransferHttpClient;
+import uk.gov.companieshouse.api.handler.filetransfer.InternalFileTransferClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.environment.impl.EnvironmentReaderImpl;
@@ -126,16 +128,16 @@ public class ApplicationConfiguration {
 
 
     @Bean
-    public Supplier<InternalApiClient> internalApiClientSupplier(
+    public Supplier<InternalFileTransferClient> internalFileTransferClientSupplier(
             @Value("${internal.api.key}") String internalApiKey,
             @Value("${file.transfer.api.base.path}") String fileTransferBasePath
     ) {
 
         return () -> {
-            ApiKeyHttpClient httpClient = new ApiKeyHttpClient(internalApiKey);
-            InternalApiClient internalApiClient = new InternalApiClient(httpClient);
-            internalApiClient.setBasePath(fileTransferBasePath);
-            return internalApiClient;
+            FileTransferHttpClient httpClient = new FileTransferHttpClient(internalApiKey);
+            InternalFileTransferClient internalFileTransferClient = new InternalFileTransferClient(httpClient);
+            internalFileTransferClient.setBasePath(fileTransferBasePath);
+            return internalFileTransferClient;
         };
     }
 

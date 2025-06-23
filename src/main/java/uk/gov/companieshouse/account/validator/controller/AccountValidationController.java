@@ -36,7 +36,7 @@ import uk.gov.companieshouse.account.validator.service.file.transfer.FileTransfe
 import uk.gov.companieshouse.account.validator.service.maintenance.AccountMaintenanceService;
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
 import uk.gov.companieshouse.api.model.felixvalidator.ValidationStatusApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
