@@ -15,20 +15,15 @@
     <properties>
         <java.version>21</java.version>
 
-        <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
+        <!-- spring -->
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- external -->
+        <jackson-dataformat-xml.version>2.19.1</jackson-dataformat-xml.version>
+
         <!-- tests -->
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-        <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
         <test-containers.version>1.21.2</test-containers.version>
-        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
-        <skip.integration.tests>false</skip.integration.tests>
-        <skip.unit.tests>false</skip.unit.tests>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <mockito.version>5.18.0</mockito.version>
         <junit-bom.version>5.13.1</junit-bom.version>
 
@@ -39,9 +34,24 @@
         <web-security-java.version>3.1.5</web-security-java.version>
         <private-api-sdk-java.version>4.0.312</private-api-sdk-java.version>
 
+        <!-- plugin -->
+        <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
+        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- config -->
+        <skip.integration.tests>false</skip.integration.tests>
+        <skip.unit.tests>false</skip.unit.tests>
+
       <!-- overrides -->
       <mockito-inline.version>5.2.0</mockito-inline.version>
-        <istack-commons-runtime.version>4.2.0</istack-commons-runtime.version>
+      <istack-commons-runtime.version>4.2.0</istack-commons-runtime.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -218,7 +228,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.14.2</version>
+            <version>${jackson-dataformat-xml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.istack</groupId>
@@ -260,6 +270,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+              <version>${jacoco-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>pre-integration-test</id>
