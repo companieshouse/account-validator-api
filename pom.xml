@@ -21,18 +21,19 @@
 
         <!-- external -->
         <jackson-dataformat-xml.version>2.19.1</jackson-dataformat-xml.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
 
         <!-- tests -->
-        <test-containers.version>1.21.2</test-containers.version>
+        <test-containers.version>1.21.3</test-containers.version>
         <mockito.version>5.18.0</mockito.version>
-        <junit-bom.version>5.13.1</junit-bom.version>
+        <junit-bom.version>5.13.2</junit-bom.version>
 
         <!-- internal -->
         <structured-logging.version>3.0.32</structured-logging.version>
         <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
         <web-security-java.version>3.1.5</web-security-java.version>
-        <private-api-sdk-java.version>4.0.312</private-api-sdk-java.version>
+        <private-api-sdk-java.version>4.0.315</private-api-sdk-java.version>
 
         <!-- plugin -->
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
