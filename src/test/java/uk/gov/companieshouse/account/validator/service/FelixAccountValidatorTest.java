@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.handler.felixvalidator.PrivateFelixValidatorRes
 import uk.gov.companieshouse.api.handler.felixvalidator.request.PrivateModelFelixValidatorValidateAsync;
 import uk.gov.companieshouse.api.model.felixvalidator.AsyncValidationRequestApi;
 import uk.gov.companieshouse.api.model.felixvalidator.PackageTypeApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)

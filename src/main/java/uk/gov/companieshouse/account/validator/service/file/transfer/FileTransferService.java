@@ -11,14 +11,16 @@ import uk.gov.companieshouse.account.validator.service.retry.RetryException;
 import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.filetransfer.AvStatus;
+import uk.gov.companieshouse.api.filetransfer.FileApi;
+import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
+import uk.gov.companieshouse.api.handler.filetransfer.InternalFileTransferClient;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferDelete;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferDownload;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferGetDetails;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.filetransfer.AvStatusApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.handler.filetransfer.FileTransferHttpClient;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Map;
@@ -35,13 +37,13 @@ public class FileTransferService implements FileTransferStrategy {
     private final Logger logger;
     private final RetryStrategy retryStrategy;
 
-    private final Supplier<InternalApiClient> apiClientSupplier;
+    private final Supplier<InternalFileTransferClient> apiClientSupplier;
 
     @Autowired
     public FileTransferService(
             Logger logger,
             @Qualifier("fileTransferRetryStrategy") RetryStrategy retryStrategy,
-            Supplier<InternalApiClient> apiClientSupplier) {
+            Supplier<InternalFileTransferClient> apiClientSupplier) {
 
         this.logger = logger;
         this.retryStrategy = retryStrategy;
@@ -56,11 +58,13 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public Optional<File> get(String id) {
+
+
         Optional<FileDetailsApi> details = retryStrategy.attempt(() -> {
             Optional<FileDetailsApi> maybeFileDetails;
             maybeFileDetails = getFileDetails(id);
             var stillAwaitingScan = maybeFileDetails
-                    .map(fileDetailsApi -> fileDetailsApi.getAvStatusApi().equals(AvStatusApi.NOT_SCANNED))
+                    .map(fileDetailsApi -> fileDetailsApi.getAvStatus().equals(AvStatus.NOT_SCANNED))
                     .orElse(false);
 
             logger.debugContext(id, "File still awaiting scan. Retrying.", null);
@@ -115,8 +119,8 @@ public class FileTransferService implements FileTransferStrategy {
      */
     @Override
     public void delete(String id) {
-        PrivateModelFileTransferDelete delete = getInternalApiClient()
-                .privateFileTransferResourceHandler()
+        PrivateFileTransferDelete delete = getInternalApiClient()
+                .privateFileTransferHandler()
                 .delete(id);
 
         try {
@@ -127,8 +131,8 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileApi> getFileApiResponse(String id) {
-        PrivateModelFileTransferDownload download = getInternalApiClient()
-                .privateFileTransferResourceHandler()
+        PrivateFileTransferDownload download = getInternalApiClient()
+                .privateFileTransferHandler()
                 .download(id);
 
         try {
@@ -139,8 +143,8 @@ public class FileTransferService implements FileTransferStrategy {
     }
 
     private ApiResponse<FileDetailsApi> getFileDetailsApiResponse(String id) {
-        PrivateModelFileTransferGetDetails details = getInternalApiClient()
-                .privateFileTransferResourceHandler()
+        PrivateFileTransferGetDetails details = getInternalApiClient()
+                .privateFileTransferHandler()
                 .details(id);
 
         try {
@@ -150,7 +154,7 @@ public class FileTransferService implements FileTransferStrategy {
         }
     }
 
-    private InternalApiClient getInternalApiClient() {
+    private InternalFileTransferClient getInternalApiClient() {
         return apiClientSupplier.get();
     }
 
