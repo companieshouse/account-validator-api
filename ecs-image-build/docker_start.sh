@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Start script for account-validator-api
 
 PORT=8080
