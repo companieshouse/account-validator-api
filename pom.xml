@@ -29,7 +29,7 @@
         <junit-bom.version>5.13.2</junit-bom.version>
 
         <!-- internal -->
-        <structured-logging.version>3.0.32</structured-logging.version>
+        <structured-logging.version>3.0.34</structured-logging.version>
         <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
         <web-security-java.version>3.1.5</web-security-java.version>
