@@ -4,7 +4,7 @@ import uk.gov.companieshouse.account.validator.exceptionhandler.XBRLValidationEx
 import uk.gov.companieshouse.account.validator.model.content.AccountsDetails;
 import uk.gov.companieshouse.account.validator.model.felix.ixbrl.Results;
 import uk.gov.companieshouse.account.validator.model.validation.RequestStatus;
-import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 
 import java.util.Optional;
 

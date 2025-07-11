@@ -15,14 +15,15 @@ import uk.gov.companieshouse.account.validator.service.retry.RetryStrategy;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.handler.filetransfer.InternalFileTransferClient;
 import uk.gov.companieshouse.api.handler.filetransfer.PrivateFileTransferResourceHandler;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDelete;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferDownload;
-import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateModelFileTransferGetDetails;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferDelete;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferDownload;
+import uk.gov.companieshouse.api.handler.filetransfer.request.PrivateFileTransferGetDetails;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.filetransfer.AvStatusApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileApi;
-import uk.gov.companieshouse.api.model.filetransfer.FileDetailsApi;
+import uk.gov.companieshouse.api.filetransfer.AvStatus;
+import uk.gov.companieshouse.api.filetransfer.FileApi;
+import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
@@ -55,7 +56,7 @@ class FileTransferServiceTest {
     private RetryStrategy retryStrategy;
 
     @Mock
-    private InternalApiClient mockClient;
+    private InternalFileTransferClient mockClient;
 
     @Mock
     private PrivateFileTransferResourceHandler mockHandler;
@@ -71,7 +72,7 @@ class FileTransferServiceTest {
     void getHappyPath() throws ApiErrorResponseException, URIValidationException {
         // given
         var data = "Hello World!".getBytes();
-        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatusApi.CLEAN, "contentType", 100, TEST_FILE_NAME_ZIP, "createdOn", null);
+        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatus.CLEAN, "contentType", 100L, TEST_FILE_NAME_ZIP, "createdOn", null);
         FileApi fileApi = new FileApi(TEST_FILE_NAME_ZIP, data, "mimeType", 100, "extension");
         ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(200, null, fileDetailsApi);
         ApiResponse<FileApi> downloadResponse = new ApiResponse<>(200, null, fileApi);
@@ -80,13 +81,13 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
-            PrivateModelFileTransferDownload mockDownload = mock(PrivateModelFileTransferDownload.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
+            PrivateFileTransferDownload mockDownload = mock(PrivateFileTransferDownload.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
             when(mockHandler.download(anyString())).thenReturn(mockDownload);
@@ -117,12 +118,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
 
@@ -138,19 +139,19 @@ class FileTransferServiceTest {
     @DisplayName("Attempt to get a file that isn't scanned")
     void ThrowRetryExceptionWhenFileNotScanned() throws ApiErrorResponseException, URIValidationException {
         // given
-        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatusApi.NOT_SCANNED, "contentType", 100, TEST_FILE_NAME_ZIP, "createdOn", null);
+        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatus.NOT_SCANNED, "contentType", 100L, TEST_FILE_NAME_ZIP, "createdOn", null);
         ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(200, null, fileDetailsApi);
 
         setupRetryStrategy();
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
 
@@ -170,12 +171,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenThrow(mock(ApiErrorResponseException.class));
 
@@ -195,12 +196,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenThrow(mock(URIValidationException.class));
 
@@ -221,12 +222,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
 
@@ -243,20 +244,20 @@ class FileTransferServiceTest {
     @DisplayName("Convert ApiErrorResponseException to ResponseException during get file")
     void ThrowResponseExceptionOnApiErrorResponseExceptionInGetFile() throws ApiErrorResponseException, URIValidationException {
         // given
-        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatusApi.CLEAN, "contentType", 100, TEST_FILE_NAME_ZIP, "createdOn", null);
+        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatus.CLEAN, "contentType", 100L, TEST_FILE_NAME_ZIP, "createdOn", null);
         ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(200, null, fileDetailsApi);
 
         setupRetryStrategy();
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
-            PrivateModelFileTransferDownload mockDownload = mock(PrivateModelFileTransferDownload.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
+            PrivateFileTransferDownload mockDownload = mock(PrivateFileTransferDownload.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
             when(mockHandler.download(anyString())).thenReturn(mockDownload);
@@ -273,20 +274,20 @@ class FileTransferServiceTest {
     @DisplayName("Convert URIValidationException to ValidationException during get file")
     void ThrowValidationExceptionOnURIValidationExceptionInGetFile() throws ApiErrorResponseException, URIValidationException {
         // given
-        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatusApi.CLEAN, "contentType", 100, TEST_FILE_NAME_ZIP, "createdOn", null);
+        FileDetailsApi fileDetailsApi = new FileDetailsApi(TEST_FILE_ID, "avTimestamp", AvStatus.CLEAN, "contentType", 100L, TEST_FILE_NAME_ZIP, "createdOn", null);
         ApiResponse<FileDetailsApi> detailsResponse = new ApiResponse<>(200, null, fileDetailsApi);
 
         setupRetryStrategy();
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferGetDetails mockDetails = mock(PrivateModelFileTransferGetDetails.class);
-            PrivateModelFileTransferDownload mockDownload = mock(PrivateModelFileTransferDownload.class);
+            PrivateFileTransferGetDetails mockDetails = mock(PrivateFileTransferGetDetails.class);
+            PrivateFileTransferDownload mockDownload = mock(PrivateFileTransferDownload.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.details(anyString())).thenReturn(mockDetails);
             when(mockDetails.execute()).thenReturn(detailsResponse);
             when(mockHandler.download(anyString())).thenReturn(mockDownload);
@@ -307,12 +308,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferDelete mockDelete = mock(PrivateModelFileTransferDelete.class);
+            PrivateFileTransferDelete mockDelete = mock(PrivateFileTransferDelete.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler);
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);
 
             // when
@@ -330,12 +331,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferDelete mockDelete = mock(PrivateModelFileTransferDelete.class);
+            PrivateFileTransferDelete mockDelete = mock(PrivateFileTransferDelete.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);
             when(mockDelete.execute()).thenThrow(mock(ApiErrorResponseException.class));
 
@@ -353,12 +354,12 @@ class FileTransferServiceTest {
 
         try (MockedStatic<ApiSdkManager> mockManager = mockStatic(ApiSdkManager.class)) {
             // Create mocks
-            PrivateModelFileTransferDelete mockDelete = mock(PrivateModelFileTransferDelete.class);
+            PrivateFileTransferDelete mockDelete = mock(PrivateFileTransferDelete.class);
 
             // Mock scope
             mockManager.when(ApiSdkManager::getInternalSDK).thenReturn(mockClient);
             setupMockClient();
-            when(mockClient.privateFileTransferResourceHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
+            when(mockClient.privateFileTransferHandler()).thenReturn(mockHandler).thenReturn(mockHandler);
             when(mockDelete.execute()).thenThrow(mock(URIValidationException.class));
             when(mockHandler.delete(anyString())).thenReturn(mockDelete);
 
