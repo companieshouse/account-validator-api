@@ -46,7 +46,7 @@ endif
 dist: clean build package
 
 .PHONY: sonar
-sonar:
+sonar: clean build test
 	mvn sonar:sonar
 
 .PHONY: sonar-pr-analysis
