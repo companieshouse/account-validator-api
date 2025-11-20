@@ -56,7 +56,6 @@
         <sonar.password></sonar.password>
         <sonar.projectKey>uk.gov.companieshouse:account-validator-api</sonar.projectKey>
         <sonar.projectName>account-validator-api</sonar.projectName>
-        <sonar.jacoco.reports>${sonar.jacoco.reports}/jacoco-it</sonar.jacoco.reports>
 
       <!-- overrides -->
       <mockito-inline.version>5.2.0</mockito-inline.version>
@@ -303,11 +302,6 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <!-- Sets the path to the file which contains the execution model. -->
-                            <destFile>${sonar.jacoco.reports}/jacoco-it.exec</destFile>
-                            <propertyName>failsafeArgLine</propertyName>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>post-integration-test</id>
@@ -315,12 +309,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <!-- Sets the path to the file which contains the execution data. -->
-                            <dataFile>${sonar.jacoco.reports}/jacoco-it.exec</dataFile>
-                            <!-- Sets the output directory for the code coverage report. -->
-                            <outputDirectory>${sonar.jacoco.reports}/jacoco-it</outputDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
