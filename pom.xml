@@ -56,6 +56,7 @@
         <sonar.password></sonar.password>
         <sonar.projectKey>uk.gov.companieshouse:account-validator-api</sonar.projectKey>
         <sonar.projectName>account-validator-api</sonar.projectName>
+        <sonar.jacoco.reports>${sonar.jacoco.reports}/jacoco-it</sonar.jacoco.reports>
 
       <!-- overrides -->
       <mockito-inline.version>5.2.0</mockito-inline.version>
