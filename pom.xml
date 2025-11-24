@@ -42,7 +42,7 @@
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -56,6 +56,13 @@
         <sonar.password></sonar.password>
         <sonar.projectKey>uk.gov.companieshouse:account-validator-api</sonar.projectKey>
         <sonar.projectName>account-validator-api</sonar.projectName>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.sources>src/main</sonar.sources>
+        <sonar.tests>src/test</sonar.tests>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.jacoco.reports>${project.build.directory}/site</sonar.jacoco.reports>
 
       <!-- overrides -->
       <mockito-inline.version>5.2.0</mockito-inline.version>
@@ -294,18 +301,27 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-              <version>${jacoco-maven-plugin.version}</version>
+                <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <append>true</append>
+                    <destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
+                    <dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
+                    <outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
+                </configuration>
+
                 <executions>
                     <execution>
-                        <id>pre-integration-test</id>
-                        <phase>pre-integration-test</phase>
+                        <id>pre-unit-test</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
-                        <id>post-integration-test</id>
-                        <phase>post-integration-test</phase>
+                        <id>post-unit-test</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
