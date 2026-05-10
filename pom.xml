@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.12</version>
+        <version>2.1.14</version>
         <relativePath/>
     </parent>
     <artifactId>account-validator-api</artifactId>
@@ -17,7 +17,7 @@
 
         <!-- spring -->
         <spring-boot-dependencies.version>3.5.14</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.10</spring-boot-maven-plugin.version>
+        <spring-boot-maven-plugin.version>3.5.14</spring-boot-maven-plugin.version>
 
         <!-- external -->
         <jackson-dataformat-xml.version>2.19.1</jackson-dataformat-xml.version>
@@ -29,11 +29,11 @@
         <junit-bom.version>5.13.2</junit-bom.version>
 
         <!-- internal -->
-        <structured-logging.version>3.0.38</structured-logging.version>
-        <api-sdk-manager-java-library.version>3.0.13</api-sdk-manager-java-library.version>
-        <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
+        <structured-logging.version>3.0.56</structured-logging.version>
+        <api-sdk-manager-java-library.version>3.0.22</api-sdk-manager-java-library.version>
+        <api-helper-java-library.version>3.0.4</api-helper-java-library.version>
         <web-security-java.version>3.1.5</web-security-java.version>
-        <private-api-sdk-java.version>4.0.315</private-api-sdk-java.version>
+        <private-api-sdk-java.version>6.0.8</private-api-sdk-java.version>
 
         <!-- plugin -->
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>

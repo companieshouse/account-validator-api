@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.account.validator.security;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;

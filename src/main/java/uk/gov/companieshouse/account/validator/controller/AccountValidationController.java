@@ -2,7 +2,8 @@ package uk.gov.companieshouse.account.validator.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF;
 
-import org.apache.commons.lang.StringUtils;
+import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,6 @@ import uk.gov.companieshouse.api.filetransfer.FileDetailsApi;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.logging.Logger;
 
-import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
