@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.account.validator.service.factory.request.status;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
