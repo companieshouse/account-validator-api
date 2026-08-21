@@ -32,7 +32,7 @@
         <structured-logging.version>3.0.56</structured-logging.version>
         <api-sdk-manager-java-library.version>3.0.22</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.4</api-helper-java-library.version>
-        <web-security-java.version>3.1.5</web-security-java.version>
+        <web-security-java.version>3.1.19</web-security-java.version>
         <private-api-sdk-java.version>6.0.8</private-api-sdk-java.version>
 
         <!-- plugin -->
