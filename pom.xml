@@ -32,7 +32,7 @@
         <ch-test-bom.version>0.1.21</ch-test-bom.version>
 
         <!-- internal -->
-        <structured-logging.version>3.0.56</structured-logging.version>
+        <structured-logging.version>4.0.4</structured-logging.version>
         <api-sdk-manager-java-library.version>3.0.22</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.4</api-helper-java-library.version>
         <web-security-java.version>3.1.19</web-security-java.version>
