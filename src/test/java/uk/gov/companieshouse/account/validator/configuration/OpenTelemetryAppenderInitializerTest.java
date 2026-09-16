@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.account.validator.configuration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -22,17 +23,17 @@ class OpenTelemetryAppenderInitializerTest {
     @Mock
     private OpenTelemetry openTelemetry;
 
-    private OpenTelemetryAppenderInitializer undertest;
+    private OpenTelemetryAppenderInitializer openTelemetryAppender;
 
     @BeforeEach
     public void setUp() {
-        undertest = new OpenTelemetryAppenderInitializer(openTelemetry);
+        openTelemetryAppender = new OpenTelemetryAppenderInitializer(openTelemetry);
     }
 
     @Test
     @DisplayName("Test component is instantiated with OpenTelemetry dependency")
     void testComponentInstantiation() {
-        assertNotNull(undertest);
+        assertNotNull(openTelemetryAppender);
     }
 
     @Test
@@ -46,7 +47,7 @@ class OpenTelemetryAppenderInitializerTest {
     @DisplayName("Test afterPropertiesSet installs OpenTelemetryAppender with correct OpenTelemetry instance")
     void testAfterPropertiesSetInstallsAppender() {
         try (MockedStatic<OpenTelemetryAppender> mockedStatic = mockStatic(OpenTelemetryAppender.class)) {
-            undertest.afterPropertiesSet();
+            openTelemetryAppender.afterPropertiesSet();
             mockedStatic.verify(() -> OpenTelemetryAppender.install(openTelemetry));
         }
     }
@@ -55,8 +56,8 @@ class OpenTelemetryAppenderInitializerTest {
     @DisplayName("Test afterPropertiesSet can be called multiple times without error")
     void testAfterPropertiesSetMultipleCalls() {
         try (MockedStatic<OpenTelemetryAppender> mockedStatic = mockStatic(OpenTelemetryAppender.class)) {
-            undertest.afterPropertiesSet();
-            undertest.afterPropertiesSet();
+            openTelemetryAppender.afterPropertiesSet();
+            openTelemetryAppender.afterPropertiesSet();
             mockedStatic.verify(() -> OpenTelemetryAppender.install(openTelemetry), times(2));
         }
     }
@@ -65,18 +66,18 @@ class OpenTelemetryAppenderInitializerTest {
     @DisplayName("Test afterPropertiesSet properly uses the injected OpenTelemetry instance")
     void testAfterPropertiesSetUsesCorrectInstance() {
         try (MockedStatic<OpenTelemetryAppender> mockedStatic = mockStatic(OpenTelemetryAppender.class)) {
-            OpenTelemetry mockInstance1 = mock(OpenTelemetry.class);
-            OpenTelemetryAppenderInitializer component1 = new OpenTelemetryAppenderInitializer(mockInstance1);
-            component1.afterPropertiesSet();
+            OpenTelemetry mockOpenTelemetry = mock(OpenTelemetry.class);
+            OpenTelemetryAppenderInitializer component = new OpenTelemetryAppenderInitializer(mockOpenTelemetry);
+            component.afterPropertiesSet();
             
-            mockedStatic.verify(() -> OpenTelemetryAppender.install(mockInstance1));
+            mockedStatic.verify(() -> OpenTelemetryAppender.install(mockOpenTelemetry));
         }
     }
 
     @Test
     @DisplayName("Test component is a Spring bean that implements InitializingBean")
     void testComponentImplementsInitializingBean() {
-        assertNotNull(undertest);
-        assertInstanceOf(InitializingBean.class, undertest);
+        assertNotNull(openTelemetryAppender);
+        assertInstanceOf(InitializingBean.class, openTelemetryAppender);
     }
 }
